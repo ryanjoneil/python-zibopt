@@ -2,6 +2,9 @@
 
 // TODO: wrap scip calls in exception handling
 
+/*****************************************************************************/
+/* PYTHON TYPE METHODS                                                       */
+/*****************************************************************************/
 static PyObject *solver_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     solver *self;
 
@@ -18,8 +21,6 @@ static PyObject *solver_new(PyTypeObject *type, PyObject *args, PyObject *kwds) 
         // TODO: what are all these NULLs for?
         SCIPcreateProb(self->scip, "python-zibobt", NULL, NULL, NULL, NULL, NULL, NULL);
         
-        // TODO: make this configurable
-        SCIPsetObjsense(self->scip, SCIP_OBJSENSE_MAXIMIZE);
     }
 
     return (PyObject *) self;
@@ -36,7 +37,48 @@ static void solver_dealloc(solver *self) {
     self->ob_type->tp_free((PyObject *) self);
 }
 
+/*****************************************************************************/
+/* ADDITONAL METHODS                                                         */
+/*****************************************************************************/
+static void _solver_solve(solver *self) {
+    SCIP *scip = self->scip;
+    SCIPsolve(scip);
+
+    // TODO: this is null when it does not succeed
+    SCIP_SOL *sol = SCIPgetBestSol(scip);
+//    SCIPprintBestSol(scip, NULL, FALSE);
+
+    printf("OBJECTIVE VALUE: %.02f\n", 
+        SCIPprobExternObjval(scip->transprob, scip->set, SCIPsolGetObj(sol, scip->set, scip->transprob)));
+    printf("TIME: %.02f\n", sol->time);
+}
+
+static PyObject *solver_maximize(solver *self) {
+    // TODO: figure out all the right python incantations (incref, etc)
+    //       this should probably return a solution instance or something
+    puts("max");
+    SCIPsetObjsense(self->scip, SCIP_OBJSENSE_MAXIMIZE);
+    _solver_solve(self);
+    
+    Py_RETURN_NONE;
+}
+
+static PyObject *solver_minimize(solver *self) {
+    // TODO: figure out all the right python incantations (incref, etc)
+    puts("min");
+    SCIPsetObjsense(self->scip, SCIP_OBJSENSE_MINIMIZE);
+    _solver_solve(self);
+    
+    Py_RETURN_NONE;
+}
+
+
+/*****************************************************************************/
+/* MODULE INITIALIZATION                                                     */
+/*****************************************************************************/
 static PyMethodDef solver_methods[] = {
+    {"maximize", (PyCFunction) solver_maximize, METH_NOARGS, "maximize our problem"},
+    {"minimize", (PyCFunction) solver_minimize, METH_NOARGS, "minimize our problem"},
     {NULL} /* Sentinel */
 };
 

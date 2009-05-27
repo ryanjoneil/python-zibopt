@@ -5,6 +5,8 @@
 #include <scip/scip.h>
 #include <scip/scipdefplugins.h>
 #include <scip/misc.h>
+#include <scip/prob.h>
+#include <scip/sol.h>
 
 typedef struct {
     PyObject_HEAD
