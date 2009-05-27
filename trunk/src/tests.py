@@ -1,4 +1,5 @@
-import scip, unittest
+from zibopt import scip
+import unittest
 
 class ScipTest(unittest.TestCase):
     def setUp(self):

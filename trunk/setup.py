@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages, Extension
 
-scip = Extension('scip', 
-    sources = ['src/scipmodule.c'], 
+scip = Extension('zibopt._scip', 
+    sources = ['src/zibopt/scipmodule.c'], 
     library_dirs = ['../../lib'], # TODO: fix this
     include_dirs = ['../ziboptsuite-1.1.0/scip-1.1.0/src/'], # TODO: fix this
     libraries = [
@@ -11,8 +11,8 @@ scip = Extension('scip',
 )
 
 setup (
-    name         = 'zibopt',
-    version      = '0.1-alpha',
+    name         = 'python-zibopt',
+    version      = '0.1',
     description  = 'ZIB Optimization Suite interface for python',
     author       = "Ryan J. O'Neil",
     author_email = 'ryan@chenoneil.com',
