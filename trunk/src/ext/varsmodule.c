@@ -2,8 +2,9 @@
 
 static PyObject *variable_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     variable *self;
-    PyObject *o;
     const char *s;
+    PyObject *o;
+    SCIP *scip;
 
     self = (variable *) type->tp_alloc(type, 0);
     if (self != NULL) {
@@ -11,8 +12,24 @@ static PyObject *variable_new(PyTypeObject *type, PyObject *args, PyObject *kwds
             return NULL;
         
         // TODO: raise error if solver object of wrong type
-        SCIPcreateVar(((solver *) o)->scip, &self->variable, s, 0.0, 1.0, 1.0, SCIP_VARTYPE_BINARY, TRUE, FALSE, NULL, NULL, NULL, NULL);
-    
+        scip = ((solver *) o)->scip;
+        
+        // TODO: optional objective coefficients
+        // TODO: different types of variables; optional bounds
+        
+        // SCIPcreateVar Arguments:
+        // scip         SCIP data structure
+        // var          pointer to variable object
+        // name         name of variable, or NULL for automatic name creation
+        // lb           lower bound of variable
+        // ub           upper bound of variable
+        // obj          objective function value
+        // vartype      type of variable
+        // initial      should var's column be present in the initial root LP?
+        // removable    is var's column removable from the LP?
+        // vardata      user data for this specific variable 
+        SCIPcreateVar(scip, &self->variable, s, 0.0, 1.0, 1.0, SCIP_VARTYPE_BINARY, TRUE, FALSE, NULL, NULL, NULL, NULL);
+        SCIPaddVar(scip, self->variable);
     }
 
     return (PyObject *) self;
