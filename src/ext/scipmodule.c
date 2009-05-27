@@ -1,14 +1,6 @@
-#include <Python.h>
-#include <scip/scip.h>
-#include <scip/scipdefplugins.h>
-#include <scip/misc.h>
+#include "python_zibopt.h"
 
 // TODO: wrap scip calls in exception handling
-
-typedef struct {
-    PyObject_HEAD
-    SCIP *scip;
-} solver;
 
 static PyObject *solver_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     solver *self;
@@ -25,6 +17,9 @@ static PyObject *solver_new(PyTypeObject *type, PyObject *args, PyObject *kwds) 
         // TODO: allow user to name problem?
         // TODO: what are all these NULLs for?
         SCIPcreateProb(self->scip, "python-zibobt", NULL, NULL, NULL, NULL, NULL, NULL);
+        
+        // TODO: make this configurable
+        SCIPsetObjsense(self->scip, SCIP_OBJSENSE_MAXIMIZE);
     }
 
     return (PyObject *) self;

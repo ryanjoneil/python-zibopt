@@ -1,7 +1,17 @@
 from setuptools import setup, find_packages, Extension
 
-scip = Extension('zibopt._scip', 
-    sources = ['src/zibopt/scipmodule.c'], 
+solver = Extension('zibopt._scip', 
+    sources = ['src/ext/scipmodule.c'], 
+    library_dirs = ['../../lib'], # TODO: fix this
+    include_dirs = ['../ziboptsuite-1.1.0/scip-1.1.0/src/'], # TODO: fix this
+    libraries = [
+        'lpispx', 'objscip', 'scip', 'soplex', 'zimpl',
+    	'readline', 'ncurses', 'gmp', 'z'
+    ],
+)
+
+variables = Extension('zibopt._vars', 
+    sources = ['src/ext/varsmodule.c'], 
     library_dirs = ['../../lib'], # TODO: fix this
     include_dirs = ['../ziboptsuite-1.1.0/scip-1.1.0/src/'], # TODO: fix this
     libraries = [
@@ -24,7 +34,7 @@ setup (
     zip_safe    = True,
     test_suite  = 'tests',
 
-    ext_modules  = [scip],
+    ext_modules  = [solver, variables],
 
     keywords    = 'mixed binary integer programming optimization zib zibopt',
     classifiers = [
