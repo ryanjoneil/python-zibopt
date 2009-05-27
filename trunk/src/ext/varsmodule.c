@@ -1,0 +1,89 @@
+#include "python_zibopt.h"
+
+static PyObject *variable_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
+    variable *self;
+    PyObject *o;
+    const char *s;
+
+    self = (variable *) type->tp_alloc(type, 0);
+    if (self != NULL) {
+        if (!PyArg_ParseTuple(args, "Os", &o, &s))
+            return NULL;
+        
+        // TODO: raise error if solver object of wrong type
+        SCIPcreateVar(((solver *) o)->scip, &self->variable, s, 0.0, 1.0, 1.0, SCIP_VARTYPE_BINARY, TRUE, FALSE, NULL, NULL, NULL, NULL);
+    
+    }
+
+    return (PyObject *) self;
+}
+
+static int variable_init(variable *self, PyObject *args, PyObject *kwds) {
+    return 0;
+}
+
+static void variable_dealloc(variable *self) {
+    self->ob_type->tp_free((PyObject *) self);
+}
+
+static PyMethodDef variable_methods[] = {
+    {NULL} /* Sentinel */
+};
+
+static PyTypeObject variable_type = {
+    PyObject_HEAD_INIT(NULL)
+    0,                         /*ob_size*/
+    "_vars.variable",             /*tp_name*/
+    sizeof(variable),             /*tp_basicsize*/
+    0,                         /*tp_itemsize*/
+    (destructor) variable_dealloc, /*tp_dealloc*/
+    0,                         /*tp_print*/
+    0,                         /*tp_getattr*/
+    0,                         /*tp_setattr*/
+    0,                         /*tp_compare*/
+    0,                         /*tp_repr*/
+    0,                         /*tp_as_number*/
+    0,                         /*tp_as_sequence*/
+    0,                         /*tp_as_mapping*/
+    0,                         /*tp_hash */
+    0,                         /*tp_call*/
+    0,                         /*tp_str*/
+    0,                         /*tp_getattro*/
+    0,                         /*tp_setattro*/
+    0,                         /*tp_as_buffer*/
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /*tp_flags*/
+    "SCIP variable objects",           /* tp_doc */
+    0,		               /* tp_traverse */
+    0,		               /* tp_clear */
+    0,		               /* tp_richcompare */
+    0,		               /* tp_weaklistoffset */
+    0,		               /* tp_iter */
+    0,		               /* tp_iternext */
+    variable_methods,             /* tp_methods */
+    0,//scip_members,             /* tp_members */
+    0,                         /* tp_getset */
+    0,                         /* tp_base */
+    0,                         /* tp_dict */
+    0,                         /* tp_descr_get */
+    0,                         /* tp_descr_set */
+    0,                         /* tp_dictoffset */
+    (initproc) variable_init,      /* tp_init */
+    0,                         /* tp_alloc */
+    variable_new,                 /* tp_new */
+};
+
+#ifndef PyMODINIT_FUNC	/* declarations for DLL import/export */
+#define PyMODINIT_FUNC void
+#endif
+PyMODINIT_FUNC init_vars(void) {
+    PyObject* m;
+
+    if (PyType_Ready(&variable_type) < 0)
+        return;
+
+    m = Py_InitModule3("_vars", variable_methods, "SCIP Variable");
+
+    Py_INCREF(&variable_type);
+    PyModule_AddObject(m, "variable", (PyObject *) &variable_type);
+}
+
