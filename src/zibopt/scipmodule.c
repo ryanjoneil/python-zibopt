@@ -48,7 +48,7 @@ static PyMethodDef solver_methods[] = {
 static PyTypeObject solver_type = {
     PyObject_HEAD_INIT(NULL)
     0,                         /*ob_size*/
-    "scip.solver",             /*tp_name*/
+    "_scip.solver",             /*tp_name*/
     sizeof(solver),             /*tp_basicsize*/
     0,                         /*tp_itemsize*/
     (destructor) solver_dealloc, /*tp_dealloc*/
@@ -90,13 +90,13 @@ static PyTypeObject solver_type = {
 #ifndef PyMODINIT_FUNC	/* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
-PyMODINIT_FUNC initscip(void) {
+PyMODINIT_FUNC init_scip(void) {
     PyObject* m;
 
     if (PyType_Ready(&solver_type) < 0)
         return;
 
-    m = Py_InitModule3("scip", solver_methods, "SCIP Solver");
+    m = Py_InitModule3("_scip", solver_methods, "SCIP Solver");
 
     Py_INCREF(&solver_type);
     PyModule_AddObject(m, "solver", (PyObject *) &solver_type);
