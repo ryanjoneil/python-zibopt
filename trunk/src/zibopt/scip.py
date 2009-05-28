@@ -11,7 +11,7 @@ class variable(_vars.variable):
         return hash(self.name)
     
     def __cmp__(self, other):
-        return cmp(self.name, '=', other.name)
+        return cmp(self.name, other.name)
 
     def __repr__(self):
         return self.name
