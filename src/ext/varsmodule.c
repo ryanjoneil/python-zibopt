@@ -1,41 +1,45 @@
 #include "python_zibopt.h"
 
 static PyObject *variable_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
-    variable *self;
-    const char *s;
-    PyObject *o;
-    SCIP *scip;
-
-    self = (variable *) type->tp_alloc(type, 0);
-    if (self != NULL) {
-        if (!PyArg_ParseTuple(args, "Os", &o, &s))
-            return NULL;
-        
-        // TODO: raise error if solver object of wrong type
-        scip = ((solver *) o)->scip;
-        
-        // TODO: optional objective coefficients
-        // TODO: different types of variables; optional bounds
-        
-        // SCIPcreateVar Arguments:
-        // scip         SCIP data structure
-        // var          pointer to variable object
-        // name         name of variable, or NULL for automatic name creation
-        // lb           lower bound of variable
-        // ub           upper bound of variable
-        // obj          objective function value
-        // vartype      type of variable
-        // initial      should var's column be present in the initial root LP?
-        // removable    is var's column removable from the LP?
-        // vardata      user data for this specific variable 
-        SCIPcreateVar(scip, &self->variable, s, 0.0, 1.0, 1.0, SCIP_VARTYPE_BINARY, TRUE, FALSE, NULL, NULL, NULL, NULL);
-        SCIPaddVar(scip, self->variable);
-    }
-
+    variable *self = (variable *) type->tp_alloc(type, 0);
     return (PyObject *) self;
 }
 
 static int variable_init(variable *self, PyObject *args, PyObject *kwds) {
+    PyObject *s;   // solver Python object
+    solver *solv;  // solver C object
+    const char *n; // name
+    double c;      // coefficient
+
+    if (!PyArg_ParseTuple(args, "Osd", &s, &n, &c))
+        return NULL;
+    
+    self->name = n;
+    
+    // TODO: raise error if solver object of wrong type
+    solv =  (solver *) s;
+    self->scip = solv->scip;
+    
+    // Put new variable at head of linked list
+    self->next = solv->first;
+    solv->first = self;
+    
+    // TODO: different types of variables; optional bounds
+    
+    // SCIPcreateVar Arguments:
+    // scip         SCIP data structure
+    // var          pointer to variable object
+    // name         name of variable, or NULL for automatic name creation
+    // lb           lower bound of variable
+    // ub           upper bound of variable
+    // obj          objective function value
+    // vartype      type of variable
+    // initial      should var's column be present in the initial root LP?
+    // removable    is var's column removable from the LP?
+    // vardata      user data for this specific variable 
+    SCIPcreateVar(self->scip, &self->variable, n, 0.0, 1.0, c, SCIP_VARTYPE_BINARY, TRUE, FALSE, NULL, NULL, NULL, NULL);
+    SCIPaddVar(self->scip, self->variable);
+
     return 0;
 }
 

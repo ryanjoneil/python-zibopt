@@ -1,24 +1,15 @@
 from setuptools import setup, find_packages, Extension
 
-solver = Extension('zibopt._scip', 
-    sources = ['src/ext/scipmodule.c'], 
-    library_dirs = ['../../lib'], # TODO: fix this
-    include_dirs = ['../ziboptsuite-1.1.0/scip-1.1.0/src/'], # TODO: fix this
-    libraries = [
-        'lpispx', 'objscip', 'scip', 'soplex', 'zimpl',
-    	'readline', 'ncurses', 'gmp', 'z'
-    ],
-)
-
-variables = Extension('zibopt._vars', 
-    sources = ['src/ext/varsmodule.c'], 
-    library_dirs = ['../../lib'], # TODO: fix this
-    include_dirs = ['../ziboptsuite-1.1.0/scip-1.1.0/src/'], # TODO: fix this
-    libraries = [
-        'lpispx', 'objscip', 'scip', 'soplex', 'zimpl',
-    	'readline', 'ncurses', 'gmp', 'z'
-    ],
-)
+def zibopt_ext(name, c_file):
+    return Extension('zibopt.%s' % name, 
+        sources = ['src/ext/%s' % c_file], 
+        library_dirs = ['../../lib'], # TODO: fix this
+        include_dirs = ['../ziboptsuite-1.1.0/scip-1.1.0/src/'], # TODO: fix this
+        libraries = [
+            'lpispx', 'objscip', 'scip', 'soplex', 'zimpl',
+        	'readline', 'ncurses', 'gmp', 'z'
+        ],
+    )
 
 setup (
     name         = 'python-zibopt',
@@ -34,7 +25,11 @@ setup (
     zip_safe    = True,
     test_suite  = 'tests',
 
-    ext_modules  = [solver, variables],
+    ext_modules  = [
+        zibopt_ext('_scip', 'scipmodule.c'),
+        zibopt_ext('_vars', 'varsmodule.c'),
+        zibopt_ext('_soln', 'solnmodule.c'),
+    ],
 
     keywords    = 'mixed binary integer programming optimization zib zibopt',
     classifiers = [
