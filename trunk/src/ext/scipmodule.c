@@ -31,13 +31,13 @@ static int solver_init(solver *self, PyObject *args, PyObject *kwds) {
 
 static void solver_dealloc(solver *self) {
     if (self->scip) {
-        // We must free the variables before the solver is freed
+        // Free all variables
         while (self->first != NULL) {
             SCIPreleaseVar(self->scip, &self->first->variable);
             self->first = self->first->next;
         }
         
-        // TODO: same with any constraints
+        // TODO: Free constraints
         
         // Free the solver itself
         SCIPfree(&self->scip);
@@ -49,11 +49,9 @@ static void solver_dealloc(solver *self) {
 /*****************************************************************************/
 /* ADDITONAL METHODS                                                         */
 /*****************************************************************************/
-
 static PyObject *solver_maximize(solver *self) {
     SCIPsetObjsense(self->scip, SCIP_OBJSENSE_MAXIMIZE);
     SCIPsolve(self->scip);
-    // TODO: how will we handle infeasibility?
     Py_RETURN_NONE;
 }
 
@@ -62,7 +60,6 @@ static PyObject *solver_minimize(solver *self) {
     SCIPsolve(self->scip);
     Py_RETURN_NONE;
 }
-
 
 /*****************************************************************************/
 /* MODULE INITIALIZATION                                                     */
@@ -103,7 +100,7 @@ static PyTypeObject solver_type = {
     0,		               /* tp_iter */
     0,		               /* tp_iternext */
     solver_methods,             /* tp_methods */
-    0,//scip_members,             /* tp_members */
+    0,                         /* tp_members */
     0,                         /* tp_getset */
     0,                         /* tp_base */
     0,                         /* tp_dict */

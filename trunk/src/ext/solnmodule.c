@@ -1,10 +1,8 @@
 #include "python_zibopt.h"
 
-static PyObject *solution_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
-    solution *self = (solution *) type->tp_alloc(type, 0);
-    return (PyObject *) self;
-}
-
+/*****************************************************************************/
+/* PYTHON TYPE METHODS                                                       */
+/*****************************************************************************/
 static int solution_init(solution *self, PyObject *args, PyObject *kwds) {
     PyObject *s;   // solver Python object
     solver *solv;  // solver C object
@@ -15,10 +13,12 @@ static int solution_init(solution *self, PyObject *args, PyObject *kwds) {
     // TODO: raise error if solver object of wrong type
     solv =  (solver *) s;
     self->scip = solv->scip;
-
     self->solution = SCIPgetBestSol(self->scip);
-    printf("OBJECTIVE VALUE: %.02f\n", SCIPgetSolOrigObj(self->scip, self->solution));
 
+    // TODO: handle infeasibility
+    // Extract objective value into Python float
+    self->objective = SCIPgetSolOrigObj(self->scip, self->solution);
+    
     return 0;
 }
 
@@ -26,7 +26,27 @@ static void solution_dealloc(solution *self) {
     self->ob_type->tp_free((PyObject *) self);
 }
 
+/*****************************************************************************/
+/* ADDITONAL METHODS                                                         */
+/*****************************************************************************/
+static PyObject *solution_value(solution *self, PyObject *o) {
+    variable *var;
+
+    // TODO: raise error if var object of wrong type
+    var = (variable *) o;
+    return Py_BuildValue("d", SCIPgetSolVal(self->scip, self->solution, var->variable));
+}
+
+/*****************************************************************************/
+/* MODULE INITIALIZATION                                                     */
+/*****************************************************************************/
+static PyMemberDef solution_members[] = {
+    {"objective", T_DOUBLE, offsetof(solution, objective), 0, "objective value"},
+    {NULL}  /* Sentinel */
+};
+
 static PyMethodDef solution_methods[] = {
+    {"value", (PyCFunction) solution_value, METH_O, "get variable value in a solution"},
     {NULL} /* Sentinel */
 };
 
@@ -59,8 +79,8 @@ static PyTypeObject solution_type = {
     0,		               /* tp_weaklistoffset */
     0,		               /* tp_iter */
     0,		               /* tp_iternext */
-    solution_methods,             /* tp_methods */
-    0,                         /* tp_members */
+    solution_methods,          /* tp_methods */
+    solution_members,          /* tp_members */
     0,                         /* tp_getset */
     0,                         /* tp_base */
     0,                         /* tp_dict */
@@ -69,7 +89,7 @@ static PyTypeObject solution_type = {
     0,                         /* tp_dictoffset */
     (initproc) solution_init,      /* tp_init */
     0,                         /* tp_alloc */
-    solution_new,                 /* tp_new */
+    0 ,                 /* tp_new */
 };
 
 #ifndef PyMODINIT_FUNC	/* declarations for DLL import/export */
@@ -78,6 +98,7 @@ static PyTypeObject solution_type = {
 PyMODINIT_FUNC init_soln(void) {
     PyObject* m;
 
+    solution_type.tp_new = PyType_GenericNew;
     if (PyType_Ready(&solution_type) < 0)
         return;
 

@@ -2,6 +2,7 @@ from zibopt import scip
 import unittest
 
 class ScipTest(unittest.TestCase):
+    # TODO: add assertions
     def setUp(self):
         pass
         
@@ -18,6 +19,7 @@ class ScipTest(unittest.TestCase):
         solver.variable('x2', 1)
         solver.variable('x3', 2)
         solution = solver.maximize()
+        print solution.values()
 
     def testMin(self):
         solver = scip.solver()
@@ -25,7 +27,7 @@ class ScipTest(unittest.TestCase):
         solver.variable('x2')
         solver.variable('x3')
         solution = solver.minimize()
-        # TODO: assertions
+        print solution.values()
         
 if __name__ == '__main__':
     unittest.main()

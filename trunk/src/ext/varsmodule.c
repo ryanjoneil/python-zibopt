@@ -1,10 +1,8 @@
 #include "python_zibopt.h"
 
-static PyObject *variable_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
-    variable *self = (variable *) type->tp_alloc(type, 0);
-    return (PyObject *) self;
-}
-
+/*****************************************************************************/
+/* PYTHON TYPE METHODS                                                       */
+/*****************************************************************************/
 static int variable_init(variable *self, PyObject *args, PyObject *kwds) {
     PyObject *s;   // solver Python object
     solver *solv;  // solver C object
@@ -17,7 +15,7 @@ static int variable_init(variable *self, PyObject *args, PyObject *kwds) {
     self->name = n;
     
     // TODO: raise error if solver object of wrong type
-    solv =  (solver *) s;
+    solv = (solver *) s;
     self->scip = solv->scip;
     
     // Put new variable at head of linked list
@@ -47,6 +45,9 @@ static void variable_dealloc(variable *self) {
     self->ob_type->tp_free((PyObject *) self);
 }
 
+/*****************************************************************************/
+/* MODULE INITIALIZATION                                                     */
+/*****************************************************************************/
 static PyMethodDef variable_methods[] = {
     {NULL} /* Sentinel */
 };
@@ -81,7 +82,7 @@ static PyTypeObject variable_type = {
     0,		               /* tp_iter */
     0,		               /* tp_iternext */
     variable_methods,             /* tp_methods */
-    0,//scip_members,             /* tp_members */
+    0,                         /* tp_members */
     0,                         /* tp_getset */
     0,                         /* tp_base */
     0,                         /* tp_dict */
@@ -90,7 +91,7 @@ static PyTypeObject variable_type = {
     0,                         /* tp_dictoffset */
     (initproc) variable_init,      /* tp_init */
     0,                         /* tp_alloc */
-    variable_new,                 /* tp_new */
+    0,                 /* tp_new */
 };
 
 #ifndef PyMODINIT_FUNC	/* declarations for DLL import/export */
@@ -99,6 +100,7 @@ static PyTypeObject variable_type = {
 PyMODINIT_FUNC init_vars(void) {
     PyObject* m;
 
+    variable_type.tp_new = PyType_GenericNew;
     if (PyType_Ready(&variable_type) < 0)
         return;
 

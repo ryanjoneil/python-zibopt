@@ -11,11 +11,18 @@ class variable(_vars.variable):
         return hash(self.name)
     
     def __cmp__(self, other):
-        return cmp(self.name, other.name)
+        return cmp(self.name, '=', other.name)
+
+    def __repr__(self):
+        return self.name
 
 class solution(_soln.solution):
     def __init__(self, solver):
         super(solution, self).__init__(solver)
+        self.solver = solver
+    
+    def values(self):
+        return dict((v, self.value(v)) for v in self.solver.variables)
 
 class solver(_scip.solver):
     def __init__(self, *args, **kwds):
