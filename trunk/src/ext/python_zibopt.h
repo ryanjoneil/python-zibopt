@@ -10,13 +10,23 @@
 
 typedef struct {
     PyObject_HEAD
+    SCIP_VAR *variable;
     SCIP *scip;
+    char *name;
+    struct variable *next; // linked list next
+} variable;
+
+typedef struct {
+    PyObject_HEAD
+    SCIP *scip;
+    variable *first; // linked list head
 } solver;
 
 typedef struct {
     PyObject_HEAD
-    SCIP_VAR *variable;
-} variable;
+    SCIP_SOL *solution;
+    SCIP *scip;
+} solution;
 
 #endif
 
