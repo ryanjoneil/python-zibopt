@@ -7,6 +7,7 @@
 #include <scip/misc.h>
 #include <scip/prob.h>
 #include <scip/sol.h>
+#include "structmember.h"
 
 typedef struct {
     PyObject_HEAD
@@ -26,6 +27,7 @@ typedef struct {
     PyObject_HEAD
     SCIP_SOL *solution;
     SCIP *scip;
+    double objective; // objective value
 } solution;
 
 #endif
