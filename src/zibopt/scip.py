@@ -1,7 +1,23 @@
-from zibopt import _scip, _vars, _soln
+from zibopt import _scip, _vars, _cons, _soln
 
 class variable(_vars.variable):
     def __init__(self, solver, name, coefficient=0):
+        super(variable, self).__init__(solver, name, coefficient)
+        self.solver = solver
+        self.name = name
+        self.coefficient = coefficient
+
+    def __hash__(self):
+        return hash(self.name)
+    
+    def __cmp__(self, other):
+        return cmp(self.name, other.name)
+
+    def __repr__(self):
+        return self.name
+
+class constraint(_cons.constraint):
+    def __init__(self, solver, name):
         super(variable, self).__init__(solver, name, coefficient)
         self.solver = solver
         self.name = name

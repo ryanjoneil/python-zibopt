@@ -19,8 +19,17 @@ typedef struct {
 
 typedef struct {
     PyObject_HEAD
+    SCIP_CONS *constraint;
     SCIP *scip;
-    variable *first; // linked list head
+    char *name;
+    struct constraint *next; // linked list next
+} constraint;
+
+typedef struct {
+    PyObject_HEAD
+    SCIP *scip;
+    variable   *first_var;  // linked list head
+    constraint *first_cons; // linked list head
 } solver;
 
 typedef struct {

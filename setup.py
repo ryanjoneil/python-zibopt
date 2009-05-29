@@ -28,6 +28,7 @@ setup (
     ext_modules  = [
         zibopt_ext('_scip', 'scipmodule.c'),
         zibopt_ext('_vars', 'varsmodule.c'),
+        zibopt_ext('_cons', 'consmodule.c'),
         zibopt_ext('_soln', 'solnmodule.c'),
     ],
 
