@@ -127,6 +127,11 @@ PyMODINIT_FUNC init_scip(void) {
 
     m = Py_InitModule3("_scip", solver_methods, "SCIP Solver");
 
+    // Constants on scip module
+    PyModule_AddIntConstant(m, "BINARY", SCIP_VARTYPE_BINARY);
+    PyModule_AddIntConstant(m, "INTEGER", SCIP_VARTYPE_INTEGER);
+    PyModule_AddIntConstant(m, "CONTINUOUS", SCIP_VARTYPE_CONTINUOUS);
+
     Py_INCREF(&solver_type);
     PyModule_AddObject(m, "solver", (PyObject *) &solver_type);
 }

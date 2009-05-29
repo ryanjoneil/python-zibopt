@@ -4,14 +4,20 @@
 /* PYTHON TYPE METHODS                                                       */
 /*****************************************************************************/
 static int variable_init(variable *self, PyObject *args, PyObject *kwds) {
-    PyObject *s;   // solver Python object
-    solver *solv;  // solver C object
-    const char *n; // name
-    double c;      // coefficient
-
-    if (!PyArg_ParseTuple(args, "Osd", &s, &n, &c))
-        return NULL;
+    static char *argnames[] = {"solver", "name", "coefficient", "vartype", "lower", "upper", NULL};
+    PyObject *s;     // solver Python object
+    solver *solv;    // solver C object
+    const char *n;   // name
+    double c;        // coefficient
+    int t;           // integer / binary / continuous
+    double lhs, rhs; // lhs <= a'x <= rhs
     
+    t = SCIP_VARTYPE_CONTINUOUS;
+
+    // SCIPinfinity requires self->scip, so we have to parse the args twice
+    if (!PyArg_ParseTuple(args, "Osd|idd", &s, &n, &c, &t, &lhs, &rhs))
+        return NULL;
+
     self->name = n;
     
     // TODO: raise error if solver object of wrong type
@@ -23,6 +29,23 @@ static int variable_init(variable *self, PyObject *args, PyObject *kwds) {
     solv->first_var = self;
     
     // TODO: different types of variables; optional bounds
+
+    lhs = -SCIPinfinity(self->scip);
+    rhs = SCIPinfinity(self->scip);
+
+    // This time is just to get the upper and lower bounds out    
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "Osd|idd", argnames, &s, &n, &c, &t, &lhs, &rhs))
+        return NULL;
+
+    // TODO: raise error if variable type unrecognized
+    if (t != SCIP_VARTYPE_BINARY && t != SCIP_VARTYPE_INTEGER) {
+        t = SCIP_VARTYPE_CONTINUOUS;
+    } else if (t == SCIP_VARTYPE_BINARY) {
+        if (lhs < 0)
+            lhs = 0;
+        if (rhs > 1)
+            rhs = 1;
+    }
     
     // SCIPcreateVar Arguments:
     // scip         SCIP data structure
@@ -35,7 +58,8 @@ static int variable_init(variable *self, PyObject *args, PyObject *kwds) {
     // initial      should var's column be present in the initial root LP?
     // removable    is var's column removable from the LP?
     // vardata      user data for this specific variable 
-    SCIPcreateVar(self->scip, &self->variable, n, 0.0, 1.0, c, SCIP_VARTYPE_BINARY, TRUE, FALSE, NULL, NULL, NULL, NULL);
+    SCIPcreateVar(self->scip, &self->variable, n, lhs, rhs, c, t,
+        TRUE, FALSE, NULL, NULL, NULL, NULL);
     SCIPaddVar(self->scip, self->variable);
 
     return 0;

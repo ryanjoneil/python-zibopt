@@ -3,28 +3,35 @@
 /*****************************************************************************/
 /* PYTHON TYPE METHODS                                                       */
 /*****************************************************************************/
-static int constraint_init(variable *self, PyObject *args, PyObject *kwds) {
+static int constraint_init(constraint *self, PyObject *args, PyObject *kwds) {
+    static char *argnames[] = {"solver", "name", "lower", "upper", NULL};
     PyObject *s;     // solver Python object
     solver *solv;    // solver C object
     const char *n;   // name
     double lhs, rhs; // lhs <= a'x <= rhs
 
-    // TODO: allow +/- infinity for lhs/rhs
-    
-    if (!PyArg_ParseTuple(args, "Os", &s, &n))
+    // SCIPinfinity requires self->scip, so we have to parse the args twice
+    if (!PyArg_ParseTuple(args, "Os|dd", &s, &n))
         return NULL;
-    
-    self->name = n;
-    
+
     // TODO: raise error if solver object of wrong type
     solv = (solver *) s;
     self->scip = solv->scip;
-    
+        
+    self->name = n;
+
+    lhs = -SCIPinfinity(self->scip);
+    rhs = SCIPinfinity(self->scip);
+
+    // This time is just to get the upper and lower bounds out    
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "Os|dd", argnames, &s, &n, &lhs, &rhs))
+        return NULL;
+
     // Put new constraint at head of linked list
     self->next = solv->first_cons;
     solv->first_cons = self;
     
-    // TODO: build constraint
+    // SCIPcreateConsLinear Arguments:
     // scip        SCIP data structure
     // cons        pointer to hold the created constraint
     // name        name of constraint
@@ -33,20 +40,33 @@ static int constraint_init(variable *self, PyObject *args, PyObject *kwds) {
     // vals        array with coefficients of constraint entries
     // lhs         left hand side of constraint
     // rhs         right hand side of constraint
-    // initial     should the LP relaxation of constraint be in the initial LP? Usually set to TRUE. Set to FALSE for 'lazy constraints'.
-    // separate    should the constraint be separated during LP processing? Usually set to TRUE.
-    // enforce     should the constraint be enforced during node processing? TRUE for model constraints, FALSE for additional, redundant constraints.
-    // check       should the constraint be checked for feasibility? TRUE for model constraints, FALSE for additional, redundant constraints.
-    // propagate   should the constraint be propagated during node processing? Usually set to TRUE.
-    // local       is constraint only valid locally? Usually set to FALSE. Has to be set to TRUE, e.g., for branching constraints.
-    // modifiable  is constraint modifiable (subject to column generation)? Usually set to FALSE. In column generation applications, set to TRUE if pricing adds coefficients to this constraint.
-    // dynamic     Is constraint subject to aging? Usually set to FALSE. Set to TRUE for own cuts which are seperated as constraints.
-    // removable   should the relaxation be removed from the LP due to aging or cleanup? Usually set to FALSE. Set to TRUE for 'lazy constraints' and 'user cuts'.
-    // stickingatnode   should the constraint always be kept at the node where it was added, even if it may be moved to a more global node? Usually set to FALSE. Set to TRUE to for constraints that represent node data.
-
-    // self->constraint =  SCIPcreateConsLinear(_scip, & cons, namebuf.str().c_str(), 0, NULL, NULL, 0.0, 1.0, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE);
-    // FOR EACH VAR: SCIPaddCoefLinear(_scip, cons, _vars[i][j+i], 1.0);
-    // SCIPaddCons(_scip, cons);
+    // initial     should the LP relaxation of constraint be in the initial LP? 
+    //             Usually set to TRUE. Set to FALSE for 'lazy constraints'.
+    // separate    should the constraint be separated during LP processing? 
+    //             Usually set to TRUE.
+    // enforce     should the constraint be enforced during node processing? 
+    //             TRUE for model constraints, FALSE for additional, redundant 
+    //             constraints.
+    // check       should the constraint be checked for feasibility? TRUE for 
+    //             model constraints, FALSE for additional, redundant constraints.
+    // propagate   should the constraint be propagated during node processing? 
+    //             Usually set to TRUE.
+    // local       is constraint only valid locally? Usually set to FALSE. Has 
+    //             to be set to TRUE, e.g., for branching constraints.
+    // modifiable  is constraint modifiable (subject to column generation)? 
+    //             Usually set to FALSE. In column generation applications, set
+    //             to TRUE if pricing adds coefficients to this constraint.
+    // dynamic     Is constraint subject to aging? Usually set to FALSE. Set to 
+    //             TRUE for own cuts which are seperated as constraints.
+    // removable   should the relaxation be removed from the LP due to aging or 
+    //             cleanup? Usually set to FALSE. Set to TRUE for 'lazy 
+    //             constraints' and 'user cuts'.
+    // stickingatnode   should the constraint always be kept at the node where 
+    //             it was added, even if it may be moved to a more global node?
+    //             Usually set to FALSE. Set to TRUE to for constraints that 
+    //             represent node data.
+    SCIPcreateConsLinear(self->scip, &self->constraint, n, 0, NULL, NULL, lhs, 
+        rhs, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE);
 
     return 0;
 }
@@ -56,9 +76,34 @@ static void constraint_dealloc(constraint *self) {
 }
 
 /*****************************************************************************/
+/* ADDITONAL METHODS                                                         */
+/*****************************************************************************/
+static PyObject *constraint_variable(constraint *self, PyObject *args) {
+    PyObject *v;
+    double coefficient;
+    variable *var;
+
+    if (!PyArg_ParseTuple(args, "Od", &v, &coefficient))
+        return NULL;
+        
+    // TODO: raise error if var object of wrong type
+    var = (variable *) v;
+
+    SCIPaddCoefLinear(self->scip, self->constraint, var->variable, coefficient);
+    Py_RETURN_NONE;
+}
+
+static PyObject *constraint_register(constraint *self) {
+    SCIPaddCons(self->scip, self->constraint);
+    Py_RETURN_NONE;
+}
+
+/*****************************************************************************/
 /* MODULE INITIALIZATION                                                     */
 /*****************************************************************************/
 static PyMethodDef constraint_methods[] = {
+    {"variable", (PyCFunction) constraint_variable, METH_VARARGS, "add a variable to a constraint"},
+    {"register", (PyCFunction) constraint_register, METH_NOARGS, "registers the constraint with the solver"},
     {NULL} /* Sentinel */
 };
 

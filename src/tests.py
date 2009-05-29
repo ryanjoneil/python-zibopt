@@ -6,7 +6,7 @@ class ScipTest(unittest.TestCase):
     def setUp(self):
         pass
         
-    def atestLoadSolver(self):
+    def testLoadSolver(self):
         scip.solver()
 
     def testAddVariable(self):
@@ -15,9 +15,18 @@ class ScipTest(unittest.TestCase):
 
     def testMax(self):
         solver = scip.solver()
-        solver.variable('x1', 1)
-        solver.variable('x2', 1)
-        solver.variable('x3', 2)
+        solver.variable('x1', coefficient=1, vartype=scip.INTEGER, upper=2)
+        solver.variable('x2', coefficient=1, vartype=scip.INTEGER)
+        solver.variable('x3', coefficient=2, vartype=scip.INTEGER)
+        solver.constraint('foo', 
+            lower = 0, 
+            upper = 3,
+            coefficients = {
+                'x1': 1,
+                'x2': 1,
+                'x3': 3
+            }
+        )
         solution = solver.maximize()
         print solution.values()
 
