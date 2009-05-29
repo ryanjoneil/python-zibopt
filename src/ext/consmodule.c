@@ -25,6 +25,28 @@ static int constraint_init(variable *self, PyObject *args, PyObject *kwds) {
     solv->first_cons = self;
     
     // TODO: build constraint
+    // scip        SCIP data structure
+    // cons        pointer to hold the created constraint
+    // name        name of constraint
+    // nvars       number of nonzeros in the constraint
+    // vars        array with variables of constraint entries
+    // vals        array with coefficients of constraint entries
+    // lhs         left hand side of constraint
+    // rhs         right hand side of constraint
+    // initial     should the LP relaxation of constraint be in the initial LP? Usually set to TRUE. Set to FALSE for 'lazy constraints'.
+    // separate    should the constraint be separated during LP processing? Usually set to TRUE.
+    // enforce     should the constraint be enforced during node processing? TRUE for model constraints, FALSE for additional, redundant constraints.
+    // check       should the constraint be checked for feasibility? TRUE for model constraints, FALSE for additional, redundant constraints.
+    // propagate   should the constraint be propagated during node processing? Usually set to TRUE.
+    // local       is constraint only valid locally? Usually set to FALSE. Has to be set to TRUE, e.g., for branching constraints.
+    // modifiable  is constraint modifiable (subject to column generation)? Usually set to FALSE. In column generation applications, set to TRUE if pricing adds coefficients to this constraint.
+    // dynamic     Is constraint subject to aging? Usually set to FALSE. Set to TRUE for own cuts which are seperated as constraints.
+    // removable   should the relaxation be removed from the LP due to aging or cleanup? Usually set to FALSE. Set to TRUE for 'lazy constraints' and 'user cuts'.
+    // stickingatnode   should the constraint always be kept at the node where it was added, even if it may be moved to a more global node? Usually set to FALSE. Set to TRUE to for constraints that represent node data.
+
+    // self->constraint =  SCIPcreateConsLinear(_scip, & cons, namebuf.str().c_str(), 0, NULL, NULL, 0.0, 1.0, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE);
+    // FOR EACH VAR: SCIPaddCoefLinear(_scip, cons, _vars[i][j+i], 1.0);
+    // SCIPaddCons(_scip, cons);
 
     return 0;
 }
@@ -63,12 +85,12 @@ static PyTypeObject constraint_type = {
     0,                         /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /*tp_flags*/
     "SCIP constraint objects",           /* tp_doc */
-    0,		               /* tp_traverse */
-    0,		               /* tp_clear */
-    0,		               /* tp_richcompare */
-    0,		               /* tp_weaklistoffset */
-    0,		               /* tp_iter */
-    0,		               /* tp_iternext */
+    0,                       /* tp_traverse */
+    0,                       /* tp_clear */
+    0,                       /* tp_richcompare */
+    0,                       /* tp_weaklistoffset */
+    0,                       /* tp_iter */
+    0,                       /* tp_iternext */
     constraint_methods,             /* tp_methods */
     0,                         /* tp_members */
     0,                         /* tp_getset */
@@ -82,7 +104,7 @@ static PyTypeObject constraint_type = {
     0,                 /* tp_new */
 };
 
-#ifndef PyMODINIT_FUNC	/* declarations for DLL import/export */
+#ifndef PyMODINIT_FUNC    /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
 PyMODINIT_FUNC init_cons(void) {
