@@ -11,7 +11,7 @@ static int solution_init(solution *self, PyObject *args, PyObject *kwds) {
         return NULL;
     
     // TODO: raise error if solver object of wrong type
-    solv =  (solver *) s;
+    solv = (solver *) s;
     self->scip = solv->scip;
     self->solution = SCIPgetBestSol(self->scip);
 
