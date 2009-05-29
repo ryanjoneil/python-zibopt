@@ -32,12 +32,16 @@ static int solver_init(solver *self, PyObject *args, PyObject *kwds) {
 static void solver_dealloc(solver *self) {
     if (self->scip) {
         // Free all variables
-        while (self->first != NULL) {
-            SCIPreleaseVar(self->scip, &self->first->variable);
-            self->first = self->first->next;
+        while (self->first_var != NULL) {
+            SCIPreleaseVar(self->scip, &self->first_var->variable);
+            self->first_var = self->first_var->next;
         }
         
-        // TODO: Free constraints
+        // Free constraints
+        while (self->first_cons != NULL) {
+            SCIPreleaseCons(self->scip, &self->first_cons->constraint);
+            self->first_cons = self->first_cons->next;
+        }
         
         // Free the solver itself
         SCIPfree(&self->scip);
