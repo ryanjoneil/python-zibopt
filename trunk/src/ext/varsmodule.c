@@ -4,10 +4,9 @@
 /* PYTHON TYPE METHODS                                                       */
 /*****************************************************************************/
 static int variable_init(variable *self, PyObject *args, PyObject *kwds) {
-    static char *argnames[] = {"solver", "name", "coefficient", "vartype", "lower", "upper", NULL};
+    static char *argnames[] = {"solver", "coefficient", "vartype", "lower", "upper", NULL};
     PyObject *s;     // solver Python object
     solver *solv;    // solver C object
-    const char *n;   // name
     double c;        // coefficient
     int t;           // integer / binary / continuous
     double lhs, rhs; // lhs <= a'x <= rhs
@@ -15,11 +14,9 @@ static int variable_init(variable *self, PyObject *args, PyObject *kwds) {
     t = SCIP_VARTYPE_CONTINUOUS;
 
     // SCIPinfinity requires self->scip, so we have to parse the args twice
-    if (!PyArg_ParseTuple(args, "Osd|idd", &s, &n, &c, &t, &lhs, &rhs))
+    if (!PyArg_ParseTuple(args, "Od|idd", &s, &c, &t, &lhs, &rhs))
         return NULL;
 
-    self->name = n;
-    
     // TODO: raise error if solver object of wrong type
     solv = (solver *) s;
     self->scip = solv->scip;
@@ -28,13 +25,11 @@ static int variable_init(variable *self, PyObject *args, PyObject *kwds) {
     self->next = solv->first_var;
     solv->first_var = self;
     
-    // TODO: different types of variables; optional bounds
-
     lhs = -SCIPinfinity(self->scip);
     rhs = SCIPinfinity(self->scip);
 
     // This time is just to get the upper and lower bounds out    
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "Osd|idd", argnames, &s, &n, &c, &t, &lhs, &rhs))
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "Od|idd", argnames, &s, &c, &t, &lhs, &rhs))
         return NULL;
 
     // TODO: raise error if variable type unrecognized
@@ -58,7 +53,7 @@ static int variable_init(variable *self, PyObject *args, PyObject *kwds) {
     // initial      should var's column be present in the initial root LP?
     // removable    is var's column removable from the LP?
     // vardata      user data for this specific variable 
-    SCIPcreateVar(self->scip, &self->variable, n, lhs, rhs, c, t,
+    SCIPcreateVar(self->scip, &self->variable, NULL, lhs, rhs, c, t,
         TRUE, FALSE, NULL, NULL, NULL, NULL);
     SCIPaddVar(self->scip, self->variable);
 

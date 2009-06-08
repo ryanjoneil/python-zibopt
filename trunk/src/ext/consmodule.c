@@ -4,27 +4,24 @@
 /* PYTHON TYPE METHODS                                                       */
 /*****************************************************************************/
 static int constraint_init(constraint *self, PyObject *args, PyObject *kwds) {
-    static char *argnames[] = {"solver", "name", "lower", "upper", NULL};
+    static char *argnames[] = {"solver", "lower", "upper", NULL};
     PyObject *s;     // solver Python object
     solver *solv;    // solver C object
-    const char *n;   // name
     double lhs, rhs; // lhs <= a'x <= rhs
 
     // SCIPinfinity requires self->scip, so we have to parse the args twice
-    if (!PyArg_ParseTuple(args, "Os|dd", &s, &n))
+    if (!PyArg_ParseTuple(args, "O|dd", &s))
         return NULL;
 
     // TODO: raise error if solver object of wrong type
     solv = (solver *) s;
     self->scip = solv->scip;
         
-    self->name = n;
-
     lhs = -SCIPinfinity(self->scip);
     rhs = SCIPinfinity(self->scip);
 
     // This time is just to get the upper and lower bounds out    
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "Os|dd", argnames, &s, &n, &lhs, &rhs))
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|dd", argnames, &s, &lhs, &rhs))
         return NULL;
 
     // Put new constraint at head of linked list
@@ -65,8 +62,8 @@ static int constraint_init(constraint *self, PyObject *args, PyObject *kwds) {
     //             it was added, even if it may be moved to a more global node?
     //             Usually set to FALSE. Set to TRUE to for constraints that 
     //             represent node data.
-    SCIPcreateConsLinear(self->scip, &self->constraint, n, 0, NULL, NULL, lhs, 
-        rhs, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE);
+    SCIPcreateConsLinear(self->scip, &self->constraint, "", 0, NULL, NULL, 
+        lhs, rhs, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE);
 
     return 0;
 }

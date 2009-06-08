@@ -25,56 +25,62 @@ if __name__ == '__main__':
     vals = range(1, 10)
     groups = (0, 3, 6)
 
+    # 9x9x9 structure for storing all binary variables
+    # If x[i][j][k] == 1, then problem[i][j] == k.
+    x = dict((i, dict((j, {}) for j in cols)) for i in rows)
+
     # Initialize one binary variable per cell value
     solver = scip.solver()
     for i, j, k in product(rows, cols, vals):
-        solver.variable('%d %d %d' % (i, j, k),
+        x[i][j][k] = solver.variable(
             vartype = scip.BINARY,
             lower   = 1 if problem[i][j] == k else 0
         )
      
     # Each cell takes on exactly one value
     for i, j in product(rows, cols):
-        solver.constraint('value %d %d' % (i, j), 
+        solver.constraint( 
             lower = 1,
             upper = 1,
-            coefficients = dict(('%d %d %d' % (i, j, k), 1) for k in vals)
+            coefficients = dict((x[i][j][k], 1) for k in vals)
         )
 
     # Each value occurs in each row once
     for i, k in product(rows, vals):
-        solver.constraint('row %d %d' % (i, k), 
+        solver.constraint(
             lower = 1,
             upper = 1,
-            coefficients = dict(('%d %d %d' % (i, j, k), 1) for j in cols)
+            coefficients = dict((x[i][j][k], 1) for j in cols)
         )
 
     # Each value occurs in each column once
     for j, k in product(cols, vals):
-        solver.constraint('column %d %d' % (j, k), 
+        solver.constraint( 
             lower = 1,
             upper = 1,
-            coefficients = dict(('%d %d %d' % (i, j, k), 1) for i in rows)
+            coefficients = dict((x[i][j][k], 1) for i in rows)
         )
 
     # Each 3x3 group has all unique values    
     for m, n, k in product(groups, groups, vals):
-        solver.constraint('group %d %d %d' % (m, n, k),
+        solver.constraint(
             lower = 1,
             upper = 1,
             coefficients = dict(
-                ('%d %d %d' % (i, j, k), 1) for i, j in product(
-                    range(m, m+3), range(n, n+3)
-                )
+                (x[i][j][k], 1) for i, j in product(range(m,m+3), range(n,n+3))
             )
         )    
-    
+
     # All variables have 0 coefficients, so we can either max or min            
     solution = solver.maximize()
-    for x in solution.values():
-        i, j, k = x.name.split()
-        problem[int(i)][int(j)] = int(k)
-        
+
+    # Convert solution values to a nice solution matrix
+    for i, j in product(rows, cols):
+        for k in vals:
+            if solution.value(x[i][j][k]):
+                problem[i][j] = k
+                break
+                
     for row in problem:
         print row
 
