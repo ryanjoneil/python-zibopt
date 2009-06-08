@@ -13,7 +13,6 @@ typedef struct {
     PyObject_HEAD
     SCIP_VAR *variable;
     SCIP *scip;
-    char *name;
     struct variable *next; // linked list next
 } variable;
 
@@ -21,7 +20,6 @@ typedef struct {
     PyObject_HEAD
     SCIP_CONS *constraint;
     SCIP *scip;
-    char *name;
     struct constraint *next; // linked list next
 } constraint;
 
