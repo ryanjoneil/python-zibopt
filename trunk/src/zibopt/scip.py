@@ -2,6 +2,7 @@ from zibopt import _scip, _vars, _cons, _soln
 
 BINARY     = _scip.BINARY
 INTEGER    = _scip.INTEGER
+IMPLINT    = _scip.IMPLINT
 CONTINUOUS = _scip.CONTINUOUS
 
 class variable(_vars.variable):
