@@ -130,6 +130,7 @@ PyMODINIT_FUNC init_scip(void) {
     // Constants on scip module
     PyModule_AddIntConstant(m, "BINARY", SCIP_VARTYPE_BINARY);
     PyModule_AddIntConstant(m, "INTEGER", SCIP_VARTYPE_INTEGER);
+    PyModule_AddIntConstant(m, "IMPLINT", SCIP_VARTYPE_IMPLINT);
     PyModule_AddIntConstant(m, "CONTINUOUS", SCIP_VARTYPE_CONTINUOUS);
 
     Py_INCREF(&solver_type);
