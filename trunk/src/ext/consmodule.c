@@ -1,5 +1,7 @@
 #include "python_zibopt.h"
 
+static PyObject *error;
+
 /*****************************************************************************/
 /* PYTHON TYPE METHODS                                                       */
 /*****************************************************************************/
@@ -11,7 +13,7 @@ static int constraint_init(constraint *self, PyObject *args, PyObject *kwds) {
 
     // SCIPinfinity requires self->scip, so we have to parse the args twice
     if (!PyArg_ParseTuple(args, "O|dd", &s))
-        return NULL;
+        return -1;
 
     // TODO: raise error if solver object of wrong type
     solv = (solver *) s;
@@ -22,12 +24,8 @@ static int constraint_init(constraint *self, PyObject *args, PyObject *kwds) {
 
     // This time is just to get the upper and lower bounds out    
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|dd", argnames, &s, &lhs, &rhs))
-        return NULL;
+        return -1;
 
-    // Put new constraint at head of linked list
-    self->next = solv->first_cons;
-    solv->first_cons = self;
-    
     // SCIPcreateConsLinear Arguments:
     // scip        SCIP data structure
     // cons        pointer to hold the created constraint
@@ -62,8 +60,14 @@ static int constraint_init(constraint *self, PyObject *args, PyObject *kwds) {
     //             it was added, even if it may be moved to a more global node?
     //             Usually set to FALSE. Set to TRUE to for constraints that 
     //             represent node data.
-    SCIPcreateConsLinear(self->scip, &self->constraint, "", 0, NULL, NULL, 
-        lhs, rhs, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE);
+    PY_SCIP_CALL(error, -1,
+        SCIPcreateConsLinear(self->scip, &self->constraint, "", 0, NULL, NULL, 
+            lhs, rhs, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE)        
+    );
+
+    // Put new constraint at head of linked list
+    self->next = solv->first_cons;
+    solv->first_cons = self;
 
     return 0;
 }
@@ -86,12 +90,14 @@ static PyObject *constraint_variable(constraint *self, PyObject *args) {
     // TODO: raise error if var object of wrong type
     var = (variable *) v;
 
-    SCIPaddCoefLinear(self->scip, self->constraint, var->variable, coefficient);
+    PY_SCIP_CALL(error, NULL, 
+        SCIPaddCoefLinear(self->scip, self->constraint, var->variable, coefficient)
+    );
     Py_RETURN_NONE;
 }
 
 static PyObject *constraint_register(constraint *self) {
-    SCIPaddCons(self->scip, self->constraint);
+    PY_SCIP_CALL(error, NULL, SCIPaddCons(self->scip, self->constraint));
     Py_RETURN_NONE;
 }
 
@@ -160,5 +166,10 @@ PyMODINIT_FUNC init_cons(void) {
 
     Py_INCREF(&constraint_type);
     PyModule_AddObject(m, "constraint", (PyObject *) &constraint_type);
+
+    // Initialize exception type
+    error = PyErr_NewException("_cons.error", NULL, NULL);
+    Py_INCREF(error);
+    PyModule_AddObject(m, "error", error);
 }
 

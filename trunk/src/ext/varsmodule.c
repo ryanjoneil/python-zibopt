@@ -1,5 +1,7 @@
 #include "python_zibopt.h"
 
+static PyObject *error;
+
 /*****************************************************************************/
 /* PYTHON TYPE METHODS                                                       */
 /*****************************************************************************/
@@ -15,22 +17,19 @@ static int variable_init(variable *self, PyObject *args, PyObject *kwds) {
 
     // SCIPinfinity requires self->scip, so we have to parse the args twice
     if (!PyArg_ParseTuple(args, "Od|idd", &s, &c, &t, &lhs, &rhs))
-        return NULL;
+        return -1;
 
     // TODO: raise error if solver object of wrong type
     solv = (solver *) s;
     self->scip = solv->scip;
-    
-    // Put new variable at head of linked list
-    self->next = solv->first_var;
-    solv->first_var = self;
+
     
     lhs = -SCIPinfinity(self->scip);
     rhs = SCIPinfinity(self->scip);
 
     // This time is just to get the upper and lower bounds out    
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "Od|idd", argnames, &s, &c, &t, &lhs, &rhs))
-        return NULL;
+        return -1;
 
     // TODO: raise error if variable type unrecognized
     if (t != SCIP_VARTYPE_BINARY && t != SCIP_VARTYPE_INTEGER) {
@@ -53,9 +52,16 @@ static int variable_init(variable *self, PyObject *args, PyObject *kwds) {
     // initial      should var's column be present in the initial root LP?
     // removable    is var's column removable from the LP?
     // vardata      user data for this specific variable 
-    SCIPcreateVar(self->scip, &self->variable, NULL, lhs, rhs, c, t,
-        TRUE, FALSE, NULL, NULL, NULL, NULL);
-    SCIPaddVar(self->scip, self->variable);
+    PY_SCIP_CALL(error, -1, 
+        SCIPcreateVar(self->scip, &self->variable, NULL, lhs, rhs, c, t,
+            TRUE, FALSE, NULL, NULL, NULL, NULL)
+    );
+            
+    PY_SCIP_CALL(error, -1, SCIPaddVar(self->scip, self->variable));
+
+    // Put new variable at head of linked list
+    self->next = solv->first_var;
+    solv->first_var = self;
 
     return 0;
 }
@@ -127,5 +133,10 @@ PyMODINIT_FUNC init_vars(void) {
 
     Py_INCREF(&variable_type);
     PyModule_AddObject(m, "variable", (PyObject *) &variable_type);
+
+    // Initialize exception type
+    error = PyErr_NewException("_vars.error", NULL, NULL);
+    Py_INCREF(error);
+    PyModule_AddObject(m, "error", error);
 }
 

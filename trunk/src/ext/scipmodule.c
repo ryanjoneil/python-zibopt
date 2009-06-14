@@ -1,6 +1,6 @@
 #include "python_zibopt.h"
 
-// TODO: wrap scip calls in exception handling
+static PyObject *error;
 
 /*****************************************************************************/
 /* PYTHON TYPE METHODS                                                       */
@@ -11,15 +11,17 @@ static PyObject *solver_new(PyTypeObject *type, PyObject *args, PyObject *kwds) 
     self = (solver *) type->tp_alloc(type, 0);
     if (self != NULL) {
         // Initialize SCIP
-        SCIPcreate(&self->scip);
+        PY_SCIP_CALL(error, NULL, SCIPcreate(&self->scip));
         
         // Default plugins, heuristics, etc
-        SCIPincludeDefaultPlugins(self->scip);
+        PY_SCIP_CALL(error, NULL, SCIPincludeDefaultPlugins(self->scip));
         
         // Create an empty problem
         // TODO: allow user to name problem?
         // TODO: what are all these NULLs for?
-        SCIPcreateProb(self->scip, "python-zibobt", NULL, NULL, NULL, NULL, NULL, NULL);
+        PY_SCIP_CALL(error, NULL, 
+            SCIPcreateProb(self->scip, "python-zibobt", NULL, NULL, NULL, NULL, NULL, NULL)
+        );
     }
 
     return (PyObject *) self;
@@ -54,14 +56,14 @@ static void solver_dealloc(solver *self) {
 /* ADDITONAL METHODS                                                         */
 /*****************************************************************************/
 static PyObject *solver_maximize(solver *self) {
-    SCIPsetObjsense(self->scip, SCIP_OBJSENSE_MAXIMIZE);
-    SCIPsolve(self->scip);
+    PY_SCIP_CALL(error, NULL, SCIPsetObjsense(self->scip, SCIP_OBJSENSE_MAXIMIZE));
+    PY_SCIP_CALL(error, NULL, SCIPsolve(self->scip));
     Py_RETURN_NONE;
 }
 
 static PyObject *solver_minimize(solver *self) {
-    SCIPsetObjsense(self->scip, SCIP_OBJSENSE_MINIMIZE);
-    SCIPsolve(self->scip);
+    PY_SCIP_CALL(error, NULL, SCIPsetObjsense(self->scip, SCIP_OBJSENSE_MINIMIZE));
+    PY_SCIP_CALL(error, NULL, SCIPsolve(self->scip));
     Py_RETURN_NONE;
 }
 
@@ -135,5 +137,10 @@ PyMODINIT_FUNC init_scip(void) {
 
     Py_INCREF(&solver_type);
     PyModule_AddObject(m, "solver", (PyObject *) &solver_type);
+
+    // Initialize exception type
+    error = PyErr_NewException("_scip.error", NULL, NULL);
+    Py_INCREF(error);
+    PyModule_AddObject(m, "error", error);
 }
 
