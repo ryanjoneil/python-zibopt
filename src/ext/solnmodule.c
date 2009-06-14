@@ -8,14 +8,16 @@ static int solution_init(solution *self, PyObject *args, PyObject *kwds) {
     solver *solv;  // solver C object
 
     if (!PyArg_ParseTuple(args, "O", &s))
-        return NULL;
+        return -1;
     
     // TODO: raise error if solver object of wrong type
     solv = (solver *) s;
     self->scip = solv->scip;
     self->solution = SCIPgetBestSol(self->scip);
 
-    // TODO: handle infeasibility
+    // TODO: if null return PyNone?
+
+    // TODO: handle infeasibility, same here wrt null
     // Extract objective value into Python float
     self->objective = SCIPgetSolOrigObj(self->scip, self->solution);
     
