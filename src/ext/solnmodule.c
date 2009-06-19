@@ -21,9 +21,10 @@ static int solution_init(solution *self, PyObject *args, PyObject *kwds) {
     solv = (solver *) s;
     self->scip = solv->scip;
     
+    // Detect infeasibility
     self->solution = SCIPgetBestSol(self->scip);
+    self->feasible = self->solution != 0;
 
-    // TODO: handle infeasibility, same here wrt null
     // Extract objective value into Python float
     self->objective = SCIPgetSolOrigObj(self->scip, self->solution);
     
@@ -55,6 +56,7 @@ static PyObject *solution_value(solution *self, PyObject *v) {
 /*****************************************************************************/
 static PyMemberDef solution_members[] = {
     {"objective", T_DOUBLE, offsetof(solution, objective), 0, "objective value"},
+    {"feasible", T_BOOL, offsetof(solution, feasible), 0, "solution is feasible"},
     {NULL}  /* Sentinel */
 };
 
