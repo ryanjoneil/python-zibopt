@@ -28,15 +28,26 @@ static PyObject *solver_new(PyTypeObject *type, PyObject *args, PyObject *kwds) 
         PY_SCIP_CALL(error, NULL, 
             SCIPcreateProb(self->scip, "python-zibobt", NULL, NULL, NULL, NULL, NULL, NULL)
         );
-
-        // Turn off chatter
-        PY_SCIP_CALL(error, NULL, SCIPsetMessagehdlr(NULL));
     }
 
     return (PyObject *) self;
 }
 
 static int solver_init(solver *self, PyObject *args, PyObject *kwds) {
+    static char *argnames[] = {"quiet", NULL};
+    bool quiet;
+    
+    quiet = true;
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|b", argnames, &quiet))
+        return -1;
+
+    // Turn on/off solver chatter
+    if (quiet) {
+        PY_SCIP_CALL(error, -1, SCIPsetMessagehdlr(NULL));
+    } else {
+        PY_SCIP_CALL(error, -1, SCIPsetDefaultMessagehdlr());
+    }
+
     return 0;
 }
 
