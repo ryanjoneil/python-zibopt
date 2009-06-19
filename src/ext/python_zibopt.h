@@ -9,6 +9,9 @@
 #include <scip/sol.h>
 #include "structmember.h"
 
+#define SOLVER_TYPE_NAME "solver"
+#define VARIABLE_TYPE_NAME "_vars.variable"
+
 typedef struct {
     PyObject_HEAD
     SCIP_VAR *variable;

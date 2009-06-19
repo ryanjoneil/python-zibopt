@@ -6,19 +6,10 @@ IMPLINT    = _scip.IMPLINT
 CONTINUOUS = _scip.CONTINUOUS
 
 ConstraintError = _cons.error
+SolutionError   = _soln.error
 SolverError     = _scip.error
 VariableError   = _vars.error
 
-class variable(_vars.variable):
-    def __init__(self, solver, coefficient=0, vartype=CONTINUOUS, lower=0, **kwds):
-        super(variable, self).__init__(solver, coefficient, vartype, lower, **kwds)
-        self.solver = solver
-        self.coefficient = coefficient
-
-class constraint(_cons.constraint):
-    def __init__(self, solver, **kwds):
-        super(constraint, self).__init__(solver, **kwds)
-        self.solver = solver
 class solution(_soln.solution):
     def __init__(self, solver):
         super(solution, self).__init__(solver)
@@ -37,7 +28,7 @@ class solver(_scip.solver):
         self.constraints = set()
 
     def variable(self, coefficient=0, vartype=CONTINUOUS, lower=0, **kwds):
-        v = variable(self, coefficient, vartype, lower, **kwds)
+        v = _vars.variable(self, coefficient, vartype, lower, **kwds)
         self.variables.add(v)
         return v
 
@@ -49,7 +40,7 @@ class solver(_scip.solver):
         except KeyError:
             coefficients = {}            
 
-        cons = constraint(self, **kwds)
+        cons = _cons.constraint(self, **kwds)
         for k, v in coefficients.iteritems():
             cons.variable(k, v)
 

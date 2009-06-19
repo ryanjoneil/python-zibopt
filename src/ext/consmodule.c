@@ -15,7 +15,12 @@ static int constraint_init(constraint *self, PyObject *args, PyObject *kwds) {
     if (!PyArg_ParseTuple(args, "O|dd", &s))
         return -1;
 
-    // TODO: raise error if solver object of wrong type
+    // Check solver type in the best way we seem to have available
+    if (strcmp(s->ob_type->tp_name, SOLVER_TYPE_NAME)) {
+        PyErr_SetString(error, "invalid solver type");
+        return -1;
+    }
+    
     solv = (solver *) s;
     self->scip = solv->scip;
         
@@ -87,7 +92,11 @@ static PyObject *constraint_variable(constraint *self, PyObject *args) {
     if (!PyArg_ParseTuple(args, "Od", &v, &coefficient))
         return NULL;
         
-    // TODO: raise error if var object of wrong type
+    // Check and make sure we have a real variable type
+    if (strcmp(v->ob_type->tp_name, VARIABLE_TYPE_NAME)) {
+        PyErr_SetString(error, "invalid variable type");
+        return NULL;
+    }
     var = (variable *) v;
 
     PY_SCIP_CALL(error, NULL, 

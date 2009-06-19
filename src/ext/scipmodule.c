@@ -17,7 +17,6 @@ static PyObject *solver_new(PyTypeObject *type, PyObject *args, PyObject *kwds) 
         PY_SCIP_CALL(error, NULL, SCIPincludeDefaultPlugins(self->scip));
         
         // Create an empty problem
-        // TODO: allow user to name problem?
         // TODO: what are all these NULLs for?
         PY_SCIP_CALL(error, NULL, 
             SCIPcreateProb(self->scip, "python-zibobt", NULL, NULL, NULL, NULL, NULL, NULL)
@@ -56,6 +55,7 @@ static void solver_dealloc(solver *self) {
 /* ADDITONAL METHODS                                                         */
 /*****************************************************************************/
 static PyObject *solver_maximize(solver *self) {
+    // TODO: turn off/on solver verbosity!
     PY_SCIP_CALL(error, NULL, SCIPsetObjsense(self->scip, SCIP_OBJSENSE_MAXIMIZE));
     PY_SCIP_CALL(error, NULL, SCIPsolve(self->scip));
     Py_RETURN_NONE;
