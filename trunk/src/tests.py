@@ -5,10 +5,8 @@ class ScipTest(unittest.TestCase):
     def setUp(self):
         pass
         
-    def testVerbosity(self):
+    def testLoadSolver(self):
         solver = scip.solver()
-        solver.verbose()
-        solver.quiet()
 
     def testMax(self):
         solver = scip.solver()
