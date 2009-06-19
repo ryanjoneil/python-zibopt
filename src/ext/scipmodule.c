@@ -21,6 +21,9 @@ static PyObject *solver_new(PyTypeObject *type, PyObject *args, PyObject *kwds) 
         PY_SCIP_CALL(error, NULL, 
             SCIPcreateProb(self->scip, "python-zibobt", NULL, NULL, NULL, NULL, NULL, NULL)
         );
+
+        // Turn off chatter
+        PY_SCIP_CALL(error, NULL, SCIPsetMessagehdlr(NULL));
     }
 
     return (PyObject *) self;
@@ -54,8 +57,17 @@ static void solver_dealloc(solver *self) {
 /*****************************************************************************/
 /* ADDITONAL METHODS                                                         */
 /*****************************************************************************/
+static PyObject *solver_verbose(solver *self) {
+    PY_SCIP_CALL(error, NULL, SCIPsetDefaultMessagehdlr());
+    Py_RETURN_NONE;
+}
+
+static PyObject *solver_quiet(solver *self) {
+    PY_SCIP_CALL(error, NULL, SCIPsetMessagehdlr(NULL));
+    Py_RETURN_NONE;
+}
+
 static PyObject *solver_maximize(solver *self) {
-    // TODO: turn off/on solver verbosity!
     PY_SCIP_CALL(error, NULL, SCIPsetObjsense(self->scip, SCIP_OBJSENSE_MAXIMIZE));
     PY_SCIP_CALL(error, NULL, SCIPsolve(self->scip));
     Py_RETURN_NONE;
@@ -71,6 +83,8 @@ static PyObject *solver_minimize(solver *self) {
 /* MODULE INITIALIZATION                                                     */
 /*****************************************************************************/
 static PyMethodDef solver_methods[] = {
+    {"verbose",  (PyCFunction) solver_maximize, METH_NOARGS, "turn on solver chatter"},
+    {"quiet",    (PyCFunction) solver_minimize, METH_NOARGS, "turn off solver chatter"},
     {"maximize", (PyCFunction) solver_maximize, METH_NOARGS, "maximize the objective value"},
     {"minimize", (PyCFunction) solver_minimize, METH_NOARGS, "minimize the objective value"},
     {NULL} /* Sentinel */
