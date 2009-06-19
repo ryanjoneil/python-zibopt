@@ -15,9 +15,11 @@ class ScipTest(unittest.TestCase):
         x3 = solver.variable(coefficient=2, vartype=scip.INTEGER)
         solver.constraint(upper=3, coefficients={x1:1, x2:1, x3:3})
         # TODO: why does this segfault!!!???!!!???
+
         solution = solver.maximize()
+        self.assertTrue(solution)
+
         values = solution.values()
-            
         self.assertEqual(values[x1], 0)
         self.assertEqual(values[x2], 3)
         self.assertEqual(values[x3], 0)
@@ -32,6 +34,14 @@ class ScipTest(unittest.TestCase):
         solver = scip.solver()
         self.assertRaises(scip.VariableError, _vars.variable, object(), 0)
         self.assertRaises(scip.ConstraintError, _cons.constraint, object())
+
+    def testInfeasible(self):
+        solver = scip.solver()
+        x1 = solver.variable()
+        solver.constraint(upper=0, coefficients={x1:1})
+        solver.constraint(lower=1, coefficients={x1:1})
+        solution = solver.maximize() 
+        self.assertFalse(solution)
         
 if __name__ == '__main__':
     unittest.main()

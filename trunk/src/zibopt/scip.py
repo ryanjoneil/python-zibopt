@@ -14,6 +14,9 @@ class solution(_soln.solution):
     def __init__(self, solver):
         super(solution, self).__init__(solver)
         self.solver = solver
+
+    def __nonzero__(self):
+        return bool(self.feasible)
     
     def values(self):
         vals = {}
@@ -49,7 +52,6 @@ class solver(_scip.solver):
 
     def maximize(self):
         super(solver, self).maximize()
-        # TODO: what to do about infeasibility?
         return solution(self)
         
     def minimize(self):

@@ -2,6 +2,9 @@
 #define PYTHON_ZIBOPT_H
 
 #include <Python.h>
+#include <stdbool.h>
+#include <string.h>
+
 #include <scip/scip.h>
 #include <scip/scipdefplugins.h>
 #include <scip/misc.h>
@@ -38,6 +41,7 @@ typedef struct {
     SCIP_SOL *solution;
     SCIP *scip;
     double objective; // objective value
+    bool feasible;
 } solution;
 
 static void PyScipSetError(PyObject *error_type, SCIP_RETCODE err_code) {

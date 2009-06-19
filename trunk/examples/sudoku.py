@@ -73,14 +73,17 @@ if __name__ == '__main__':
 
     # All variables have 0 coefficients, so we can either max or min            
     solution = solver.maximize()
-
-    # Convert solution values to a nice solution matrix
-    for i, j in product(rows, cols):
-        for k in vals:
-            if solution.value(x[i][j][k]):
-                problem[i][j] = k
-                break
+    if solution:
+        # Convert solution values to a nice solution matrix
+        for i, j in product(rows, cols):
+            for k in vals:
+                if solution.value(x[i][j][k]):
+                    problem[i][j] = k
+                    break
                 
-    for row in problem:
-        print row
+        for row in problem:
+            print row
+
+    else:
+        print 'no solution'
 
