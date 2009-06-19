@@ -41,7 +41,7 @@ class solver(_scip.solver):
             coefficients = kwds['coefficients']
             del kwds['coefficients']
         except KeyError:
-            coefficients = {}            
+            coefficients = {} 
 
         cons = _cons.constraint(self, **kwds)
         for k, v in coefficients.iteritems():

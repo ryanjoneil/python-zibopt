@@ -14,8 +14,6 @@ class ScipTest(unittest.TestCase):
         x2 = solver.variable(coefficient=1, vartype=scip.INTEGER)
         x3 = solver.variable(coefficient=2, vartype=scip.INTEGER)
         solver.constraint(upper=3, coefficients={x1:1, x2:1, x3:3})
-        # TODO: why does this segfault!!!???!!!???
-
         solution = solver.maximize()
         self.assertTrue(solution)
 
