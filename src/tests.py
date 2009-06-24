@@ -41,6 +41,20 @@ class ScipTest(unittest.TestCase):
         solution = solver.maximize() 
         self.assertFalse(solution)
         
+    def testRestart(self):
+        solver = scip.solver()
+        solver.variable(coefficient=1, vartype=scip.INTEGER, upper=2)
+        solution = solver.maximize() 
+        self.assertEqual(solution.objective, 2)
+
+        solver.restart()
+        solver.variable(coefficient=1, vartype=scip.INTEGER, upper=2)
+        solution = solver.maximize() 
+        self.assertEqual(solution.objective, 4)
+        
+    
+    # TODO: deal with unbounded problems
+
 if __name__ == '__main__':
     unittest.main()
 
