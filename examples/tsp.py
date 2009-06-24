@@ -2,20 +2,7 @@
 
 from itertools import product
 from zibopt import scip
-
-# We represent STSP as a lower triangular matrix with the diagonal.
-# Thus the first column and row represent connections to the first node.
-DISTANCE = [
-    [0], 
-    [1, 0],
-    [5, 2, 0],
-    [3, 9, 2, 0],
-    [2, 8, 1, 3, 0],
-    [8, 5, 2, 1, 8, 0],
-    [4, 4, 2, 3, 7, 4, 0],
-    [5, 6, 3, 4, 6, 6, 2, 0],
-    [2, 3, 6, 4, 2, 8, 1, 3, 0]
-]
+import json, sys
 
 def walk_subtours(arcs, solution):
     l = len(arcs)
@@ -66,14 +53,22 @@ def walk_subtours(arcs, solution):
     return subtours
 
 if __name__ == '__main__':
+    # We represent STSP as a lower triangular matrix with the diagonal.
+    # Thus the first column and row represent connections to the first node.
+    try:
+        distance = json.load(open(sys.argv[1]))
+    except IndexError:
+        print 'usage: %s data.json' % sys.argv[0]
+        sys.exit()
+
     solver = scip.solver()
     
     arcs = []
-    for d in DISTANCE:
+    for d in distance:
         arcs.append([solver.variable(c, scip.BINARY) for c in d])
     
     # Assignment Problem Relaxation: each node connects to two other nodes
-    l = len(DISTANCE)
+    l = len(distance)
     for i in range(l):
         solver.constraint(
             lower = 2,
@@ -99,7 +94,8 @@ if __name__ == '__main__':
                 solver.restart()
                 
                 # Generate subtour elimination constraints.  These function by
-                # adding a 
+                # adding a knapsack constraint setting the sum of the arcs
+                # in each subtour to their cardinality minus one.
                 for subtour in subtours:
                     coefficients = {}
                     for pair in zip(subtour, subtour[1:]):
@@ -114,12 +110,6 @@ if __name__ == '__main__':
 
             else:
                 print 'optimal tour:', subtours[0]
-                for i, row in enumerate(arcs):
-                    print i , '::',
-                    print ' '.join('X' if solution.value(x) else '-' for x in row)
-                print '----' + '--' * l
-                print '  ::', ' '.join(str(x) for x in range(l))
-
                 break
         
         else:
