@@ -87,12 +87,18 @@ static PyObject *solver_minimize(solver *self) {
     Py_RETURN_NONE;
 }
 
+static PyObject *solver_restart(solver *self) {
+    PY_SCIP_CALL(error, NULL, SCIPfreeTransform(self->scip));
+    Py_RETURN_NONE;
+}
+
 /*****************************************************************************/
 /* MODULE INITIALIZATION                                                     */
 /*****************************************************************************/
 static PyMethodDef solver_methods[] = {
     {"maximize", (PyCFunction) solver_maximize, METH_NOARGS, "maximize the objective value"},
     {"minimize", (PyCFunction) solver_minimize, METH_NOARGS, "minimize the objective value"},
+    {"restart",  (PyCFunction) solver_restart,  METH_NOARGS, "restart the solver"},
     {NULL} /* Sentinel */
 };
 
