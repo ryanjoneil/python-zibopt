@@ -81,15 +81,19 @@ if __name__ == '__main__':
     
     # Our formulation thus far only represents a combinatorial relaxation of
     # STSP as an assignment problem.  It is possible the solver will return
-    # disconnected subtours.  
+    # disconnected subtours.
+    n = 0
     while True:
         solution = solver.minimize()
 
         if solution:
             subtours = walk_subtours(arcs, solution)
-            print 'length:', solution.objective, '/', 
-            print 'subtours:', len(subtours), '/', subtours
-
+            print '-' * 80
+            print '[%d] LENGTH:' % n, solution.objective, '/ SUBTOURS:', len(subtours)
+            for s in subtours:
+                print '   ', [x+1 for x in s]
+ 
+            n += 1
             if len(subtours) > 1:
                 solver.restart()
                 
@@ -98,7 +102,9 @@ if __name__ == '__main__':
                 # in each subtour to their cardinality minus one.
                 for subtour in subtours:
                     coefficients = {}
-                    for pair in zip(subtour, subtour[1:]):
+                    # n points in a tour have n arcs, not n-1.  That means we
+                    # have to include the arc that takes us to the start node.
+                    for pair in zip(subtour, subtour[1:]+[subtour[0]]):
                         # Column # is the higher of the two
                         i, j = max(*pair), min(*pair)
                         coefficients[arcs[i][j]] = 1
@@ -109,9 +115,9 @@ if __name__ == '__main__':
                     )
 
             else:
-                print 'optimal tour:', subtours[0]
+                # Optimal tour found.  Stop.
                 break
-        
+
         else:
             print 'infeasible'
             break
