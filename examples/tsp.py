@@ -91,7 +91,7 @@ if __name__ == '__main__':
             print '-' * 80
             print '[%d] LENGTH:' % n, solution.objective, '/ SUBTOURS:', len(subtours)
             for s in subtours:
-                print '   ', [x+1 for x in s]
+                print '   ', s
  
             n += 1
             if len(subtours) > 1:
@@ -103,7 +103,7 @@ if __name__ == '__main__':
                 for subtour in subtours:
                     coefficients = {}
                     # n points in a tour have n arcs, not n-1.  That means we
-                    # have to include the arc that takes us to the start node.
+                    # have to include the arc going back to the start node.
                     for pair in zip(subtour, subtour[1:]+[subtour[0]]):
                         # Column # is the higher of the two
                         i, j = max(*pair), min(*pair)
