@@ -6,9 +6,11 @@ class ScipTest(unittest.TestCase):
         pass
         
     def testLoadSolver(self):
+        '''Try loading the SCIP solver'''
         solver = scip.solver()
 
     def testMax(self):
+        '''Maximize an objective subject to integer constraints'''
         solver = scip.solver()
         x1 = solver.variable(coefficient=1, vartype=scip.INTEGER, upper=2)
         x2 = solver.variable(coefficient=1, vartype=scip.INTEGER)
@@ -23,17 +25,20 @@ class ScipTest(unittest.TestCase):
         self.assertEqual(values[x3], 0)
         
     def testAddVarConsError(self):
+        '''Test that out-of-stage operations raise appropriate errors'''
         solver = scip.solver()
         solver.minimize()
         self.assertRaises(scip.VariableError, solver.variable)
         self.assertRaises(scip.ConstraintError, solver.constraint)
 
     def testBadSolverType(self):
+        '''Test that solvers must be properly passed'''
         solver = scip.solver()
         self.assertRaises(scip.VariableError, _vars.variable, object(), 0)
         self.assertRaises(scip.ConstraintError, _cons.constraint, object())
 
     def testInfeasible(self):
+        '''Solutions should be false for infeasibility'''
         solver = scip.solver()
         x1 = solver.variable()
         solver.constraint(upper=0, coefficients={x1:1})
@@ -42,6 +47,7 @@ class ScipTest(unittest.TestCase):
         self.assertFalse(solution)
         
     def testRestart(self):
+        '''Test solver restart'''
         solver = scip.solver()
         solver.variable(coefficient=1, vartype=scip.INTEGER, upper=2)
         solution = solver.maximize() 
@@ -52,7 +58,13 @@ class ScipTest(unittest.TestCase):
         solution = solver.maximize() 
         self.assertEqual(solution.objective, 4)
         
-    
+    def testPrimal(self):
+        '''Test feeding of primal solutions to the solver'''
+        solver = scip.solver()
+        v = solver.variable(coefficient=1, vartype=scip.INTEGER, upper=2)
+        solution = solver.maximize(v=2) # pass solution to the solver
+        self.assertEqual(solution.objective, 2)
+        
     # TODO: deal with unbounded problems
 
 if __name__ == '__main__':

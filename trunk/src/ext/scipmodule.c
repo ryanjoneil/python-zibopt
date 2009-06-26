@@ -75,13 +75,22 @@ static void solver_dealloc(solver *self) {
 /*****************************************************************************/
 /* ADDITONAL METHODS                                                         */
 /*****************************************************************************/
-static PyObject *solver_maximize(solver *self) {
+static PyObject *solver_maximize(solver *self, PyObject *args, PyObject *kwds) {
+/*   SCIP_SOL* sol;*/
+
+/*
+I already know a solution in advance, which I want to pass to SCIP. How do I do this?
+
+First you have to build your problem, then you have to transform your problem (SCIP only accepts solutions if it is at least in the transformed stage, see here) via calling SCIPtransformProb(). Next, you create a new SCIP primal solution by calling SCIPcreateSol() and set all nonzero values by calling SCIPsetSolVal().
+After that, you add this solution by calling SCIPtrySol() (the variable success should be true afterwards, if your solution was correct) and then release it by calling SCIPsolFree(). 
+*/
+
     PY_SCIP_CALL(error, NULL, SCIPsetObjsense(self->scip, SCIP_OBJSENSE_MAXIMIZE));
     PY_SCIP_CALL(error, NULL, SCIPsolve(self->scip));
     Py_RETURN_NONE;
 }
 
-static PyObject *solver_minimize(solver *self) {
+static PyObject *solver_minimize(solver *self, PyObject *args, PyObject *kwds) {
     PY_SCIP_CALL(error, NULL, SCIPsetObjsense(self->scip, SCIP_OBJSENSE_MINIMIZE));
     PY_SCIP_CALL(error, NULL, SCIPsolve(self->scip));
     Py_RETURN_NONE;
@@ -96,9 +105,9 @@ static PyObject *solver_restart(solver *self) {
 /* MODULE INITIALIZATION                                                     */
 /*****************************************************************************/
 static PyMethodDef solver_methods[] = {
-    {"maximize", (PyCFunction) solver_maximize, METH_NOARGS, "maximize the objective value"},
-    {"minimize", (PyCFunction) solver_minimize, METH_NOARGS, "minimize the objective value"},
-    {"restart",  (PyCFunction) solver_restart,  METH_NOARGS, "restart the solver"},
+    {"maximize", (PyCFunction) solver_maximize, METH_KEYWORDS, "maximize the objective value"},
+    {"minimize", (PyCFunction) solver_minimize, METH_KEYWORDS, "minimize the objective value"},
+    {"restart",  (PyCFunction) solver_restart,  METH_NOARGS,   "restart the solver"},
     {NULL} /* Sentinel */
 };
 
