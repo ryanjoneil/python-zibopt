@@ -50,11 +50,11 @@ class solver(_scip.solver):
         cons.register()
         self.constraints.add(cons)
 
-    def maximize(self):
-        super(solver, self).maximize()
+    def maximize(self, *args, **kwds):
+        super(solver, self).maximize(*args, **kwds)
         return solution(self)
         
-    def minimize(self):
-        super(solver, self).minimize()
+    def minimize(self, *args, **kwds):
+        super(solver, self).minimize(*args, **kwds)
         return solution(self)
         
