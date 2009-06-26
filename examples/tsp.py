@@ -52,35 +52,6 @@ def walk_subtours(arcs, solution):
 
     return subtours
     
-def greedy(arcs, distance):
-    current = 0
-    seen = set([current])
-    tour = []
-    
-    while len(seen) < len(arcs):
-        # Yank out arcs, distances, and nodes from this node to all others
-        options = [
-            dict(next=j, arc=arcs[current][j], distance=distance[current][j])
-            for j in range(current)
-        ] + [
-            dict(next=j, arc=arcs[j][current], distance=distance[j][current])
-            for j in range(current+1,len(arcs))
-        ]
-        
-        # Find the min distance arc we haven't already seen
-        next = min(
-            [o for o in options if o['next'] not in seen],
-            key = lambda o: o['distance']
-        )
-        
-        # Add this arc
-        current = next['next']
-        seen.add(current)
-        tour.append(next['arc'])
-        
-    # Add the final arc back to 0
-    return tour + [arcs[current][0]]
-
 if __name__ == '__main__':
     # We represent STSP as a lower triangular matrix with the diagonal.
     # Thus the first column and row represent connections to the first node.
@@ -107,9 +78,6 @@ if __name__ == '__main__':
                 [arcs[j][i] for j in range(i+1,l)]
             )
         )
-    
-    # Create a primal solution to feed to the solver
-    primal = greedy(arcs, distance)
     
     # Our formulation thus far only represents a combinatorial relaxation of
     # STSP as an assignment problem.  It is possible the solver will return
