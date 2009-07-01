@@ -61,7 +61,7 @@ if __name__ == '__main__':
         print 'usage: %s data.json' % sys.argv[0]
         sys.exit()
 
-    solver = scip.solver()
+    solver = scip.solver(quiet=False)
     
     arcs = []
     for d in distance:
@@ -79,12 +79,30 @@ if __name__ == '__main__':
             )
         )
     
+    # Primal solution!
+    print arcs
+    primal = {}
+    for i in arcs:
+        for j in i:
+            primal[j] = 1
+#    primal[arcs[0][0]] = 1
+#    primal[arcs[1][0]] = 1
+#    primal[arcs[1][1]] = 1
+#    primal[arcs[2][0]] = 1
+#    primal[arcs[2][1]] = 1
+#    primal[arcs[2][2]] = 1
+
+#    primal[arcs[1][0]] = 1
+#    for i in range(1, len(arcs)):
+#        primal[arcs[i][i-1]] = 1
+#    primal[arcs[i][0]] = 1
+    
     # Our formulation thus far only represents a combinatorial relaxation of
     # STSP as an assignment problem.  It is possible the solver will return
     # disconnected subtours.
     n = 0
     while True:
-        solution = solver.minimize()
+        solution = solver.minimize(solution=primal)
 
         if solution:
             subtours = walk_subtours(arcs, solution)

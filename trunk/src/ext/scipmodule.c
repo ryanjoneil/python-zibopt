@@ -75,23 +75,118 @@ static void solver_dealloc(solver *self) {
 /*****************************************************************************/
 /* ADDITONAL METHODS                                                         */
 /*****************************************************************************/
+static int _seed_primal(solver *self, PyObject *solution) {
+    // Extracts data for a primal solution and hands it to SCIP
+    PyObject *key, *value;
+    int pos = 0;
+    double d;
+    SCIP_SOL* sol;
+    SCIP_Bool feasible, stored;
+
+    if (solution && PyObject_Length(solution) > 0) {
+        // We were given a primal solution.  Feed it to the solver. But first,
+        // check and make sure we got a dictionary of variables and numbers.
+        while (PyDict_Next(solution, &pos, &key, &value)) {
+            // Check and make sure we have a real variable type
+            if (strcmp(key->ob_type->tp_name, VARIABLE_TYPE_NAME)) {
+                PyErr_SetString(error, "invalid variable type");
+                return NULL;
+            }
+        
+            // Check and make sure we have a number as the value
+            if (!(PyFloat_Check(value) || PyInt_Check(value) || PyLong_Check(value))) {
+                PyErr_SetString(error, "number required for variable's value");
+                return NULL;
+            }
+        }
+
+        // Passed validation.  Now we can create the SCIP solution.
+        pos = 0;
+        while (PyDict_Next(solution, &pos, &key, &value)) {
+            SCIPtransformProb(self->scip);
+            SCIPcreateSol(self->scip, &sol, NULL);
+            
+            // Convert the value to a C double
+            if (PyFloat_Check(value))
+                d = PyFloat_AsDouble(value);
+            else if (PyInt_Check(value))
+                d = (double) PyInt_AsLong(value);
+            else
+                d = (double) PyLong_AsLong(value);
+            
+            // Only set nonzero values
+            if (d) {
+                //printf("SETTING: %.4f\n", d);
+                SCIPsetSolVal(self->scip, sol, ((variable *) key)->variable, d); 
+            }
+        }
+
+        // Test the solution for feasibility.
+        SCIP_Real activity;
+        SCIP_CONSDATA* consdata;
+        consdata = SCIPconsGetData(self->first_cons->constraint);
+        activity = consdataGetActivity(self->scip, consdata, sol);
+        printf("\n>>>ACTIVITY: %.4f\n", activity);
+
+        PY_SCIP_CALL(error, NULL, SCIPcheckSolOrig(self->scip, sol, &feasible, TRUE, FALSE));
+        if (!feasible)
+            PyErr_SetString(error, "infeasible primal solution");
+            
+        printf("\b>>> FEASIBLE: %d\n", feasible);
+        
+        // SCIPtrySolFree Arguments:
+        // scip 	        SCIP data structure
+        // sol           	pointer to primal CIP solution; is cleared in function call
+        // checkbounds 	    should the bounds of the variables be checked?
+        // checkintegrality has integrality to be checked?
+        // checklprows 	    have current LP rows to be checked?
+        // stored           stores whether solution was feasible and good enough to keep 
+        SCIPtrySolFree(self->scip, &sol, FALSE, FALSE, FALSE, &stored);
+        
+        // We don't actually do anything with the value of stored for the
+        // time being.  Other programs do an assert(stored) but we have
+        // already tested it for feasibility and don't want to raise an
+        // error if the objective is too bad to use.
+        printf("STORED: %d\n", stored);
+    }
+}
+
+
 static PyObject *solver_maximize(solver *self, PyObject *args, PyObject *kwds) {
-/*   SCIP_SOL* sol;*/
+    static char *argnames[] = {"solution", NULL};
+    PyObject *solution;
 
-/*
-I already know a solution in advance, which I want to pass to SCIP. How do I do this?
-
-First you have to build your problem, then you have to transform your problem (SCIP only accepts solutions if it is at least in the transformed stage, see here) via calling SCIPtransformProb(). Next, you create a new SCIP primal solution by calling SCIPcreateSol() and set all nonzero values by calling SCIPsetSolVal().
-After that, you add this solution by calling SCIPtrySol() (the variable success should be true afterwards, if your solution was correct) and then release it by calling SCIPsolFree(). 
-*/
+    // See if we were given a primal solution dict
+    solution = NULL;
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|O!", argnames, &PyDict_Type, &solution))
+        return NULL;
 
     PY_SCIP_CALL(error, NULL, SCIPsetObjsense(self->scip, SCIP_OBJSENSE_MAXIMIZE));
+
+    _seed_primal(self, solution);
+    if (PyErr_Occurred())
+        return NULL;
+
     PY_SCIP_CALL(error, NULL, SCIPsolve(self->scip));
     Py_RETURN_NONE;
 }
 
 static PyObject *solver_minimize(solver *self, PyObject *args, PyObject *kwds) {
+    static char *argnames[] = {"solution", NULL};
+    PyObject *solution;
+
+    // See if we were given a primal solution dict
+    solution = NULL;
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|O!", argnames, &PyDict_Type, &solution))
+        return NULL;
+
+
     PY_SCIP_CALL(error, NULL, SCIPsetObjsense(self->scip, SCIP_OBJSENSE_MINIMIZE));
+
+    _seed_primal(self, solution);
+    if (PyErr_Occurred())
+        return NULL;
+        
     PY_SCIP_CALL(error, NULL, SCIPsolve(self->scip));
     Py_RETURN_NONE;
 }
