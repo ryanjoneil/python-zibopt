@@ -60,12 +60,17 @@ class ScipTest(unittest.TestCase):
         
     def testPrimal(self):
         '''Test feeding of primal solutions to the solver'''
-        solver = scip.solver()
-        v = solver.variable(coefficient=1, vartype=scip.INTEGER, upper=2)
-        solution = solver.maximize(v=2) # pass solution to the solver
+        solver = scip.solver(quiet=False)
+        v1 = solver.variable(coefficient=1, vartype=scip.INTEGER, upper=2)
+#        v2 = solver.variable(vartype=scip.BINARY)
+#        v3 = solver.variable()
+        solver.constraint(upper=2, coefficients={v1:1})
+        solution = solver.maximize(solution={v1:4})#, v2:1L, v3:5.4}) # pass solution to the solver
         self.assertEqual(solution.objective, 2)
         
     # TODO: deal with unbounded problems
+    # TODO: test feeding of primal with variable from another solver
+    # TODO: test feeding of primal with invalid key/value types
 
 if __name__ == '__main__':
     unittest.main()
