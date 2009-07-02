@@ -78,14 +78,15 @@ static void solver_dealloc(solver *self) {
 static int _seed_primal(solver *self, PyObject *solution) {
     // Extracts data for a primal solution and hands it to SCIP
     PyObject *key, *value;
-    int pos = 0;
+    Py_ssize_t pos;
     double d;
-    SCIP_SOL* sol;
     SCIP_Bool feasible, stored;
+    SCIP_SOL *sol = NULL;
 
     if (solution && PyObject_Length(solution) > 0) {
         // We were given a primal solution.  Feed it to the solver. But first,
         // check and make sure we got a dictionary of variables and numbers.
+        pos = 0;
         while (PyDict_Next(solution, &pos, &key, &value)) {
             // Check and make sure we have a real variable type
             if (strcmp(key->ob_type->tp_name, VARIABLE_TYPE_NAME)) {
@@ -101,11 +102,12 @@ static int _seed_primal(solver *self, PyObject *solution) {
         }
 
         // Passed validation.  Now we can create the SCIP solution.
+        SCIPtransformProb(self->scip);
+        SCIPcreateSol(self->scip, &sol, NULL);
+
+        // Add all the variables to it            
         pos = 0;
         while (PyDict_Next(solution, &pos, &key, &value)) {
-            SCIPtransformProb(self->scip);
-            SCIPcreateSol(self->scip, &sol, NULL);
-            
             // Convert the value to a C double
             if (PyFloat_Check(value))
                 d = PyFloat_AsDouble(value);
@@ -115,24 +117,13 @@ static int _seed_primal(solver *self, PyObject *solution) {
                 d = (double) PyLong_AsLong(value);
             
             // Only set nonzero values
-            if (d) {
-                //printf("SETTING: %.4f\n", d);
+            if (d)
                 SCIPsetSolVal(self->scip, sol, ((variable *) key)->variable, d); 
-            }
         }
-
-        // Test the solution for feasibility.
-        SCIP_Real activity;
-        SCIP_CONSDATA* consdata;
-        consdata = SCIPconsGetData(self->first_cons->constraint);
-        activity = consdataGetActivity(self->scip, consdata, sol);
-        printf("\n>>>ACTIVITY: %.4f\n", activity);
 
         PY_SCIP_CALL(error, NULL, SCIPcheckSolOrig(self->scip, sol, &feasible, TRUE, FALSE));
         if (!feasible)
             PyErr_SetString(error, "infeasible primal solution");
-            
-        printf("\b>>> FEASIBLE: %d\n", feasible);
         
         // SCIPtrySolFree Arguments:
         // scip 	        SCIP data structure
@@ -147,7 +138,6 @@ static int _seed_primal(solver *self, PyObject *solution) {
         // time being.  Other programs do an assert(stored) but we have
         // already tested it for feasibility and don't want to raise an
         // error if the objective is too bad to use.
-        printf("STORED: %d\n", stored);
     }
 }
 
@@ -162,7 +152,7 @@ static PyObject *solver_maximize(solver *self, PyObject *args, PyObject *kwds) {
         return NULL;
 
     PY_SCIP_CALL(error, NULL, SCIPsetObjsense(self->scip, SCIP_OBJSENSE_MAXIMIZE));
-
+        
     _seed_primal(self, solution);
     if (PyErr_Occurred())
         return NULL;
@@ -179,7 +169,6 @@ static PyObject *solver_minimize(solver *self, PyObject *args, PyObject *kwds) {
     solution = NULL;
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "|O!", argnames, &PyDict_Type, &solution))
         return NULL;
-
 
     PY_SCIP_CALL(error, NULL, SCIPsetObjsense(self->scip, SCIP_OBJSENSE_MINIMIZE));
 
