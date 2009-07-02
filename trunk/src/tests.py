@@ -5,11 +5,11 @@ class ScipTest(unittest.TestCase):
     def setUp(self):
         pass
         
-    def testLoadSolver(self):
+    def atestLoadSolver(self):
         '''Try loading the SCIP solver'''
         solver = scip.solver()
 
-    def testMax(self):
+    def atestMax(self):
         '''Maximize an objective subject to integer constraints'''
         solver = scip.solver()
         x1 = solver.variable(coefficient=1, vartype=scip.INTEGER, upper=2)
@@ -24,20 +24,20 @@ class ScipTest(unittest.TestCase):
         self.assertEqual(values[x2], 3)
         self.assertEqual(values[x3], 0)
         
-    def testAddVarConsError(self):
+    def atestAddVarConsError(self):
         '''Test that out-of-stage operations raise appropriate errors'''
         solver = scip.solver()
         solver.minimize()
         self.assertRaises(scip.VariableError, solver.variable)
         self.assertRaises(scip.ConstraintError, solver.constraint)
 
-    def testBadSolverType(self):
+    def atestBadSolverType(self):
         '''Test that solvers must be properly passed'''
         solver = scip.solver()
         self.assertRaises(scip.VariableError, _vars.variable, object(), 0)
         self.assertRaises(scip.ConstraintError, _cons.constraint, object())
 
-    def testInfeasible(self):
+    def atestInfeasible(self):
         '''Solutions should be false for infeasibility'''
         solver = scip.solver()
         x1 = solver.variable()
@@ -46,7 +46,7 @@ class ScipTest(unittest.TestCase):
         solution = solver.maximize() 
         self.assertFalse(solution)
         
-    def testRestart(self):
+    def atestRestart(self):
         '''Test solver restart'''
         solver = scip.solver()
         solver.variable(coefficient=1, vartype=scip.INTEGER, upper=2)
@@ -60,12 +60,12 @@ class ScipTest(unittest.TestCase):
         
     def testPrimal(self):
         '''Test feeding of primal solutions to the solver'''
-        solver = scip.solver(quiet=False)
+        solver = scip.solver()
         v1 = solver.variable(coefficient=1, vartype=scip.INTEGER, upper=2)
-#        v2 = solver.variable(vartype=scip.BINARY)
-#        v3 = solver.variable()
+        v2 = solver.variable(vartype=scip.BINARY)
+        v3 = solver.variable()
         solver.constraint(upper=2, coefficients={v1:1})
-        solution = solver.maximize(solution={v1:4})#, v2:1L, v3:5.4}) # pass solution to the solver
+        solution = solver.maximize(solution={v1:2, v2:1L, v3:5.4}) # pass solution to the solver
         self.assertEqual(solution.objective, 2)
         
     # TODO: deal with unbounded problems
