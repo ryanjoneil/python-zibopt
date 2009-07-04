@@ -9,7 +9,7 @@ class ScipTest(unittest.TestCase):
         '''Try loading the SCIP solver'''
         solver = scip.solver()
 
-    def atestMax(self):
+    def testMax(self):
         '''Maximize an objective subject to integer constraints'''
         solver = scip.solver()
         x1 = solver.variable(coefficient=1, vartype=scip.INTEGER, upper=2)
@@ -24,20 +24,20 @@ class ScipTest(unittest.TestCase):
         self.assertEqual(values[x2], 3)
         self.assertEqual(values[x3], 0)
         
-    def atestAddVarConsError(self):
+    def testAddVarConsError(self):
         '''Test that out-of-stage operations raise appropriate errors'''
         solver = scip.solver()
         solver.minimize()
         self.assertRaises(scip.VariableError, solver.variable)
         self.assertRaises(scip.ConstraintError, solver.constraint)
 
-    def atestBadSolverType(self):
+    def testBadSolverType(self):
         '''Test that solvers must be properly passed'''
         solver = scip.solver()
         self.assertRaises(scip.VariableError, _vars.variable, object(), 0)
         self.assertRaises(scip.ConstraintError, _cons.constraint, object())
 
-    def atestInfeasible(self):
+    def testInfeasible(self):
         '''Solutions should be false for infeasibility'''
         solver = scip.solver()
         x1 = solver.variable()
@@ -46,7 +46,7 @@ class ScipTest(unittest.TestCase):
         solution = solver.maximize() 
         self.assertFalse(solution)
         
-    def atestRestart(self):
+    def testRestart(self):
         '''Test solver restart'''
         solver = scip.solver()
         solver.variable(coefficient=1, vartype=scip.INTEGER, upper=2)
