@@ -28,6 +28,9 @@ static PyObject *solver_new(PyTypeObject *type, PyObject *args, PyObject *kwds) 
         PY_SCIP_CALL(error, NULL, 
             SCIPcreateProb(self->scip, "python-zibobt", NULL, NULL, NULL, NULL, NULL, NULL)
         );
+
+        // Keep SCIP from catching keyboard interrupts.  These go to python.
+        self->scip->set->misc_catchctrlc = FALSE;
     }
 
     return (PyObject *) self;
@@ -96,7 +99,7 @@ static int _seed_primal(solver *self, PyObject *solution) {
         
             // Check and make sure we have a number as the value
             if (!(PyFloat_Check(value) || PyInt_Check(value) || PyLong_Check(value))) {
-                PyErr_SetString(error, "number required for variable's value");
+                PyErr_SetString(error, "solution values must be numeric");
                 return NULL;
             }
         }
@@ -137,8 +140,10 @@ static int _seed_primal(solver *self, PyObject *solution) {
         // We don't actually do anything with the value of stored for the
         // time being.  Other programs do an assert(stored) but we have
         // already tested it for feasibility and don't want to raise an
-        // error if the objective is too bad to use.
+        // error if the primal objective value is too poor to use.
     }
+    
+    return NULL;
 }
 
 
@@ -175,7 +180,7 @@ static PyObject *solver_minimize(solver *self, PyObject *args, PyObject *kwds) {
     _seed_primal(self, solution);
     if (PyErr_Occurred())
         return NULL;
-        
+
     PY_SCIP_CALL(error, NULL, SCIPsolve(self->scip));
     Py_RETURN_NONE;
 }
