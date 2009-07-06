@@ -48,6 +48,12 @@ static PyObject *solution_value(solution *self, PyObject *v) {
     }
     var = (variable *) v;
     
+    // Verify that the variable is associated with this solver
+    if (var->scip != self->scip) {
+        PyErr_SetString(error, "variable not associated with solver");
+        return NULL;
+    }    
+    
     return Py_BuildValue("d", SCIPgetSolVal(self->scip, self->solution, var->variable));
 }
 

@@ -5,7 +5,7 @@ class ScipTest(unittest.TestCase):
     def setUp(self):
         pass
         
-    def atestLoadSolver(self):
+    def testLoadSolver(self):
         '''Try loading the SCIP solver'''
         solver = scip.solver()
 
@@ -46,6 +46,15 @@ class ScipTest(unittest.TestCase):
         solution = solver.maximize() 
         self.assertFalse(solution)
         
+    def testUnbounded(self):
+        '''Solutions should be false when unbounded'''
+        solver = scip.solver()
+        solver.variable(coefficient=1)
+        solution = solver.maximize() 
+        self.assertFalse(solution)
+        self.assertFalse(solution.feasible)
+        self.assertTrue(solution.objective > 0)
+    
     def testRestart(self):
         '''Test solver restart'''
         solver = scip.solver()
@@ -65,13 +74,32 @@ class ScipTest(unittest.TestCase):
         v2 = solver.variable(vartype=scip.BINARY)
         v3 = solver.variable()
         solver.constraint(upper=2, coefficients={v1:1})
-        solution = solver.maximize(solution={v1:2, v2:1L, v3:5.4}) # pass solution to the solver
-        self.assertEqual(solution.objective, 2)
         
-    # TODO: deal with unbounded problems
-    # TODO: test feeding of primal with variable from another solver
-    # TODO: test feeding of primal with invalid key/value types
-
+        # Pass known solution to the solver
+        solution = solver.maximize(solution={v1:2, v2:1L, v3:5.4})
+        self.assertEqual(solution.objective, 2)
+    
+    def testPrimalErrors(self):
+        '''Test feeding of primal with invalid key/value types'''
+        solver = scip.solver()
+        v = solver.variable(coefficient=1, vartype=scip.INTEGER, upper=2)
+        self.assertRaises(scip.SolverError, solver.maximize, {'x':3})
+        self.assertRaises(scip.SolverError, solver.maximize, {v:'y'})
+    
+    def testPrimalInfeasible(self):
+        '''Test passing of infeasible solution to solver'''
+        solver = scip.solver()
+        v = solver.variable(coefficient=1, vartype=scip.INTEGER, upper=2)
+        self.assertRaises(scip.SolverError, solver.maximize, {v:3})
+    
+    def testWrongSolver(self):
+        '''Test incorrect mixing of variables and solvers'''
+        solver1 = scip.solver()
+        solver2 = scip.solver()
+        v1 = solver1.variable()
+        self.assertRaises(scip.ConstraintError, solver2.constraint, upper=1, coefficients={v1:1})
+        self.assertRaises(scip.SolverError, solver2.maximize, {v1: 3})
+        
 if __name__ == '__main__':
     unittest.main()
 
