@@ -96,6 +96,12 @@ static int _seed_primal(solver *self, PyObject *solution) {
                 PyErr_SetString(error, "invalid variable type");
                 return NULL;
             }
+            
+            // Verify that the variable is associated with this solver
+            if (((variable *) key)->scip != self->scip) {
+                PyErr_SetString(error, "variable not associated with solver");
+                return NULL;
+            }
         
             // Check and make sure we have a number as the value
             if (!(PyFloat_Check(value) || PyInt_Check(value) || PyLong_Check(value))) {

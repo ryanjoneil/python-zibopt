@@ -99,6 +99,12 @@ static PyObject *constraint_variable(constraint *self, PyObject *args) {
     }
     var = (variable *) v;
 
+    // Verify that the variable is associated with this solver
+    if (var->scip != self->scip) {
+        PyErr_SetString(error, "variable not associated with solver");
+        return NULL;
+    }
+
     PY_SCIP_CALL(error, NULL, 
         SCIPaddCoefLinear(self->scip, self->constraint, var->variable, coefficient)
     );
