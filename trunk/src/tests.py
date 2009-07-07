@@ -19,10 +19,9 @@ class ScipTest(unittest.TestCase):
         solution = solver.maximize()
         self.assertTrue(solution)
 
-        values = solution.values()
-        self.assertEqual(values[x1], 0)
-        self.assertEqual(values[x2], 3)
-        self.assertEqual(values[x3], 0)
+        self.assertEqual(solution[x1], 0)
+        self.assertEqual(solution[x2], 3)
+        self.assertEqual(solution[x3], 0)
         
     def testAddVarConsError(self):
         '''Test that out-of-stage operations raise appropriate errors'''

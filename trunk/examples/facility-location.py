@@ -71,10 +71,10 @@ if __name__ == '__main__':
     if solution:
         print 'TOTAL COST:', solution.objective
         for f in FACILITIES:
-            if solution.value(y[f]) > 0.5:
+            if solution[y[f]] > 0.5:
                 print 'FACTILITY', f, 'CUSTOMERS:',
                 for c in CUSTOMERS:
-                    if solution.value(x[f][c]) > 0.5:
+                    if solution[x[f][c]] > 0.5:
                         print c,
                 print
     else:

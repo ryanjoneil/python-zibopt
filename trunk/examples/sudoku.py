@@ -77,7 +77,7 @@ if __name__ == '__main__':
         # Convert solution values to a nice solution matrix
         for i, j in product(rows, cols):
             for k in vals:
-                if solution.value(x[i][j][k]):
+                if solution[x[i][j][k]]:
                     problem[i][j] = k
                     break
                 
