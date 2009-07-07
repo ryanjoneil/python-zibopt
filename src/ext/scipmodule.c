@@ -152,7 +152,6 @@ static int _seed_primal(solver *self, PyObject *solution) {
     return NULL;
 }
 
-
 static PyObject *solver_maximize(solver *self, PyObject *args, PyObject *kwds) {
     static char *argnames[] = {"solution", NULL};
     PyObject *solution;

@@ -12,13 +12,13 @@ def walk_subtours(arcs, solution):
     for i in range(l):
         # Horizonal row up to node i
         for j in range(i):
-            if solution.value(arcs[i][j]) > 0.5:
+            if solution[arcs[i][j]] > 0.5:
                 connects[i].add(j)
                 connects[j].add(i)
             
         # Vertical column below node i
         for j in range(i+1,l):
-            if solution.value(arcs[j][i]) > 0.5:
+            if solution[arcs[j][i]] > 0.5:
                 connects[i].add(j)
                 connects[j].add(i)
         
