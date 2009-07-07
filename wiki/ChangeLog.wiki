@@ -1,0 +1,10 @@
+#summary python-zibopt change log
+#labels Featured
+
+= 0.1 dev =
+  * Initial libraries for interfacing to solver, variables, constraints, and solutions
+  * Ability to turn off solver verbosity
+  * Solutions are false in case of infeasibilty or unboundedness
+  * SCIP errors get mapped to Python exception types
+  * The solver can be restarted with additional constraints and variables
+  * Primal solutions can be fed to minimize/maximize and are checked for feasibility
