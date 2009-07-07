@@ -1,0 +1,21 @@
+#summary If anyone were asking questions, they'd probably be asking these...
+
+= Frequently Asked Questions =
+==== Q: What's IMPLINT? ====
+
+A: This type is for variables that are supposed to take on integer values, but will do so implicitly since they only appear in constraints with other integer variables.  This can save SCIP some time.
+
+==== Q: I can't represent my problem in its entirety and need to solve a combinatorial relaxation before adding more constraints.  How can I do this? ====
+
+A: SCIP keeps the original problem untouched and works against a transformed copy of problem.  Once you've solved by calling solver.minimize() or solver.maximize(), you can make changes to the original problem by first calling solver.restart().
+{{{
+# ... instantiate a problem ...
+solver.maximize()
+new_variable   = solver.variable(coefficient=1)
+new_constraint = solver.constraint(upper=2, coefficients={new_variable: 1})
+solver.maximize()
+}}}
+
+==== Q: I know a good solution already.  How do I tell the solver about it? ====
+
+A: solver.minimize() and solver.maximize both take in an optional solution dictionary mapping variable instances to their primal values.  If this is done, the solution is checked for feasibility and a SolverError is raised in case of infeasibility.
