@@ -75,6 +75,8 @@ And finally install it:
 python-zibopt$ sudo python setup.py install 
 }}}
 
+== Verifying Your Installation ==
+
 You should now be able to do this without getting any errors:
 
 {{{
