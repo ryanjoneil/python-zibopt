@@ -1,4 +1,5 @@
 #summary Installing python-zibopt
+#labels Featured
 
 = Building & Installing python-zibopt =
 
