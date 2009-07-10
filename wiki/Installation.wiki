@@ -5,7 +5,7 @@
 
 == Prerequisites ==
 
-The python-zibopt build script assumes that you have shared object files for ZIMPL, SoPlex and SCIP in your LIBRARY_PATH and header files for SCIP in your C_INCLUDE_PATH.  Make sure these are in your environment before building it.  For example, if you put the ZIBOpt shared object files in $HOME/lib after building it in $HOME/src, your environment might contain: 
+The python-zibopt build script assumes that you have shared object files for ZIMPL, SoPlex and SCIP in your LIBRARY_PATH and header files for SCIP 1.1.0 in your C_INCLUDE_PATH.  Make sure these are in your environment before building it.  For example, if you put the ZIBOpt shared object files in $HOME/lib after building it in $HOME/src, your environment might contain: 
 
 {{{
 LIBRARY_PATH=$HOME
@@ -23,7 +23,15 @@ Other required libraries include:
 
 python-zibobt should be built against Python 2.6 or later.  It is not yet compatible with 3.0.
 
-== Installation ==
+== Option 1: easy_install ==
+
+python-zibopt is registered in the pypi index.  If you have easy_install and meet the above prerequisites, you should be able to do this:
+
+{{{
+$ sudo easy_install python-zibopt
+}}}
+
+== Option 2: Manual Installation ==
 
 Either download the latest stable release and uncompress it, or if you'd rather run the bleeding edge code, use svn to get the latest version:
 
