@@ -1,0 +1,89 @@
+#summary Installing python-zibopt
+
+= Building & Installing python-zibopt =
+
+== Prerequisites ==
+
+The python-zibopt build script assumes that you have shared object files for ZIMPL, SoPlex and SCIP in your LIBRARY_PATH and header files for SCIP in your C_INCLUDE_PATH.  Make sure these are in your environment before building it.  For example, if you put the ZIBOpt shared object files in $HOME/lib after building it in $HOME/src, your environment might contain: 
+
+{{{
+LIBRARY_PATH=$HOME
+C_INCLUDE_PATH=$HOME/src/ziboptsuite-1.1.0/scip-1.1.0/src/
+}}}
+
+To build the shared library versions of ZIBOpt components, you'll need to use their opt-shared makefiles.  Look [http://scip.zib.de/doc/html/MAKE.html here] for more information.
+
+Other required libraries include:
+  * setuptools
+  * gmp
+  * ncurses
+  * readline
+  * z
+
+python-zibobt should be built against Python 2.6 or later.  It is not yet compatible with 3.0.
+
+== Installation ==
+
+Either download the latest stable release and uncompress it, or if you'd rather run the bleeding edge code, use svn to get the latest version:
+
+{{{ 
+$ svn checkout http://python-zibopt.googlecode.com/svn/trunk/ python-zibopt 
+}}}
+
+Now build the extension libraries:
+
+{{{
+$ cd python-zibopt
+
+python-zibopt$ python setup.py build 
+running build
+running build_py
+creating build
+[... snip ...]
+gcc -pthread -shared -Wl,-O1 -Wl,-Bsymbolic-functions build/temp.linux-i686-2.6/src/ext/solnmodule.o -llpispx -lobjscip -lscip -lsoplex -lzimpl -lreadline -lncurses -lgmp -lz -o build/lib.linux-i686-2.6/zibopt/_soln.so
+}}}
+
+Test the library to make sure it is in working order:
+
+{{{
+python-zibopt$ python setup.py test
+running test
+running egg_info
+[... snip ...]
+Test solver restart ... ok
+Solutions should be false when unbounded ... ok
+Test incorrect mixing of variables and solvers ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.096s
+
+OK
+}}}
+
+And finally install it:
+
+{{{
+python-zibopt$ sudo python setup.py install 
+}}}
+
+You should now be able to do this without getting any errors:
+
+{{{
+python-zibopt$ ipython
+Python 2.6.2 (release26-maint, Apr 19 2009, 01:56:41) 
+Type "copyright", "credits" or "license" for more information.
+
+IPython 0.9.1 -- An enhanced Interactive Python.
+?         -> Introduction and overview of IPython's features.
+%quickref -> Quick reference.
+help      -> Python's own help system.
+object?   -> Details about 'object'. ?object also works, ?? prints more.
+
+In [1]: import zibopt
+
+In [2]: zibopt.__version__
+Out[2]: '0.1'
+
+In [3]: zibopt.scip.solver()
+Out[3]: <zibopt.scip.solver object at 0x88272fc>
+}}
