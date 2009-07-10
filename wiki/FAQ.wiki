@@ -1,4 +1,5 @@
 #summary If anyone were asking questions, they'd probably be asking these...
+#labels Featured
 
 = Frequently Asked Questions =
 ==== Q: What's IMPLINT? ====
