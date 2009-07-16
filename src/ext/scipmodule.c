@@ -153,12 +153,13 @@ static int _seed_primal(solver *self, PyObject *solution) {
 }
 
 static PyObject *solver_maximize(solver *self, PyObject *args, PyObject *kwds) {
-    static char *argnames[] = {"solution", NULL};
+    static char *argnames[] = {"solution", "time", NULL};
     PyObject *solution;
+    double time = SCIP_DEFAULT_LIMIT_TIME;
 
     // See if we were given a primal solution dict
     solution = NULL;
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|O!", argnames, &PyDict_Type, &solution))
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|O!d", argnames, &PyDict_Type, &solution, &time))
         return NULL;
 
     PY_SCIP_CALL(error, NULL, SCIPsetObjsense(self->scip, SCIP_OBJSENSE_MAXIMIZE));
@@ -167,17 +168,21 @@ static PyObject *solver_maximize(solver *self, PyObject *args, PyObject *kwds) {
     if (PyErr_Occurred())
         return NULL;
 
+    // Set timeout
+    self->scip->set->limit_time = time;
+
     PY_SCIP_CALL(error, NULL, SCIPsolve(self->scip));
     Py_RETURN_NONE;
 }
 
 static PyObject *solver_minimize(solver *self, PyObject *args, PyObject *kwds) {
-    static char *argnames[] = {"solution", NULL};
+    static char *argnames[] = {"solution", "time", NULL};
     PyObject *solution;
+    double time = SCIP_DEFAULT_LIMIT_TIME;
 
     // See if we were given a primal solution dict
     solution = NULL;
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|O!", argnames, &PyDict_Type, &solution))
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|O!d", argnames, &PyDict_Type, &solution, &time))
         return NULL;
 
     PY_SCIP_CALL(error, NULL, SCIPsetObjsense(self->scip, SCIP_OBJSENSE_MINIMIZE));
@@ -185,7 +190,10 @@ static PyObject *solver_minimize(solver *self, PyObject *args, PyObject *kwds) {
     _seed_primal(self, solution);
     if (PyErr_Occurred())
         return NULL;
-
+    
+    // Set timeout
+    self->scip->set->limit_time = time;
+    
     PY_SCIP_CALL(error, NULL, SCIPsolve(self->scip));
     Py_RETURN_NONE;
 }
