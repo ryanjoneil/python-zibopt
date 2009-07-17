@@ -5,11 +5,13 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include <scip/clock.h>
 #include <scip/scip.h>
 #include <scip/scipdefplugins.h>
 #include <scip/misc.h>
 #include <scip/prob.h>
 #include <scip/sol.h>
+#include <scip/struct_stat.h>
 #include "structmember.h"
 
 #define SOLVER_TYPE_NAME "solver"
@@ -44,7 +46,10 @@ typedef struct {
     SCIP_SOL *solution;
     SCIP *scip;
     double objective; // objective value
-    bool feasible;
+    bool optimal;     // solution status flags
+    bool infeasible;
+    bool unbounded;
+    bool inforunbd;
 } solution;
 
 static void PyScipSetError(PyObject *error_type, SCIP_RETCODE err_code) {

@@ -85,5 +85,5 @@ if __name__ == '__main__':
             print row
 
     else:
-        print 'infeasible'
+        print 'invalid'
 

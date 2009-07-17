@@ -50,7 +50,7 @@ Translated to python-zibopt this becomes:
         print 'x3 =', solution[x2]
         print 'x2 =', solution[x3]
     else:
-        print 'infeasible'
+        print 'invalid problem'
 '''
 
 from zibopt import _scip, _vars, _cons, _soln
@@ -80,13 +80,20 @@ class solution(_soln.solution):
         if solution:
             # do something interesting
     
+    Solutions can be tested for optimality using the solution.optimal boolean.
+    Available solution statuses include:
+    
+        solution.optimal:     solution is optimal
+        solution.infeasible:  no feasible solution could be found
+        solution.unbounded:   solution is unbounded
+        solution.inforunbd:   solution is either infeasible or unbounded
     '''
     def __init__(self, solver):
         super(solution, self).__init__(solver)
         self.solver = solver
 
     def __nonzero__(self):
-        return bool(self.feasible)
+        return not (self.infeasible or self.unbounded or self.inforunbd)
     
     def __getitem__(self, key):
         return self.value(key)
