@@ -70,7 +70,7 @@ static PyMemberDef solution_members[] = {
     {"infeasible", T_BOOL, offsetof(solution, infeasible), 0, "solution is infeasible"},
     {"unbounded", T_BOOL, offsetof(solution, unbounded), 0, "solution is unbounded"},
     {"inforunbd", T_BOOL, offsetof(solution, inforunbd), 0, "solution is infeasible or unbounded"},
-    {NULL}  /* Sentinel */
+    {NULL} /* Sentinel */
 };
 
 static PyMethodDef solution_methods[] = {

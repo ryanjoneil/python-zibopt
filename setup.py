@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages, Extension
 
 def zibopt_ext(name, c_file):
-    # ZIBOpt headers and shared objects will have to be in the user's
+    # ZIBOpt headers and shared objects will must be in the user's
     # C_INCLUDE_PATH and LIBRARY_PATH, respectively.
     return Extension('zibopt.%s' % name, 
         sources = ['src/ext/%s' % c_file], 

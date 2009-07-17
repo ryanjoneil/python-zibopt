@@ -154,23 +154,27 @@ static int _seed_primal(solver *self, PyObject *solution) {
 
 static int _optimize(solver *self, PyObject *args, PyObject *kwds) {
     // Runs components of max/min that are the same
-    static char *argnames[] = {"solution", "time", NULL};
+    static char *argnames[] = {"solution", "time", "gap", "absgap", NULL};
     PyObject *solution;
-    double time = SCIP_DEFAULT_LIMIT_TIME;
+    double time   = SCIP_DEFAULT_LIMIT_TIME;
+    double gap    = SCIP_DEFAULT_LIMIT_GAP;
+    double absgap = SCIP_DEFAULT_LIMIT_GAP;
 
     // See if we were given a primal solution dict
     solution = NULL;
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|O!d", argnames, &PyDict_Type, &solution, &time))
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|O!ddd", argnames, &PyDict_Type, &solution, &time, &gap, &absgap))
         return NULL;
 
     _seed_primal(self, solution);
     if (PyErr_Occurred())
         return NULL;
 
-    // Set timeout
+    // Set timeout & gap values
     SCIPclockReset(self->scip->stat->solvingtime);
-    self->scip->set->limit_time = time;
-
+    self->scip->set->limit_time   = time;
+    self->scip->set->limit_gap    = gap;
+    self->scip->set->limit_absgap = absgap;
+    
     PY_SCIP_CALL(error, NULL, SCIPsolve(self->scip));
     Py_RETURN_NONE;
 }
