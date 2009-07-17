@@ -19,6 +19,9 @@
 
 // These are from set.c in SCIP code
 #define SCIP_DEFAULT_LIMIT_TIME 1e+20 /**< maximal time in seconds to run */
+#define SCIP_DEFAULT_LIMIT_GAP    0.0 /**< solving stops, if the gap is below the given value */
+#define SCIP_DEFAULT_LIMIT_ABSGAP 0.0 /**< solving stops, if the absolute difference between primal and dual
+                                       *   bound reaches this value */
 
 typedef struct {
     PyObject_HEAD

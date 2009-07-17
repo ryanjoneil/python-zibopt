@@ -153,6 +153,9 @@ class solver(_scip.solver):
         Maximizes the objective function and returns a solution instance.
         @param solution={}: optional primal solution dictionary.  Raises a
                             SolverError if the solution is infeasible.
+        @param time=inf:    optional time limit for solving
+        @param gap=0.0:     optional gap percentage to stop solving (ex: 0.05)
+        @param absgap=0.0:  optional primal/dual gap to stop solving
         '''
         super(solver, self).maximize(*args, **kwds)
         return solution(self)
@@ -162,6 +165,9 @@ class solver(_scip.solver):
         Minimizes the objective function and returns a solution instance.
         @param solution={}: optional primal solution dictionary.  Raises a
                             SolverError if the solution is infeasible.
+        @param time=inf:    optional time limit for solving
+        @param gap=0.0:     optional gap percentage to stop solving (ex: 0.05)
+        @param absgap=0.0:  optional primal/dual gap to stop solving
         '''
         super(solver, self).minimize(*args, **kwds)
         return solution(self)
