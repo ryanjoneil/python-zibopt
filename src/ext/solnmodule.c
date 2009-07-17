@@ -23,7 +23,11 @@ static int solution_init(solution *self, PyObject *args, PyObject *kwds) {
     
     // Detect infeasibility
     self->solution = SCIPgetBestSol(self->scip);
-    self->feasible = self->solution != 0;
+    
+    self->optimal    = self->scip->stat->status == SCIP_STATUS_OPTIMAL;
+    self->infeasible = self->scip->stat->status == SCIP_STATUS_INFEASIBLE;
+    self->unbounded  = self->scip->stat->status == SCIP_STATUS_UNBOUNDED;
+    self->inforunbd  = self->scip->stat->status == SCIP_STATUS_INFORUNBD;
 
     // Extract objective value into Python float
     self->objective = SCIPgetSolOrigObj(self->scip, self->solution);
@@ -62,7 +66,10 @@ static PyObject *solution_value(solution *self, PyObject *v) {
 /*****************************************************************************/
 static PyMemberDef solution_members[] = {
     {"objective", T_DOUBLE, offsetof(solution, objective), 0, "objective value"},
-    {"feasible", T_BOOL, offsetof(solution, feasible), 0, "solution is feasible"},
+    {"optimal", T_BOOL, offsetof(solution, optimal), 0, "solution is optimal"},
+    {"infeasible", T_BOOL, offsetof(solution, infeasible), 0, "solution is infeasible"},
+    {"unbounded", T_BOOL, offsetof(solution, unbounded), 0, "solution is unbounded"},
+    {"inforunbd", T_BOOL, offsetof(solution, inforunbd), 0, "solution is infeasible or unbounded"},
     {NULL}  /* Sentinel */
 };
 

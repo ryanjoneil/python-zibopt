@@ -84,7 +84,7 @@ if __name__ == '__main__':
     # disconnected subtours.
     n = 0
     while True:
-        solution = solver.minimize(time=100)
+        solution = solver.minimize()
 
         if solution:
             subtours = walk_subtours(arcs, solution)
@@ -114,7 +114,7 @@ if __name__ == '__main__':
                         coefficients = coefficients
                     )
 
-            else:
+            elif solution.optimal:
                 # Optimal tour found.  Stop.
                 break
 

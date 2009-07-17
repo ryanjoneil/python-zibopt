@@ -42,7 +42,7 @@ class ScipTest(unittest.TestCase):
         x1 = solver.variable()
         solver.constraint(upper=0, coefficients={x1:1})
         solver.constraint(lower=1, coefficients={x1:1})
-        solution = solver.maximize() 
+        solution = solver.maximize()
         self.assertFalse(solution)
         
     def testUnbounded(self):
@@ -51,7 +51,7 @@ class ScipTest(unittest.TestCase):
         solver.variable(coefficient=1)
         solution = solver.maximize() 
         self.assertFalse(solution)
-        self.assertFalse(solution.feasible)
+        self.assertTrue(solution.unbounded or solution.inforunbd)
         self.assertTrue(solution.objective > 0)
     
     def testRestart(self):

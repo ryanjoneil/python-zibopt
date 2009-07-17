@@ -152,7 +152,8 @@ static int _seed_primal(solver *self, PyObject *solution) {
     return NULL;
 }
 
-static PyObject *solver_maximize(solver *self, PyObject *args, PyObject *kwds) {
+static int _optimize(solver *self, PyObject *args, PyObject *kwds) {
+    // Runs components of max/min that are the same
     static char *argnames[] = {"solution", "time", NULL};
     PyObject *solution;
     double time = SCIP_DEFAULT_LIMIT_TIME;
@@ -162,40 +163,27 @@ static PyObject *solver_maximize(solver *self, PyObject *args, PyObject *kwds) {
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "|O!d", argnames, &PyDict_Type, &solution, &time))
         return NULL;
 
-    PY_SCIP_CALL(error, NULL, SCIPsetObjsense(self->scip, SCIP_OBJSENSE_MAXIMIZE));
-        
     _seed_primal(self, solution);
     if (PyErr_Occurred())
         return NULL;
 
     // Set timeout
+    SCIPclockReset(self->scip->stat->solvingtime);
     self->scip->set->limit_time = time;
 
     PY_SCIP_CALL(error, NULL, SCIPsolve(self->scip));
     Py_RETURN_NONE;
 }
 
+static PyObject *solver_maximize(solver *self, PyObject *args, PyObject *kwds) {
+    PY_SCIP_CALL(error, NULL, SCIPsetObjsense(self->scip, SCIP_OBJSENSE_MAXIMIZE));
+    return _optimize(self, args, kwds);
+}
+
+
 static PyObject *solver_minimize(solver *self, PyObject *args, PyObject *kwds) {
-    static char *argnames[] = {"solution", "time", NULL};
-    PyObject *solution;
-    double time = SCIP_DEFAULT_LIMIT_TIME;
-
-    // See if we were given a primal solution dict
-    solution = NULL;
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|O!d", argnames, &PyDict_Type, &solution, &time))
-        return NULL;
-
     PY_SCIP_CALL(error, NULL, SCIPsetObjsense(self->scip, SCIP_OBJSENSE_MINIMIZE));
-
-    _seed_primal(self, solution);
-    if (PyErr_Occurred())
-        return NULL;
-    
-    // Set timeout
-    self->scip->set->limit_time = time;
-    
-    PY_SCIP_CALL(error, NULL, SCIPsolve(self->scip));
-    Py_RETURN_NONE;
+    return _optimize(self, args, kwds);
 }
 
 static PyObject *solver_restart(solver *self) {
