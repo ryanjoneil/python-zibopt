@@ -2,8 +2,8 @@
 #labels Featured
 
 = 0.2 dev =
-  * Added gap and absgap keywords to maximize/minimize to stop when gap is within a certain limit
-  * Added time keyword to maximize/minimize to return best solution after a number of seconds
+  * Issue 1: Added gap and absgap keywords to maximize/minimize to stop when gap is within a certain limit
+  * Issue 1: Added time keyword to maximize/minimize to return best solution after a number of seconds
   * Removed solution.feasible, added solution.infeasible, unbounded, inforunbd, and optimal
 
 = 0.1 dev =
