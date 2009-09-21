@@ -5,11 +5,11 @@
 
 == Prerequisites ==
 
-The python-zibopt build script assumes that you have shared object files for ZIMPL, SoPlex and SCIP in your LIBRARY_PATH and header files for SCIP 1.1.0 in your C_INCLUDE_PATH.  Make sure these are in your environment before building it.  For example, if you put the ZIBOpt shared object files in $HOME/lib after building it in $HOME/src, your environment might contain: 
+The python-zibopt build script assumes that you have shared object files for ZIMPL, SoPlex and SCIP in your LIBRARY_PATH and header files for SCIP 1.2.0 in your C_INCLUDE_PATH.  Make sure these are in your environment before building it.  For example, if you put the ZIBOpt shared object files in $HOME/lib after building it in $HOME/src, your environment might contain: 
 
 {{{
 LIBRARY_PATH=$HOME
-C_INCLUDE_PATH=$HOME/src/ziboptsuite-1.1.0/scip-1.1.0/src/
+C_INCLUDE_PATH=$HOME/src/ziboptsuite-1.2.0/scip-1.2.0/src/
 }}}
 
 To build the shared library versions of ZIBOpt components, you'll need to use their opt-shared makefiles.  Look [http://scip.zib.de/doc/html/MAKE.html here] for more information.
