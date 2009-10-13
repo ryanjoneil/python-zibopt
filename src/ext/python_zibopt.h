@@ -11,6 +11,7 @@
 #include <scip/misc.h>
 #include <scip/prob.h>
 #include <scip/sol.h>
+#include <scip/struct_branch.h>
 #include <scip/struct_stat.h>
 #include "structmember.h"
 
@@ -40,8 +41,9 @@ typedef struct {
 typedef struct {
     PyObject_HEAD
     SCIP *scip;
-    variable   *first_var;  // linked list head
-    constraint *first_cons; // linked list head
+    char **_branching_rules; // names of branching rules
+    variable   *first_var;   // linked list head
+    constraint *first_cons;  // linked list head
 } solver;
 
 typedef struct {
@@ -54,6 +56,12 @@ typedef struct {
     bool unbounded;
     bool inforunbd;
 } solution;
+
+typedef struct {
+    PyObject_HEAD
+    SCIP_BRANCHRULE *branch;
+    SCIP *scip;
+} branching_rule;
 
 static void PyScipSetError(PyObject *error_type, SCIP_RETCODE err_code) {
     switch(err_code) {
