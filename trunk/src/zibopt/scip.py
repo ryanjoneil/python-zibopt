@@ -53,7 +53,7 @@ Translated to python-zibopt this becomes:
         print 'invalid problem'
 '''
 
-from zibopt import _scip, _vars, _cons, _soln
+from zibopt import _scip, _vars, _cons, _soln, _branch
 
 __all__ = 'solver',
 
@@ -62,10 +62,11 @@ INTEGER    = _scip.INTEGER
 IMPLINT    = _scip.IMPLINT
 CONTINUOUS = _scip.CONTINUOUS
 
-ConstraintError = _cons.error
-SolutionError   = _soln.error
-SolverError     = _scip.error
-VariableError   = _vars.error
+ConstraintError    = _cons.error
+SolutionError      = _soln.error
+SolverError        = _scip.error
+VariableError      = _vars.error
+BranchingRuleError = _branch.error
 
 class solution(_soln.solution):
     '''
@@ -114,6 +115,12 @@ class solver(_scip.solver):
         super(solver, self).__init__(*args, **kwds)
         self.variables = set()
         self.constraints = set()
+
+        # TODO:
+        #self.branching = {
+        #    'inference': _branch.branching_rule(self, 'inference')
+        #}
+        
 
     def variable(self, coefficient=0, vartype=CONTINUOUS, lower=0, **kwds):
         '''

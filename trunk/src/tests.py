@@ -1,4 +1,4 @@
-from zibopt import scip, _vars, _cons
+from zibopt import scip, _vars, _cons, _branch
 import unittest
 
 class ScipTest(unittest.TestCase):
@@ -98,7 +98,12 @@ class ScipTest(unittest.TestCase):
         v1 = solver1.variable()
         self.assertRaises(scip.ConstraintError, solver2.constraint, upper=1, coefficients={v1:1})
         self.assertRaises(scip.SolverError, solver2.maximize, {v1: 3})
-        
+    
+    def testBadBranchingRule(self):
+        '''Test loading a branching rule that doesn't exist'''
+        solver = scip.solver()
+        self.assertRaises(scip.BranchingRuleError, _branch.branching_rule, solver, 'NOSUCHRULE')
+    
 if __name__ == '__main__':
     unittest.main()
 

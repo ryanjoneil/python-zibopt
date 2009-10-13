@@ -7,6 +7,7 @@ static PyObject *error;
 /*****************************************************************************/
 static PyObject *solver_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     solver *self;
+    int i;
 
     self = (solver *) type->tp_alloc(type, 0);
     if (self != NULL) {
@@ -31,6 +32,20 @@ static PyObject *solver_new(PyTypeObject *type, PyObject *args, PyObject *kwds) 
 
         // Keep SCIP from catching keyboard interrupts.  These go to python.
         self->scip->set->misc_catchctrlc = FALSE;
+
+        // Pull out names of branching rules in SCIP
+        self->_branching_rules = malloc(sizeof(char *) * self->scip->set->nbranchrules);
+        if (self->_branching_rules == NULL) {
+            PyErr_SetString(error, "not enough memory to initialize solver");
+            return NULL;
+        } else {
+            for (i = 0; i < self->scip->set->nbranchrules; i++)
+                self->_branching_rules[i] = ((SCIP_BRANCHRULE *) self->scip->set->branchrules[i])->name;
+        }
+        
+        // TODO: add attribute to read loaded branching rule names from SCIP solver
+        // TODO: load branching rules via branchmodule.c
+        // TODO: add ability to edit priority and other fields
     }
 
     return (PyObject *) self;
@@ -61,17 +76,24 @@ static void solver_dealloc(solver *self) {
             SCIPreleaseVar(self->scip, &self->first_var->variable);
             self->first_var = self->first_var->next;
         }
+        self->first_var = NULL;
         
         // Free constraints
         while (self->first_cons != NULL) {
             SCIPreleaseCons(self->scip, &self->first_cons->constraint);
             self->first_cons = self->first_cons->next;
         }
+        self->first_cons = NULL;
         
+        // Free settings data
+        free(self->_branching_rules);
+        self->_branching_rules = NULL;
+
         // Free the solver itself
         SCIPfree(&self->scip);
+        self->scip = NULL;
     }
-    
+
     self->ob_type->tp_free((PyObject *) self);
 }
 
