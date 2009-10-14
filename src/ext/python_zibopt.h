@@ -41,7 +41,6 @@ typedef struct {
 typedef struct {
     PyObject_HEAD
     SCIP *scip;
-    char **_branching_rules; // names of branching rules
     variable   *first_var;   // linked list head
     constraint *first_cons;  // linked list head
 } solver;

@@ -116,11 +116,10 @@ class solver(_scip.solver):
         self.variables = set()
         self.constraints = set()
 
-        # TODO:
-        #self.branching = {
-        #    'inference': _branch.branching_rule(self, 'inference')
-        #}
-        
+        self.branching = dict(
+            (name, _branch.branching_rule(self, name))
+            for name in self.branching_rules()
+        )
 
     def variable(self, coefficient=0, vartype=CONTINUOUS, lower=0, **kwds):
         '''

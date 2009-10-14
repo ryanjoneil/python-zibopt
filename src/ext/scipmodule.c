@@ -33,16 +33,6 @@ static PyObject *solver_new(PyTypeObject *type, PyObject *args, PyObject *kwds) 
         // Keep SCIP from catching keyboard interrupts.  These go to python.
         self->scip->set->misc_catchctrlc = FALSE;
 
-        // Pull out names of branching rules in SCIP
-        self->_branching_rules = malloc(sizeof(char *) * self->scip->set->nbranchrules);
-        if (self->_branching_rules == NULL) {
-            PyErr_SetString(error, "not enough memory to initialize solver");
-            return NULL;
-        } else {
-            for (i = 0; i < self->scip->set->nbranchrules; i++)
-                self->_branching_rules[i] = ((SCIP_BRANCHRULE *) self->scip->set->branchrules[i])->name;
-        }
-        
         // TODO: add attribute to read loaded branching rule names from SCIP solver
         // TODO: load branching rules via branchmodule.c
         // TODO: add ability to edit priority and other fields
@@ -85,10 +75,6 @@ static void solver_dealloc(solver *self) {
         }
         self->first_cons = NULL;
         
-        // Free settings data
-        free(self->_branching_rules);
-        self->_branching_rules = NULL;
-
         // Free the solver itself
         SCIPfree(&self->scip);
         self->scip = NULL;
@@ -217,6 +203,28 @@ static PyObject *solver_restart(solver *self) {
     Py_RETURN_NONE;
 }
 
+static PyObject *branching_rules(solver *self) {
+    // Pre-allocate a list of the appropriate size
+    int i;
+    PyObject *rules = PyList_New(self->scip->set->nbranchrules);
+    if (!rules) {
+        PyErr_SetString(error, "ran out of memory");
+        return NULL;
+    }
+    
+    // Pull out names of branching rules in SCIP
+    for (i = 0; i < self->scip->set->nbranchrules; i++) {
+        PyObject *r = PyString_FromString(self->scip->set->branchrules[i]->name);
+        if (!r) {
+            Py_DECREF(rules);
+            return NULL;
+        }
+        PyList_SET_ITEM(rules, i, r);
+    }
+    
+    return rules;
+}
+
 /*****************************************************************************/
 /* MODULE INITIALIZATION                                                     */
 /*****************************************************************************/
@@ -224,6 +232,7 @@ static PyMethodDef solver_methods[] = {
     {"maximize", (PyCFunction) solver_maximize, METH_KEYWORDS, "maximize the objective value"},
     {"minimize", (PyCFunction) solver_minimize, METH_KEYWORDS, "minimize the objective value"},
     {"restart",  (PyCFunction) solver_restart,  METH_NOARGS,   "restart the solver"},
+    {"branching_rules", (PyCFunction) branching_rules, METH_NOARGS, "returns a list of branching rule names"},
     {NULL} /* Sentinel */
 };
 
