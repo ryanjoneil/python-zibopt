@@ -45,6 +45,11 @@ static void branching_rule_dealloc(solution *self) {
 /* MODULE INITIALIZATION                                                     */
 /*****************************************************************************/
 static PyMemberDef branching_rule_members[] = {
+    /*{"priority", T_INT, 
+     ((SCIP_BRANCHRULE *) offsetof(branching_rule, branch)) + offsetof(SCIP_BRANCHRULE, priority), 
+     //self->branch->priority,
+     0, "branching priority"},
+    */
     {NULL} /* Sentinel */
 };
 

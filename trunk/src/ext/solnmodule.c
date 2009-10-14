@@ -65,11 +65,11 @@ static PyObject *solution_value(solution *self, PyObject *v) {
 /* MODULE INITIALIZATION                                                     */
 /*****************************************************************************/
 static PyMemberDef solution_members[] = {
-    {"objective", T_DOUBLE, offsetof(solution, objective), 0, "objective value"},
-    {"optimal", T_BOOL, offsetof(solution, optimal), 0, "solution is optimal"},
-    {"infeasible", T_BOOL, offsetof(solution, infeasible), 0, "solution is infeasible"},
-    {"unbounded", T_BOOL, offsetof(solution, unbounded), 0, "solution is unbounded"},
-    {"inforunbd", T_BOOL, offsetof(solution, inforunbd), 0, "solution is infeasible or unbounded"},
+    {"objective", T_DOUBLE, offsetof(solution, objective), READONLY, "objective value"},
+    {"optimal", T_BOOL, offsetof(solution, optimal), READONLY, "solution is optimal"},
+    {"infeasible", T_BOOL, offsetof(solution, infeasible), READONLY, "solution is infeasible"},
+    {"unbounded", T_BOOL, offsetof(solution, unbounded), READONLY, "solution is unbounded"},
+    {"inforunbd", T_BOOL, offsetof(solution, inforunbd), READONLY, "solution is infeasible or unbounded"},
     {NULL} /* Sentinel */
 };
 
