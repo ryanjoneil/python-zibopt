@@ -104,6 +104,13 @@ class ScipTest(unittest.TestCase):
         solver = scip.solver()
         self.assertRaises(scip.BranchingRuleError, _branch.branching_rule, solver, 'NOSUCHRULE')
     
+    def testLoadBranchingRuleNames(self):
+        '''Loads names of branching rules'''
+        solver = scip.solver()
+        rules = solver.branching_rules()
+        self.assertTrue(rules)
+        self.assertEqual(set(rules), set(solver.branching.keys()))
+        
 if __name__ == '__main__':
     unittest.main()
 
