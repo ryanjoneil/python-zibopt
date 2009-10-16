@@ -111,10 +111,13 @@ class ScipTest(unittest.TestCase):
         self.assertTrue(rules)
         self.assertEqual(set(rules), set(solver.branching.keys()))
         
-        # NOT QUITE WORKING YET:
-        #for n, b in solver.branching.items():
-        #    print n, b.priority
-            
+    def testSetBranchingPriority(self):
+        '''Sets branching priority'''
+        solver = scip.solver()
+        for n, b in solver.branching.items():
+            x = b.priority
+            b.priority = x + 1
+            self.assertEqual(x+1, b.priority)            
         
 if __name__ == '__main__':
     unittest.main()

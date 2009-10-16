@@ -29,12 +29,46 @@ static int branching_rule_init(branching_rule *self, PyObject *args, PyObject *k
         PyErr_SetString(error, "unrecognized branching rule");
         return -1;
     }
+    self->branch = r;
 
     return 0;
 }
 
 static void branching_rule_dealloc(solution *self) {
     self->ob_type->tp_free((PyObject *) self);
+}
+
+static PyObject* branching_rule_getattr(branching_rule *self, PyObject *attr_name) {
+    char *attr;
+
+    // Check and make sure we have a string as attribute name...
+    if (PyString_Check(attr_name)) {
+        attr = PyString_AsString(attr_name);
+
+        if (!strcmp(attr, "priority"))
+            return Py_BuildValue("i", self->branch->priority);
+        
+    }
+    return PyObject_GenericGetAttr(self, attr_name);
+}
+
+static int branching_rule_setattr(branching_rule *self, PyObject *attr_name, PyObject *value) {
+    char *attr;
+    
+    // Check and make sure we have a string as attribute name...
+    if (PyString_Check(attr_name)) {
+        attr = PyString_AsString(attr_name);
+
+        if (!strcmp(attr, "priority"))
+            if (PyInt_Check(value)) {
+                self->branch->priority = PyInt_AsLong(value);
+                return 0;
+            } else {
+                return -1;
+            }
+        
+    }
+    return PyObject_GenericSetAttr(self, attr_name, value);
 }
 
 /*****************************************************************************/
@@ -45,16 +79,10 @@ static void branching_rule_dealloc(solution *self) {
 /* MODULE INITIALIZATION                                                     */
 /*****************************************************************************/
 static PyMemberDef branching_rule_members[] = {
-    /*{"priority", T_INT, 
-     ((SCIP_BRANCHRULE *) offsetof(branching_rule, branch)) + offsetof(SCIP_BRANCHRULE, priority), 
-     //self->branch->priority,
-     0, "branching priority"},
-    */
     {NULL} /* Sentinel */
 };
 
 static PyMethodDef branching_rule_methods[] = {
-//    {"load", (PyCFunction) branching_rule_load, METH_STATIC, "get all branching rules in a dict"},
     {NULL} /* Sentinel */
 };
 
@@ -76,8 +104,8 @@ static PyTypeObject branching_rule_type = {
     0,                             /* tp_hash */
     0,                             /* tp_call */
     0,                             /* tp_str */
-    0,                             /* tp_getattro */
-    0,                             /* tp_setattro */
+    branching_rule_getattr,        /* tp_getattro */
+    branching_rule_setattr,        /* tp_setattro */
     0,                             /* tp_as_buffer */
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /* tp_flags */
     "SCIP branching rules",        /* tp_doc */
