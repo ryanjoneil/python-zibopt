@@ -14,14 +14,22 @@ class SettingsTest(unittest.TestCase):
         self.assertTrue(rules)
         self.assertEqual(set(rules), set(solver.branching.keys()))
         
-    def testSetBranchingPriority(self):
-        '''Sets branching priority'''
+    def testtBranchingRuleSettings(self):
+        '''Sets branching priority, maxdepth, etc'''
         solver = scip.solver()
         for n, b in solver.branching.items():
+            x = b.maxbounddist
+            b.maxbounddist = x + 1
+            self.assertEqual(x+1, b.maxbounddist)
+
+            x = b.maxdepth
+            b.maxdepth = x + 1
+            self.assertEqual(x+1, b.maxdepth)
+        
             x = b.priority
             b.priority = x + 1
             self.assertEqual(x+1, b.priority)            
-        
+
 if __name__ == '__main__':
     unittest.main()
 

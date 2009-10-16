@@ -64,7 +64,7 @@ static int branching_rule_setattr(branching_rule *self, PyObject *attr_name, PyO
 
         if (!strcmp(attr, "maxbounddist"))
             if (PyFloat_Check(value)) {
-                SCIPbranchruleSetMaxbounddist(self->branch, self->scip->set, PyFloat_AsDouble(value));
+                SCIPbranchruleSetMaxbounddist(self->branch, PyFloat_AsDouble(value));
                 return 0;
             } else {
                 return -1;
@@ -72,7 +72,7 @@ static int branching_rule_setattr(branching_rule *self, PyObject *attr_name, PyO
 
         if (!strcmp(attr, "maxdepth"))
             if (PyInt_Check(value)) {
-                SCIPbranchruleSetMaxdepth(self->branch, self->scip->set, PyInt_AsLong(value));
+                SCIPbranchruleSetMaxdepth(self->branch, PyInt_AsLong(value));
                 return 0;
             } else {
                 return -1;
