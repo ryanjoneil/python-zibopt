@@ -57,34 +57,59 @@ static PyObject* branching_rule_getattr(branching_rule *self, PyObject *attr_nam
 
 static int branching_rule_setattr(branching_rule *self, PyObject *attr_name, PyObject *value) {
     char *attr;
+    double d;
+    int i;
     
     // Check and make sure we have a string as attribute name...
     if (PyString_Check(attr_name)) {
         attr = PyString_AsString(attr_name);
 
-        if (!strcmp(attr, "maxbounddist"))
-            if (PyFloat_Check(value)) {
-                SCIPbranchruleSetMaxbounddist(self->branch, PyFloat_AsDouble(value));
+        if (!strcmp(attr, "maxbounddist")) {
+            if (PyFloat_Check(value) || PyInt_Check(value)) {
+                // Convert to float if we have an int
+                if (PyInt_Check(value))
+                    d = (double) PyInt_AsLong(value);
+                else
+                    d = PyFloat_AsDouble(value);
+
+                // Make sure we have an acceptable value
+                if (d < -1) {
+                    PyErr_SetString(error, "maxbounddist must be >= -1");
+                    return -1;
+                }
+                
+                SCIPbranchruleSetMaxbounddist(self->branch, d);
                 return 0;
             } else {
+                PyErr_SetString(error, "invalid value for maxbounddist");
                 return -1;
             }
-
-        if (!strcmp(attr, "maxdepth"))
+        }
+        
+        if (!strcmp(attr, "maxdepth")) {
             if (PyInt_Check(value)) {
-                SCIPbranchruleSetMaxdepth(self->branch, PyInt_AsLong(value));
+                i = PyInt_AsLong(value);
+                if (i < -1) {
+                    PyErr_SetString(error, "maxdepth must be >= -1");
+                    return -1;
+                }
+                SCIPbranchruleSetMaxdepth(self->branch, i);
                 return 0;
             } else {
+                PyErr_SetString(error, "invalid value for maxdepth");
                 return -1;
             }
-
-        if (!strcmp(attr, "priority"))
+        }
+        
+        if (!strcmp(attr, "priority")) {
             if (PyInt_Check(value)) {
                 SCIPbranchruleSetPriority(self->branch, self->scip->set, PyInt_AsLong(value));
                 return 0;
             } else {
+                PyErr_SetString(error, "invalid value for priority");
                 return -1;
-            }        
+            }
+        }
     }
     return PyObject_GenericSetAttr(self, attr_name, value);
 }
