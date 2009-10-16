@@ -2,6 +2,12 @@
 #labels Featured
 
 = 0.2 dev =
+  * Issue 2: Added ability to change priority, maxdepth, and maxbounddist on branching rules:
+{{{
+solver.branching['inference'].priority = 10000
+solver.branching['mostinf'].maxdepth += 2
+print(solver.branching['pscost'].maxbounddist)
+}}}
   * Issue 1: Added gap and absgap keywords to maximize/minimize to stop when gap is within a certain limit
   * Issue 1: Added time keyword to maximize/minimize to return best solution after a number of seconds
   * Removed solution.feasible, added solution.infeasible, unbounded, inforunbd, and optimal
