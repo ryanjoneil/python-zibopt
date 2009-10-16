@@ -1,7 +1,7 @@
 from zibopt import scip, _branch
 import unittest
 
-class ScipSettingsTest(unittest.TestCase):
+class SettingsTest(unittest.TestCase):
     def testBadBranchingRule(self):
         '''Test loading a branching rule that doesn't exist'''
         solver = scip.solver()

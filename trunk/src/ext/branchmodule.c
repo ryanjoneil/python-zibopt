@@ -45,9 +45,12 @@ static PyObject* branching_rule_getattr(branching_rule *self, PyObject *attr_nam
     if (PyString_Check(attr_name)) {
         attr = PyString_AsString(attr_name);
 
+        if (!strcmp(attr, "maxbounddist"))
+            return Py_BuildValue("d", SCIPbranchruleGetMaxbounddist(self->branch));
+        if (!strcmp(attr, "maxdepth"))
+            return Py_BuildValue("i", SCIPbranchruleGetMaxdepth(self->branch));
         if (!strcmp(attr, "priority"))
-            return Py_BuildValue("i", self->branch->priority);
-        
+            return Py_BuildValue("i", SCIPbranchruleGetPriority(self->branch));
     }
     return PyObject_GenericGetAttr(self, attr_name);
 }
@@ -59,14 +62,29 @@ static int branching_rule_setattr(branching_rule *self, PyObject *attr_name, PyO
     if (PyString_Check(attr_name)) {
         attr = PyString_AsString(attr_name);
 
-        if (!strcmp(attr, "priority"))
-            if (PyInt_Check(value)) {
-                self->branch->priority = PyInt_AsLong(value);
+        if (!strcmp(attr, "maxbounddist"))
+            if (PyFloat_Check(value)) {
+                SCIPbranchruleSetMaxbounddist(self->branch, self->scip->set, PyFloat_AsDouble(value));
                 return 0;
             } else {
                 return -1;
             }
-        
+
+        if (!strcmp(attr, "maxdepth"))
+            if (PyInt_Check(value)) {
+                SCIPbranchruleSetMaxdepth(self->branch, self->scip->set, PyInt_AsLong(value));
+                return 0;
+            } else {
+                return -1;
+            }
+
+        if (!strcmp(attr, "priority"))
+            if (PyInt_Check(value)) {
+                SCIPbranchruleSetPriority(self->branch, self->scip->set, PyInt_AsLong(value));
+                return 0;
+            } else {
+                return -1;
+            }        
     }
     return PyObject_GenericSetAttr(self, attr_name, value);
 }
