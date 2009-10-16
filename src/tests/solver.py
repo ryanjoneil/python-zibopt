@@ -1,10 +1,7 @@
-from zibopt import scip, _vars, _cons, _branch
+from zibopt import scip, _vars, _cons
 import unittest
 
 class ScipTest(unittest.TestCase):
-    def setUp(self):
-        pass
-        
     def testLoadSolver(self):
         '''Try loading the SCIP solver'''
         solver = scip.solver()
@@ -99,26 +96,6 @@ class ScipTest(unittest.TestCase):
         self.assertRaises(scip.ConstraintError, solver2.constraint, upper=1, coefficients={v1:1})
         self.assertRaises(scip.SolverError, solver2.maximize, {v1: 3})
     
-    def testBadBranchingRule(self):
-        '''Test loading a branching rule that doesn't exist'''
-        solver = scip.solver()
-        self.assertRaises(scip.BranchingRuleError, _branch.branching_rule, solver, 'NOSUCHRULE')
-    
-    def testLoadBranchingRuleNames(self):
-        '''Loads names of branching rules'''
-        solver = scip.solver()
-        rules = solver.branching_rules()
-        self.assertTrue(rules)
-        self.assertEqual(set(rules), set(solver.branching.keys()))
-        
-    def testSetBranchingPriority(self):
-        '''Sets branching priority'''
-        solver = scip.solver()
-        for n, b in solver.branching.items():
-            x = b.priority
-            b.priority = x + 1
-            self.assertEqual(x+1, b.priority)            
-        
 if __name__ == '__main__':
     unittest.main()
 
