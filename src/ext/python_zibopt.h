@@ -12,6 +12,7 @@
 #include <scip/prob.h>
 #include <scip/sol.h>
 #include <scip/struct_branch.h>
+#include <scip/struct_sepa.h>
 #include <scip/struct_stat.h>
 #include "structmember.h"
 
@@ -61,6 +62,12 @@ typedef struct {
     SCIP_BRANCHRULE *branch;
     SCIP *scip;
 } branching_rule;
+
+typedef struct {
+    PyObject_HEAD
+    SCIP_SEPA *sepa;
+    SCIP *scip;
+} separator;
 
 static void PyScipSetError(PyObject *error_type, SCIP_RETCODE err_code) {
     switch(err_code) {
