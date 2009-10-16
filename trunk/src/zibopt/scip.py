@@ -53,7 +53,7 @@ Translated to python-zibopt this becomes:
         print 'invalid problem'
 '''
 
-from zibopt import _scip, _vars, _cons, _soln, _branch
+from zibopt import _scip, _vars, _cons, _soln, _branch, _sepa
 
 __all__ = 'solver',
 
@@ -106,7 +106,19 @@ class solution(_soln.solution):
         return vals
 
 class solver(_scip.solver):
-    '''A SCIP mixed integer programming solver'''
+    '''
+    A SCIP mixed integer programming solver.  Normal behavior is to instantiate
+    a solver, define variables and constraints for it, and then maximize or
+    minimize an objective function.
+    
+    Solver settings for things like branching rules are accessible through 
+    dictionaries on the solver.  For instance, to change settings on the
+    inference branching rule:
+    
+        solver.branching['inference'].priority = 10000
+        solver.branching['inference'].maxdepth = -1
+        solver.branching['inference'].maxbounddist = -1
+    '''
     def __init__(self, *args, **kwds):
         '''
         Instantiates a solver with default settings.
@@ -119,6 +131,11 @@ class solver(_scip.solver):
         self.branching = dict(
             (name, _branch.branching_rule(self, name))
             for name in self.branching_rules()
+        )
+        
+        self.separators = dict(
+            (name, _sepa.separator(self, name))
+            for name in self.separators()
         )
 
     def variable(self, coefficient=0, vartype=CONTINUOUS, lower=0, **kwds):

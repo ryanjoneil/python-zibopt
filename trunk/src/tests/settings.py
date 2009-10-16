@@ -40,6 +40,16 @@ class SettingsTest(unittest.TestCase):
             self.assertRaises(scip.BranchingRuleError, setattr, b, 'maxdepth', 'foo')
             self.assertRaises(scip.BranchingRuleError, setattr, b, 'priority', 'foo')
 
+    def testLoadSeparatorNames(self):
+        '''Loads names of separators'''
+        solver = scip.solver()
+        seps = solver.separators.keys()
+        # TODO: why is this a little different than branching rules?
+        # TODO: rest of tests
+        print seps
+        self.assertTrue(seps)
+        self.assertEqual(set(seps), set(solver.separators.keys()))
+
 if __name__ == '__main__':
     unittest.main()
 

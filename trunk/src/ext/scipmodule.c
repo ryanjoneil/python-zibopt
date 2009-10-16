@@ -7,8 +7,6 @@ static PyObject *error;
 /*****************************************************************************/
 static PyObject *solver_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     solver *self;
-    int i;
-
     self = (solver *) type->tp_alloc(type, 0);
     if (self != NULL) {
         // Initialize SCIP
@@ -225,6 +223,28 @@ static PyObject *branching_rules(solver *self) {
     return rules;
 }
 
+static PyObject *separators(solver *self) {
+    // Pre-allocate a list of the appropriate size
+    int i;
+    PyObject *rules = PyList_New(self->scip->set->nsepas);
+    if (!rules) {
+        PyErr_SetString(error, "ran out of memory");
+        return NULL;
+    }
+    
+    // Pull out names of separators in SCIP
+    for (i = 0; i < self->scip->set->nsepas; i++) {
+        PyObject *r = PyString_FromString(self->scip->set->sepas[i]->name);
+        if (!r) {
+            Py_DECREF(rules);
+            return NULL;
+        }
+        PyList_SET_ITEM(rules, i, r);
+    }
+    
+    return rules;
+}
+
 /*****************************************************************************/
 /* MODULE INITIALIZATION                                                     */
 /*****************************************************************************/
@@ -233,6 +253,7 @@ static PyMethodDef solver_methods[] = {
     {"minimize", (PyCFunction) solver_minimize, METH_KEYWORDS, "minimize the objective value"},
     {"restart",  (PyCFunction) solver_restart,  METH_NOARGS,   "restart the solver"},
     {"branching_rules", (PyCFunction) branching_rules, METH_NOARGS, "returns a list of branching rule names"},
+    {"separators", (PyCFunction) separators, METH_NOARGS, "returns a list of separator names"},
     {NULL} /* Sentinel */
 };
 
