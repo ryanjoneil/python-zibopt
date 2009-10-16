@@ -9,7 +9,13 @@ solver.branching['mostinf'].maxdepth += 2
 print(solver.branching['pscost'].maxbounddist)
 }}}
   * Issue 1: Added gap and absgap keywords to maximize/minimize to stop when gap is within a certain limit
+{{{ 
+solver.maximize(absgap=0.5, gap=100) 
+}}}
   * Issue 1: Added time keyword to maximize/minimize to return best solution after a number of seconds
+{{{ 
+solver.maximize(time=500) 
+}}}
   * Removed solution.feasible, added solution.infeasible, unbounded, inforunbd, and optimal
   * Tested against SCIP 1.2
 
