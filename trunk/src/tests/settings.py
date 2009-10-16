@@ -14,7 +14,7 @@ class SettingsTest(unittest.TestCase):
         self.assertTrue(rules)
         self.assertEqual(set(rules), set(solver.branching.keys()))
         
-    def testtBranchingRuleSettings(self):
+    def testBranchingRuleSettings(self):
         '''Sets branching priority, maxdepth, etc'''
         solver = scip.solver()
         for n, b in solver.branching.items():
@@ -29,6 +29,16 @@ class SettingsTest(unittest.TestCase):
             x = b.priority
             b.priority = x + 1
             self.assertEqual(x+1, b.priority)            
+
+    def testBranchingRuleInvalidSettings(self):
+        '''Sets branching maxdepth, maxbounddist to values < -1'''
+        solver = scip.solver()
+        for b in solver.branching.values():
+            self.assertRaises(scip.BranchingRuleError, setattr, b, 'maxbounddist', -5)
+            self.assertRaises(scip.BranchingRuleError, setattr, b, 'maxdepth', -2)
+            self.assertRaises(scip.BranchingRuleError, setattr, b, 'maxbounddist', 'foo')
+            self.assertRaises(scip.BranchingRuleError, setattr, b, 'maxdepth', 'foo')
+            self.assertRaises(scip.BranchingRuleError, setattr, b, 'priority', 'foo')
 
 if __name__ == '__main__':
     unittest.main()
