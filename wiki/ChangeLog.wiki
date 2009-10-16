@@ -2,12 +2,6 @@
 #labels Featured
 
 = 0.2 dev =
-  * Issue 2: Added ability to change priority, maxdepth, and maxbounddist on branching rules:
-{{{
-solver.branching['inference'].priority = 10000
-solver.branching['mostinf'].maxdepth += 2
-print(solver.branching['pscost'].maxbounddist)
-}}}
   * Issue 1: Added gap and absgap keywords to maximize/minimize to stop when gap is within a certain limit
 {{{ 
 solver.maximize(absgap=0.5, gap=100) 
@@ -18,6 +12,12 @@ solver.maximize(time=500)
 }}}
   * Removed solution.feasible, added solution.infeasible, unbounded, inforunbd, and optimal
   * Tested against SCIP 1.2
+  * Issue 2: Added ability to change priority, maxdepth, and maxbounddist on branching rules:
+{{{
+solver.branching['inference'].priority = 10000
+solver.branching['mostinf'].maxdepth += 2
+print(solver.branching['pscost'].maxbounddist)
+}}}
 
 = 0.1 dev =
   * Initial libraries for interfacing to solver, variables, constraints, and solutions
