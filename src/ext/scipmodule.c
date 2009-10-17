@@ -219,6 +219,28 @@ static PyObject *branching_names(solver *self) {
     return rules;
 }
 
+static PyObject *conflict_names(solver *self) {
+    // Pre-allocate a list of the appropriate size
+    int i;
+    PyObject *rules = PyList_New(self->scip->set->nconflicthdlrs);
+    if (!rules) {
+        PyErr_SetString(error, "ran out of memory");
+        return NULL;
+    }
+    
+    // Pull out names of conflict handlers in SCIP
+    for (i = 0; i < self->scip->set->nconflicthdlrs; i++) {
+        PyObject *r = PyString_FromString(self->scip->set->conflicthdlrs[i]->name);
+        if (!r) {
+            Py_DECREF(rules);
+            return NULL;
+        }
+        PyList_SET_ITEM(rules, i, r);
+    }
+    
+    return rules;
+}
+
 static PyObject *separator_names(solver *self) {
     // Pre-allocate a list of the appropriate size
     int i;
@@ -249,6 +271,7 @@ static PyMethodDef solver_methods[] = {
     {"minimize", (PyCFunction) solver_minimize, METH_KEYWORDS, "minimize the objective value"},
     {"restart",  (PyCFunction) solver_restart,  METH_NOARGS,   "restart the solver"},
     {"branching_names", (PyCFunction) branching_names, METH_NOARGS, "returns a list of branching rule names"},
+    {"conflict_names",  (PyCFunction) conflict_names,  METH_NOARGS, "returns a list of conflict handler names"},
     {"separator_names", (PyCFunction) separator_names, METH_NOARGS, "returns a list of separator names"},
     {NULL} /* Sentinel */
 };
