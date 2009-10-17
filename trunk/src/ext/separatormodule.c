@@ -8,8 +8,8 @@ static PyObject *error;
 static int separator_init(separator *self, PyObject *args, PyObject *kwds) {
     PyObject *s;   // solver Python object
     solver *solv;  // solver C object
-    char *name;    // name of branching rule
-    SCIP_SEPA* r;
+    char *name;    // name of separator
+    SCIP_SEPA *r;
     
     if (!PyArg_ParseTuple(args, "Os", &s, &name))
         return -1;
@@ -23,7 +23,7 @@ static int separator_init(separator *self, PyObject *args, PyObject *kwds) {
     solv = (solver *) s;
     self->scip = solv->scip;
     
-    // Load the branching rule from SCIP
+    // Load the separator from SCIP
     r = SCIPfindSepa(self->scip, name);
     if (r == NULL) {
         PyErr_SetString(error, "unrecognized separator");
@@ -34,7 +34,7 @@ static int separator_init(separator *self, PyObject *args, PyObject *kwds) {
     return 0;
 }
 
-static void separator_dealloc(solution *self) {
+static void separator_dealloc(separator *self) {
     self->ob_type->tp_free((PyObject *) self);
 }
 

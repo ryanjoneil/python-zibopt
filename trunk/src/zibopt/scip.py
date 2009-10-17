@@ -53,7 +53,9 @@ Translated to python-zibopt this becomes:
         print 'invalid problem'
 '''
 
-from zibopt import _scip, _vars, _cons, _soln, _branch, _sepa
+from zibopt import (
+    _scip, _vars, _cons, _soln, _branch, _sepa, _conflict
+)
 
 __all__ = 'solver',
 
@@ -66,7 +68,11 @@ ConstraintError    = _cons.error
 SolutionError      = _soln.error
 SolverError        = _scip.error
 VariableError      = _vars.error
+
+# Solver Settings Errors
 BranchingRuleError = _branch.error
+ConflictError      = _conflict.error
+SeparatorError     = _sepa.error
 
 class solution(_soln.solution):
     '''
@@ -118,6 +124,14 @@ class solver(_scip.solver):
         solver.branching['inference'].priority = 10000
         solver.branching['inference'].maxdepth = -1
         solver.branching['inference'].maxbounddist = -1
+        
+    Priority can be set on separators, conflict handlers, and ... as well:
+    
+        solver.separators['clique'].priority = 10000
+        solver.conflict['logicor'].priority = 10000
+    
+    See the SCIP documentation for available branching rules, other settings, 
+    and what they do.
     '''
     def __init__(self, *args, **kwds):
         '''
@@ -128,15 +142,9 @@ class solver(_scip.solver):
         self.variables = set()
         self.constraints = set()
 
-        self.branching = dict(
-            (name, _branch.branching_rule(self, name))
-            for name in self.branching_names()
-        )
-        
-        self.separators = dict(
-            (name, _sepa.separator(self, name))
-            for name in self.separator_names()
-        )
+        self.branching  = dict((n, _branch.branching_rule(self, n)) for n in self.branching_names())
+        self.conflict   = dict((n, _conflict.conflict(self, n)) for n in self.conflict_names())
+        self.separators = dict((n, _sepa.separator(self, n)) for n in self.separator_names())
 
     def variable(self, coefficient=0, vartype=CONTINUOUS, lower=0, **kwds):
         '''

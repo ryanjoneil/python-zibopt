@@ -12,6 +12,7 @@
 #include <scip/prob.h>
 #include <scip/sol.h>
 #include <scip/struct_branch.h>
+#include <scip/struct_conflict.h>
 #include <scip/struct_sepa.h>
 #include <scip/struct_stat.h>
 #include "structmember.h"
@@ -62,6 +63,12 @@ typedef struct {
     SCIP_BRANCHRULE *branch;
     SCIP *scip;
 } branching_rule;
+
+typedef struct {
+    PyObject_HEAD
+    SCIP_CONFLICTHDLR *conflict;
+    SCIP *scip;
+} conflict;
 
 typedef struct {
     PyObject_HEAD

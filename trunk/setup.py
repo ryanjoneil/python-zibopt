@@ -31,7 +31,8 @@ setup (
         zibopt_ext('_cons', 'consmodule.c'),
         zibopt_ext('_soln', 'solnmodule.c'),
         zibopt_ext('_branch', 'branchmodule.c'),
-        zibopt_ext('_sepa', 'separators.c'),
+        zibopt_ext('_conflict', 'conflictmodule.c'),
+        zibopt_ext('_sepa', 'separatormodule.c'),
     ],
 
     keywords    = 'mixed binary integer programming optimization zib zibopt',
