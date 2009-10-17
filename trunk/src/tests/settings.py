@@ -10,9 +10,9 @@ class SettingsTest(unittest.TestCase):
     def testLoadBranchingRuleNames(self):
         '''Loads names of branching rules'''
         solver = scip.solver()
-        rules = solver.branching_rules()
+        rules = solver.branching_names()
         self.assertTrue(rules)
-        self.assertEqual(set(rules), set(solver.branching.keys()))
+        self.assertEqual(set(rules), set(solver.branching_names()))
         
     def testBranchingRuleSettings(self):
         '''Sets branching priority, maxdepth, etc'''
@@ -43,13 +43,24 @@ class SettingsTest(unittest.TestCase):
     def testLoadSeparatorNames(self):
         '''Loads names of separators'''
         solver = scip.solver()
-        seps = solver.separators.keys()
-        # TODO: why is this a little different than branching rules?
-        # TODO: rest of tests
-        print seps
+        seps = solver.separator_names()
         self.assertTrue(seps)
-        self.assertEqual(set(seps), set(solver.separators.keys()))
+        self.assertEqual(set(seps), set(solver.separator_names()))
 
+    def testSeparatorSettings(self):
+        '''Sets separator priority'''
+        solver = scip.solver()
+        for n, s in solver.separators.items():
+            x = s.priority
+            s.priority = x + 1
+            self.assertEqual(x+1, s.priority)
+
+    def testSeparatorInvalidSettings(self):
+        '''Sets separator priority to an invalid value'''
+        solver = scip.solver()
+        for s in solver.branching.values():
+            self.assertRaises(scip.BranchingRuleError, setattr, s, 'priority', 'foo')
+            
 if __name__ == '__main__':
     unittest.main()
 
