@@ -130,12 +130,12 @@ class solver(_scip.solver):
 
         self.branching = dict(
             (name, _branch.branching_rule(self, name))
-            for name in self.branching_rules()
+            for name in self.branching_names()
         )
         
         self.separators = dict(
             (name, _sepa.separator(self, name))
-            for name in self.separators()
+            for name in self.separator_names()
         )
 
     def variable(self, coefficient=0, vartype=CONTINUOUS, lower=0, **kwds):

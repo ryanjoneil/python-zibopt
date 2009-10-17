@@ -30,10 +30,6 @@ static PyObject *solver_new(PyTypeObject *type, PyObject *args, PyObject *kwds) 
 
         // Keep SCIP from catching keyboard interrupts.  These go to python.
         self->scip->set->misc_catchctrlc = FALSE;
-
-        // TODO: add attribute to read loaded branching rule names from SCIP solver
-        // TODO: load branching rules via branchmodule.c
-        // TODO: add ability to edit priority and other fields
     }
 
     return (PyObject *) self;
@@ -201,7 +197,7 @@ static PyObject *solver_restart(solver *self) {
     Py_RETURN_NONE;
 }
 
-static PyObject *branching_rules(solver *self) {
+static PyObject *branching_names(solver *self) {
     // Pre-allocate a list of the appropriate size
     int i;
     PyObject *rules = PyList_New(self->scip->set->nbranchrules);
@@ -223,7 +219,7 @@ static PyObject *branching_rules(solver *self) {
     return rules;
 }
 
-static PyObject *separators(solver *self) {
+static PyObject *separator_names(solver *self) {
     // Pre-allocate a list of the appropriate size
     int i;
     PyObject *rules = PyList_New(self->scip->set->nsepas);
@@ -252,8 +248,8 @@ static PyMethodDef solver_methods[] = {
     {"maximize", (PyCFunction) solver_maximize, METH_KEYWORDS, "maximize the objective value"},
     {"minimize", (PyCFunction) solver_minimize, METH_KEYWORDS, "minimize the objective value"},
     {"restart",  (PyCFunction) solver_restart,  METH_NOARGS,   "restart the solver"},
-    {"branching_rules", (PyCFunction) branching_rules, METH_NOARGS, "returns a list of branching rule names"},
-    {"separators", (PyCFunction) separators, METH_NOARGS, "returns a list of separator names"},
+    {"branching_names", (PyCFunction) branching_names, METH_NOARGS, "returns a list of branching rule names"},
+    {"separator_names", (PyCFunction) separator_names, METH_NOARGS, "returns a list of separator names"},
     {NULL} /* Sentinel */
 };
 
