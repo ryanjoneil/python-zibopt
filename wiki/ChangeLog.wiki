@@ -18,6 +18,11 @@ solver.branching['inference'].priority = 10000
 solver.branching['mostinf'].maxdepth += 2
 print(solver.branching['pscost'].maxbounddist)
 }}}
+  * Added ability to set priorities on conflict handlers and separators:
+{{{
+solver.separators['clique'].priority = 10000
+solver.conflict['logicor'].priority = 10000
+}}}
 
 = 0.1 dev =
   * Initial libraries for interfacing to solver, variables, constraints, and solutions
