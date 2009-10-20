@@ -55,7 +55,7 @@ Translated to python-zibopt this becomes:
 
 from zibopt import (
     _scip, _vars, _cons, _soln, 
-    _branch, _conflict, _heur, _sepa
+    _branch, _conflict, _heur, _nodesel, _sepa
 )
 
 __all__ = 'solver',
@@ -65,16 +65,17 @@ INTEGER    = _scip.INTEGER
 IMPLINT    = _scip.IMPLINT
 CONTINUOUS = _scip.CONTINUOUS
 
-ConstraintError    = _cons.error
-SolutionError      = _soln.error
-SolverError        = _scip.error
-VariableError      = _vars.error
+ConstraintError = _cons.error
+SolutionError   = _soln.error
+SolverError     = _scip.error
+VariableError   = _vars.error
 
 # Solver Settings Errors
-BranchingRuleError = _branch.error
-ConflictError      = _conflict.error
-HeuristicError     = _heur.error
-SeparatorError     = _sepa.error
+BranchingError = _branch.error
+ConflictError  = _conflict.error
+HeuristicError = _heur.error
+SelectorError  = _nodesel.error
+SeparatorError = _sepa.error
 
 class solution(_soln.solution):
     '''
@@ -127,11 +128,6 @@ class solver(_scip.solver):
         solver.branching['inference'].maxdepth = -1
         solver.branching['inference'].maxbounddist = -1
         
-    Priority can be set on separators, conflict handlers, and ... as well:
-    
-        solver.conflict['logicor'].priority = 10000
-        solver.separators['clique'].priority = 10000
-
     Heuristcs allow priority, max depth, frequency, and frequency offset
     (freqofs) to be set:
     
@@ -139,6 +135,16 @@ class solver(_scip.solver):
         solver.heuristics['octane'].maxdepth = -1
         solver.heuristics['octane'].frequency = 10
         solver.heuristics['octane'].freqofs = 5
+
+    Node selectors have standard and memory saving priority:
+    
+        solver.selectors['bfs'].stdpriority = 1000
+        solver.selectors['bfs'].memsavepriority = 10
+        
+    Priority can be set on separators and conflict handlers as well:
+    
+        solver.conflict['logicor'].priority = 10000
+        solver.separators['clique'].priority = 10000
 
     See the SCIP documentation for available branching rules, heuristics, 
     any other settings, and what they do.
@@ -155,6 +161,7 @@ class solver(_scip.solver):
         self.branching  = dict((n, _branch.branching_rule(self, n)) for n in self.branching_names())
         self.conflict   = dict((n, _conflict.conflict(self, n)) for n in self.conflict_names())
         self.heuristics = dict((n, _heur.heuristic(self, n)) for n in self.heuristic_names())
+        self.selectors  = dict((n, _nodesel.selector(self, n)) for n in self.selector_names())
         self.separators = dict((n, _sepa.separator(self, n)) for n in self.separator_names())
 
     def variable(self, coefficient=0, vartype=CONTINUOUS, lower=0, **kwds):

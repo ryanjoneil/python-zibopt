@@ -1,13 +1,14 @@
-from zibopt import scip, _branch, _conflict, _heur, _sepa
+from zibopt import scip, _branch, _conflict, _heur, _nodesel, _sepa
 import unittest
 
 class SettingsTest(unittest.TestCase):
     def testBadBranchingRule(self):
         '''Test loading a setting that doesn't exist'''
         solver = scip.solver()
-        self.assertRaises(scip.BranchingRuleError, _branch.branching_rule, solver, 'NOSUCHRULE')
-        self.assertRaises(scip.ConflictError, _conflict.conflict, solver, 'NOSUCHRULE')
+        self.assertRaises(scip.BranchingError, _branch.branching_rule, solver, 'NOSUCHRULE')
+        self.assertRaises(scip.ConflictError,  _conflict.conflict, solver, 'NOSUCHRULE')
         self.assertRaises(scip.HeuristicError, _heur.heuristic, solver, 'NOSUCHRULE')
+        self.assertRaises(scip.SelectorError,  _nodesel.selector, solver, 'NOSUCHRULE')
         self.assertRaises(scip.SeparatorError, _sepa.separator, solver, 'NOSUCHRULE')
 
     def testLoadSettingsNames(self):
@@ -16,6 +17,7 @@ class SettingsTest(unittest.TestCase):
         self.assertTrue(solver.branching_names())
         self.assertTrue(solver.conflict_names())
         self.assertTrue(solver.heuristic_names())
+        self.assertTrue(solver.selector_names())
         self.assertTrue(solver.separator_names())
 
     def testBranchRuleSettings(self):
@@ -31,11 +33,11 @@ class SettingsTest(unittest.TestCase):
         '''Sets branching maxdepth, maxbounddist to values < -1'''
         solver = scip.solver()
         for b in solver.branching.values():
-            self.assertRaises(scip.BranchingRuleError, setattr, b, 'maxbounddist', -5)
-            self.assertRaises(scip.BranchingRuleError, setattr, b, 'maxdepth', -2)
-            self.assertRaises(scip.BranchingRuleError, setattr, b, 'maxbounddist', 'foo')
-            self.assertRaises(scip.BranchingRuleError, setattr, b, 'maxdepth', 'foo')
-            self.assertRaises(scip.BranchingRuleError, setattr, b, 'priority', 'foo')
+            self.assertRaises(scip.BranchingError, setattr, b, 'maxbounddist', -5)
+            self.assertRaises(scip.BranchingError, setattr, b, 'maxdepth', -2)
+            self.assertRaises(scip.BranchingError, setattr, b, 'maxbounddist', 'foo')
+            self.assertRaises(scip.BranchingError, setattr, b, 'maxdepth', 'foo')
+            self.assertRaises(scip.BranchingError, setattr, b, 'priority', 'foo')
 
     def testConflictHandlerSettings(self):
         '''Sets conflict handler priority'''
@@ -70,6 +72,22 @@ class SettingsTest(unittest.TestCase):
             self.assertRaises(scip.HeuristicError, setattr, h, 'freqofs', 'foo')
             self.assertRaises(scip.HeuristicError, setattr, h, 'frequency', 'foo')
             self.assertRaises(scip.HeuristicError, setattr, h, 'priority', 'foo')
+
+    def testNodeSelectorSettings(self):
+        '''Sets node selector priorities'''
+        solver = scip.solver()
+        for n in solver.selectors.values():
+            for a in ('memsavepriority', 'stdpriority'):
+                x = getattr(n, a)
+                setattr(n, a, x + 1)
+                self.assertEqual(x+1, getattr(n, a))
+
+    def testNodeSelectorInvalidSettings(self):
+        '''Sets invalid node selector priorities'''
+        solver = scip.solver()
+        for n in solver.selectors.values():
+            self.assertRaises(scip.SelectorError, setattr, n, 'memsavepriority', 'foo')
+            self.assertRaises(scip.SelectorError, setattr, n, 'stdpriority', 'foo')
 
     def testSeparatorSettings(self):
         '''Sets separator priority'''
