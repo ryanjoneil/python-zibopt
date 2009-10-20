@@ -26,13 +26,17 @@ setup (
     test_suite  = 'tests',
 
     ext_modules  = [
+        # Modules to setup and solve optimization problems
         zibopt_ext('_scip', 'scipmodule.c'),
         zibopt_ext('_vars', 'varsmodule.c'),
         zibopt_ext('_cons', 'consmodule.c'),
         zibopt_ext('_soln', 'solnmodule.c'),
-        zibopt_ext('_branch', 'branchmodule.c'),
+        
+        # Modules to adjust priority and settings
+        zibopt_ext('_branch',   'branchmodule.c'),
         zibopt_ext('_conflict', 'conflictmodule.c'),
-        zibopt_ext('_sepa', 'separatormodule.c'),
+        zibopt_ext('_heur',     'heuristicmodule.c'),
+        zibopt_ext('_sepa',     'separatormodule.c'),
     ],
 
     keywords    = 'mixed binary integer programming optimization zib zibopt',

@@ -1,4 +1,4 @@
-from zibopt import scip, _branch, _conflict, _sepa
+from zibopt import scip, _branch, _conflict, _heur, _sepa
 import unittest
 
 class SettingsTest(unittest.TestCase):
@@ -7,40 +7,25 @@ class SettingsTest(unittest.TestCase):
         solver = scip.solver()
         self.assertRaises(scip.BranchingRuleError, _branch.branching_rule, solver, 'NOSUCHRULE')
         self.assertRaises(scip.ConflictError, _conflict.conflict, solver, 'NOSUCHRULE')
+        self.assertRaises(scip.HeuristicError, _heur.heuristic, solver, 'NOSUCHRULE')
         self.assertRaises(scip.SeparatorError, _sepa.separator, solver, 'NOSUCHRULE')
-    
+
     def testLoadSettingsNames(self):
         '''Loads names of branching rules, separators, etc'''
         solver = scip.solver()
         self.assertTrue(solver.branching_names())
         self.assertTrue(solver.conflict_names())
+        self.assertTrue(solver.heuristic_names())
         self.assertTrue(solver.separator_names())
-        
-    def testRuleSettings(self):
+
+    def testBranchRuleSettings(self):
         '''Sets branching priority, maxdepth, etc'''
         solver = scip.solver()
         for b in solver.branching.values():
-            x = b.maxbounddist
-            b.maxbounddist = x + 1
-            self.assertEqual(x+1, b.maxbounddist)
-
-            x = b.maxdepth
-            b.maxdepth = x + 1
-            self.assertEqual(x+1, b.maxdepth)
-        
-            x = b.priority
-            b.priority = x + 1
-            self.assertEqual(x+1, b.priority)            
-
-        for c in solver.conflict.values():
-            x = c.priority
-            c.priority = x + 1
-            self.assertEqual(x+1, c.priority)
-
-        for s in solver.separators.values():
-            x = s.priority
-            s.priority = x + 1
-            self.assertEqual(x+1, s.priority)
+            for a in ('maxbounddist', 'maxdepth', 'priority'):
+                x = getattr(b, a)
+                setattr(b, a, x + 1)
+                self.assertEqual(x+1, getattr(b, a))
 
     def testBranchingRuleInvalidSettings(self):
         '''Sets branching maxdepth, maxbounddist to values < -1'''
@@ -52,12 +37,54 @@ class SettingsTest(unittest.TestCase):
             self.assertRaises(scip.BranchingRuleError, setattr, b, 'maxdepth', 'foo')
             self.assertRaises(scip.BranchingRuleError, setattr, b, 'priority', 'foo')
 
+    def testConflictHandlerSettings(self):
+        '''Sets conflict handler priority'''
+        solver = scip.solver()
+        for c in solver.conflict.values():
+            x = c.priority
+            c.priority = x + 1
+            self.assertEqual(x+1, c.priority)
+
+    def testConflictHandlerInvalidSettings(self):
+        '''Sets invalid conflict handler priority'''
+        solver = scip.solver()
         for c in solver.conflict.values():
             self.assertRaises(scip.ConflictError, setattr, c, 'priority', 'foo')
 
+    def testHeuristicSettings(self):
+        '''Sets heuristic priority, maxdepth, etc'''
+        solver = scip.solver()
+        for h in solver.heuristics.values():
+            for a in ('freqofs', 'frequency', 'maxdepth', 'priority'):
+                x = getattr(h, a)
+                setattr(h, a, x + 1)
+                self.assertEqual(x+1, getattr(h, a))
+
+    def testHeuristicInvalidSettings(self):
+        '''Sets invalid heuristic priority'''
+        solver = scip.solver()
+        for h in solver.heuristics.values():
+            self.assertRaises(scip.HeuristicError, setattr, h, 'freqofs', -1)
+            self.assertRaises(scip.HeuristicError, setattr, h, 'frequency', -2)
+            self.assertRaises(scip.HeuristicError, setattr, h, 'maxdepth', -2)
+            self.assertRaises(scip.HeuristicError, setattr, h, 'freqofs', 'foo')
+            self.assertRaises(scip.HeuristicError, setattr, h, 'frequency', 'foo')
+            self.assertRaises(scip.HeuristicError, setattr, h, 'priority', 'foo')
+
+    def testSeparatorSettings(self):
+        '''Sets separator priority'''
+        solver = scip.solver()
+        for s in solver.separators.values():
+            x = s.priority
+            s.priority = x + 1
+            self.assertEqual(x+1, s.priority)
+
+    def testSeparatorInvalidSettings(self):
+        '''Sets invalid separator priority'''
+        solver = scip.solver()
         for s in solver.separators.values():
             self.assertRaises(scip.SeparatorError, setattr, s, 'priority', 'foo')
-            
+
 if __name__ == '__main__':
     unittest.main()
 

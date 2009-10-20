@@ -13,6 +13,7 @@
 #include <scip/sol.h>
 #include <scip/struct_branch.h>
 #include <scip/struct_conflict.h>
+#include <scip/struct_heur.h>
 #include <scip/struct_sepa.h>
 #include <scip/struct_stat.h>
 #include "structmember.h"
@@ -69,6 +70,12 @@ typedef struct {
     SCIP_CONFLICTHDLR *conflict;
     SCIP *scip;
 } conflict;
+
+typedef struct {
+    PyObject_HEAD
+    SCIP_HEUR *heur;
+    SCIP *scip;
+} heuristic;
 
 typedef struct {
     PyObject_HEAD

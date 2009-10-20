@@ -241,6 +241,28 @@ static PyObject *conflict_names(solver *self) {
     return rules;
 }
 
+static PyObject *heuristic_names(solver *self) {
+    // Pre-allocate a list of the appropriate size
+    int i;
+    PyObject *rules = PyList_New(self->scip->set->nheurs);
+    if (!rules) {
+        PyErr_SetString(error, "ran out of memory");
+        return NULL;
+    }
+    
+    // Pull out names of heuristics in SCIP
+    for (i = 0; i < self->scip->set->nheurs; i++) {
+        PyObject *r = PyString_FromString(self->scip->set->heurs[i]->name);
+        if (!r) {
+            Py_DECREF(rules);
+            return NULL;
+        }
+        PyList_SET_ITEM(rules, i, r);
+    }
+    
+    return rules;
+}
+
 static PyObject *separator_names(solver *self) {
     // Pre-allocate a list of the appropriate size
     int i;
@@ -272,6 +294,7 @@ static PyMethodDef solver_methods[] = {
     {"restart",  (PyCFunction) solver_restart,  METH_NOARGS,   "restart the solver"},
     {"branching_names", (PyCFunction) branching_names, METH_NOARGS, "returns a list of branching rule names"},
     {"conflict_names",  (PyCFunction) conflict_names,  METH_NOARGS, "returns a list of conflict handler names"},
+    {"heuristic_names", (PyCFunction) heuristic_names, METH_NOARGS, "returns a list of heuristic names"},
     {"separator_names", (PyCFunction) separator_names, METH_NOARGS, "returns a list of separator names"},
     {NULL} /* Sentinel */
 };

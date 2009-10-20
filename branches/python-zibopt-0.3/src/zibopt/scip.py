@@ -54,7 +54,8 @@ Translated to python-zibopt this becomes:
 '''
 
 from zibopt import (
-    _scip, _vars, _cons, _soln, _branch, _sepa, _conflict
+    _scip, _vars, _cons, _soln, 
+    _branch, _conflict, _heur, _sepa
 )
 
 __all__ = 'solver',
@@ -72,6 +73,7 @@ VariableError      = _vars.error
 # Solver Settings Errors
 BranchingRuleError = _branch.error
 ConflictError      = _conflict.error
+HeuristicError     = _heur.error
 SeparatorError     = _sepa.error
 
 class solution(_soln.solution):
@@ -127,11 +129,19 @@ class solver(_scip.solver):
         
     Priority can be set on separators, conflict handlers, and ... as well:
     
-        solver.separators['clique'].priority = 10000
         solver.conflict['logicor'].priority = 10000
+        solver.separators['clique'].priority = 10000
+
+    Heuristcs allow priority, max depth, frequency, and frequency offset
+    (freqofs) to be set:
     
-    See the SCIP documentation for available branching rules, other settings, 
-    and what they do.
+        solver.heuristics['octane'].priority = 500
+        solver.heuristics['octane'].maxdepth = -1
+        solver.heuristics['octane'].frequency = 10
+        solver.heuristics['octane'].freqofs = 5
+
+    See the SCIP documentation for available branching rules, heuristics, 
+    any other settings, and what they do.
     '''
     def __init__(self, *args, **kwds):
         '''
@@ -144,6 +154,7 @@ class solver(_scip.solver):
 
         self.branching  = dict((n, _branch.branching_rule(self, n)) for n in self.branching_names())
         self.conflict   = dict((n, _conflict.conflict(self, n)) for n in self.conflict_names())
+        self.heuristics = dict((n, _heur.heuristic(self, n)) for n in self.heuristic_names())
         self.separators = dict((n, _sepa.separator(self, n)) for n in self.separator_names())
 
     def variable(self, coefficient=0, vartype=CONTINUOUS, lower=0, **kwds):
