@@ -1,6 +1,18 @@
 #summary python-zibopt change log
 #labels Featured
 
+= 0.3 dev =
+ * Issue 3 and Issue 4: added access for more solver settings
+{{{
+solver.heuristics['octane'].priority = 500
+solver.heuristics['octane'].maxdepth = -1
+solver.heuristics['octane'].frequency = 10
+solver.heuristics['octane'].freqofs = 5
+
+solver.selectors['bfs'].stdpriority = 1000
+solver.selectors['bfs'].memsavepriority = 10
+}}}
+
 = 0.2 dev =
   * Issue 1: Added gap and absgap keywords to maximize/minimize to stop when gap is within a certain limit
 {{{ 
