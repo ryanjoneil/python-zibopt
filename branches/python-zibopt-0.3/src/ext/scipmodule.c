@@ -197,6 +197,10 @@ static PyObject *solver_restart(solver *self) {
     Py_RETURN_NONE;
 }
 
+// TODO: rewrite all of these using a function that takes:
+//       1. the number of elements
+//       2. the type of the elements
+//       3. a pointer to the elements
 static PyObject *branching_names(solver *self) {
     // Pre-allocate a list of the appropriate size
     int i;
@@ -263,6 +267,28 @@ static PyObject *heuristic_names(solver *self) {
     return rules;
 }
 
+static PyObject *presolver_names(solver *self) {
+    // Pre-allocate a list of the appropriate size
+    int i;
+    PyObject *rules = PyList_New(self->scip->set->npresols);
+    if (!rules) {
+        PyErr_SetString(error, "ran out of memory");
+        return NULL;
+    }
+    
+    // Pull out names of presolvers in SCIP
+    for (i = 0; i < self->scip->set->npresols; i++) {
+        PyObject *r = PyString_FromString(self->scip->set->presols[i]->name);
+        if (!r) {
+            Py_DECREF(rules);
+            return NULL;
+        }
+        PyList_SET_ITEM(rules, i, r);
+    }
+    
+    return rules;
+}
+
 static PyObject *selector_names(solver *self) {
     // Pre-allocate a list of the appropriate size
     int i;
@@ -317,6 +343,7 @@ static PyMethodDef solver_methods[] = {
     {"branching_names", (PyCFunction) branching_names, METH_NOARGS, "returns a list of branching rule names"},
     {"conflict_names",  (PyCFunction) conflict_names,  METH_NOARGS, "returns a list of conflict handler names"},
     {"heuristic_names", (PyCFunction) heuristic_names, METH_NOARGS, "returns a list of heuristic names"},
+    {"presolver_names", (PyCFunction) presolver_names, METH_NOARGS, "returns a list of presolver names"},
     {"selector_names",  (PyCFunction) selector_names,  METH_NOARGS, "returns a list of node selector names"},
     {"separator_names", (PyCFunction) separator_names, METH_NOARGS, "returns a list of separator names"},
     {NULL} /* Sentinel */

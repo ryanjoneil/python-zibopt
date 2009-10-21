@@ -15,6 +15,7 @@
 #include <scip/struct_conflict.h>
 #include <scip/struct_heur.h>
 #include <scip/struct_nodesel.h>
+#include <scip/struct_presol.h>
 #include <scip/struct_sepa.h>
 #include <scip/struct_stat.h>
 #include "structmember.h"
@@ -60,6 +61,7 @@ typedef struct {
     bool inforunbd;
 } solution;
 
+// TODO: use a macro to create these
 typedef struct {
     PyObject_HEAD
     SCIP_BRANCHRULE *branch;
@@ -77,6 +79,12 @@ typedef struct {
     SCIP_HEUR *heur;
     SCIP *scip;
 } heuristic;
+
+typedef struct {
+    PyObject_HEAD
+    SCIP_PRESOL *presol;
+    SCIP *scip;
+} presolver;
 
 typedef struct {
     PyObject_HEAD

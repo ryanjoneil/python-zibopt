@@ -73,6 +73,20 @@ class SettingsTest(unittest.TestCase):
             self.assertRaises(scip.HeuristicError, setattr, h, 'frequency', 'foo')
             self.assertRaises(scip.HeuristicError, setattr, h, 'priority', 'foo')
 
+    def testPresolverSettings(self):
+        '''Sets presolver priority'''
+        solver = scip.solver()
+        for p in solver.presolvers.values():
+            x = p.priority
+            p.priority = x + 1
+            self.assertEqual(x+1, p.priority)
+
+    def testPresolverInvalidSettings(self):
+        '''Sets invalid presolver priority'''
+        solver = scip.solver()
+        for p in solver.presolvers.values():
+            self.assertRaises(scip.PresolverError, setattr, p, 'priority', 'foo')
+
     def testNodeSelectorSettings(self):
         '''Sets node selector priorities'''
         solver = scip.solver()
