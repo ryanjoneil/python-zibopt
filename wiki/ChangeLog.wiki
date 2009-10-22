@@ -11,6 +11,9 @@ solver.heuristics['octane'].freqofs = 5
 
 solver.selectors['bfs'].stdpriority = 1000
 solver.selectors['bfs'].memsavepriority = 10
+
+solver.propagators['pseudoobj'].priority = 1000
+solver.propagators['pseudoobj'].frequency = 10
 }}}
 
 = 0.2 dev =
