@@ -62,48 +62,20 @@ typedef struct {
     bool inforunbd;
 } solution;
 
-// TODO: use a macro to create these
-typedef struct {
-    PyObject_HEAD
-    SCIP_BRANCHRULE *branch;
-    SCIP *scip;
-} branching_rule;
-
-typedef struct {
-    PyObject_HEAD
-    SCIP_CONFLICTHDLR *conflict;
-    SCIP *scip;
-} conflict;
-
-typedef struct {
-    PyObject_HEAD
-    SCIP_HEUR *heur;
-    SCIP *scip;
-} heuristic;
-
-typedef struct {
-    PyObject_HEAD
-    SCIP_PRESOL *presol;
-    SCIP *scip;
-} presolver;
-
-typedef struct {
-    PyObject_HEAD
-    SCIP_PROP *prop;
-    SCIP *scip;
-} propagator;
-
-typedef struct {
-    PyObject_HEAD
-    SCIP_NODESEL *nodesel;
-    SCIP *scip;
-} selector;
-
-typedef struct {
-    PyObject_HEAD
-    SCIP_SEPA *sepa;
-    SCIP *scip;
-} separator;
+#define PY_SCIP_SETTINGS_TYPE(setting_type, setting_field, struct_name) \
+typedef struct { \
+    PyObject_HEAD \
+    setting_type *setting_field; \
+    SCIP *scip; \
+} struct_name;
+  
+PY_SCIP_SETTINGS_TYPE(SCIP_BRANCHRULE, branch, branching_rule);
+PY_SCIP_SETTINGS_TYPE(SCIP_CONFLICTHDLR, conflict, conflict);
+PY_SCIP_SETTINGS_TYPE(SCIP_HEUR, heur, heuristic);
+PY_SCIP_SETTINGS_TYPE(SCIP_PRESOL, presol, presolver);
+PY_SCIP_SETTINGS_TYPE(SCIP_PROP, prop, propagator);
+PY_SCIP_SETTINGS_TYPE(SCIP_NODESEL, nodesel, selector);
+PY_SCIP_SETTINGS_TYPE(SCIP_SEPA, sepa, separator);
 
 static void PyScipSetError(PyObject *error_type, SCIP_RETCODE err_code) {
     switch(err_code) {
