@@ -289,6 +289,28 @@ static PyObject *presolver_names(solver *self) {
     return rules;
 }
 
+static PyObject *propagator_names(solver *self) {
+    // Pre-allocate a list of the appropriate size
+    int i;
+    PyObject *rules = PyList_New(self->scip->set->nprops);
+    if (!rules) {
+        PyErr_SetString(error, "ran out of memory");
+        return NULL;
+    }
+    
+    // Pull out names of propagators in SCIP
+    for (i = 0; i < self->scip->set->nprops; i++) {
+        PyObject *r = PyString_FromString(self->scip->set->props[i]->name);
+        if (!r) {
+            Py_DECREF(rules);
+            return NULL;
+        }
+        PyList_SET_ITEM(rules, i, r);
+    }
+    
+    return rules;
+}
+
 static PyObject *selector_names(solver *self) {
     // Pre-allocate a list of the appropriate size
     int i;
@@ -340,12 +362,13 @@ static PyMethodDef solver_methods[] = {
     {"maximize", (PyCFunction) solver_maximize, METH_KEYWORDS, "maximize the objective value"},
     {"minimize", (PyCFunction) solver_minimize, METH_KEYWORDS, "minimize the objective value"},
     {"restart",  (PyCFunction) solver_restart,  METH_NOARGS,   "restart the solver"},
-    {"branching_names", (PyCFunction) branching_names, METH_NOARGS, "returns a list of branching rule names"},
-    {"conflict_names",  (PyCFunction) conflict_names,  METH_NOARGS, "returns a list of conflict handler names"},
-    {"heuristic_names", (PyCFunction) heuristic_names, METH_NOARGS, "returns a list of heuristic names"},
-    {"presolver_names", (PyCFunction) presolver_names, METH_NOARGS, "returns a list of presolver names"},
-    {"selector_names",  (PyCFunction) selector_names,  METH_NOARGS, "returns a list of node selector names"},
-    {"separator_names", (PyCFunction) separator_names, METH_NOARGS, "returns a list of separator names"},
+    {"branching_names",  (PyCFunction) branching_names,  METH_NOARGS, "returns a list of branching rule names"},
+    {"conflict_names",   (PyCFunction) conflict_names,   METH_NOARGS, "returns a list of conflict handler names"},
+    {"heuristic_names",  (PyCFunction) heuristic_names,  METH_NOARGS, "returns a list of heuristic names"},
+    {"presolver_names",  (PyCFunction) presolver_names,  METH_NOARGS, "returns a list of presolver names"},
+    {"propagator_names", (PyCFunction) propagator_names, METH_NOARGS, "returns a list of propagator names"},
+    {"selector_names",   (PyCFunction) selector_names,   METH_NOARGS, "returns a list of node selector names"},
+    {"separator_names",  (PyCFunction) separator_names,  METH_NOARGS, "returns a list of separator names"},
     {NULL} /* Sentinel */
 };
 

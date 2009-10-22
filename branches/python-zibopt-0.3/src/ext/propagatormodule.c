@@ -5,11 +5,11 @@ static PyObject *error;
 /*****************************************************************************/
 /* PYTHON TYPE METHODS                                                       */
 /*****************************************************************************/
-static int presolver_init(presolver *self, PyObject *args, PyObject *kwds) {
+static int propagator_init(propagator *self, PyObject *args, PyObject *kwds) {
     PyObject *s;   // solver Python object
     solver *solv;  // solver C object
-    char *name;    // name of presolver
-    SCIP_PRESOL *r;
+    char *name;    // name of propagator
+    SCIP_PROP *r;
     
     if (!PyArg_ParseTuple(args, "Os", &s, &name))
         return -1;
@@ -23,44 +23,63 @@ static int presolver_init(presolver *self, PyObject *args, PyObject *kwds) {
     solv = (solver *) s;
     self->scip = solv->scip;
     
-    // Load the presolver from SCIP
-    r = SCIPfindPresol(self->scip, name);
+    // Load the propagator from SCIP
+    r = SCIPfindProp(self->scip, name);
     if (r == NULL) {
-        PyErr_SetString(error, "unrecognized presolver");
+        PyErr_SetString(error, "unrecognized propagator");
         return -1;
     }
-    self->presol = r;
+    self->prop = r;
 
     return 0;
 }
 
-static void presolver_dealloc(presolver *self) {
+static void propagator_dealloc(propagator *self) {
     self->ob_type->tp_free((PyObject *) self);
 }
 
-static PyObject* presolver_getattr(presolver *self, PyObject *attr_name) {
+static PyObject* propagator_getattr(propagator *self, PyObject *attr_name) {
     char *attr;
 
     // Check and make sure we have a string as attribute name...
     if (PyString_Check(attr_name)) {
         attr = PyString_AsString(attr_name);
 
+        if (!strcmp(attr, "frequency"))
+            return Py_BuildValue("i", SCIPpropGetFreq(self->prop));
         if (!strcmp(attr, "priority"))
-            return Py_BuildValue("i", SCIPpresolGetPriority(self->presol));
+            return Py_BuildValue("i", SCIPpropGetPriority(self->prop));
     }
     return PyObject_GenericGetAttr(self, attr_name);
 }
 
-static int presolver_setattr(presolver *self, PyObject *attr_name, PyObject *value) {
+static int propagator_setattr(propagator *self, PyObject *attr_name, PyObject *value) {
     char *attr;
+    int i;
     
     // Check and make sure we have a string as attribute name...
     if (PyString_Check(attr_name)) {
         attr = PyString_AsString(attr_name);
 
+        // TODO: it would be good to make these generic too...
+        if (!strcmp(attr, "frequency")) {
+            if (PyInt_Check(value)) {
+                i = PyInt_AsLong(value);
+                if (i < -1) {
+                    PyErr_SetString(error, "frequency must be >= -1");
+                    return -1;
+                }
+                self->prop->freq = i;
+                return 0;
+            } else {
+                PyErr_SetString(error, "invalid value for frequency");
+                return -1;
+            }
+        }
+
         if (!strcmp(attr, "priority")) {
             if (PyInt_Check(value)) {
-                SCIPpresolSetPriority(self->presol, self->scip->set, PyInt_AsLong(value));
+                SCIPpropSetPriority(self->prop, self->scip->set, PyInt_AsLong(value));
                 return 0;
             } else {
                 PyErr_SetString(error, "invalid value for priority");
@@ -78,21 +97,21 @@ static int presolver_setattr(presolver *self, PyObject *attr_name, PyObject *val
 /*****************************************************************************/
 /* MODULE INITIALIZATION                                                     */
 /*****************************************************************************/
-static PyMemberDef presolver_members[] = {
+static PyMemberDef propagator_members[] = {
     {NULL} /* Sentinel */
 };
 
-static PyMethodDef presolver_methods[] = {
+static PyMethodDef propagator_methods[] = {
     {NULL} /* Sentinel */
 };
 
-static PyTypeObject presolver_type = {
+static PyTypeObject propagator_type = {
     PyObject_HEAD_INIT(NULL)
     0,                             /* ob_size */
-    "_presol.presolver",             /* tp_name */
-    sizeof(presolver),             /* tp_basicsize */
+    "_prop.propagator",             /* tp_name */
+    sizeof(propagator),             /* tp_basicsize */
     0,                             /* tp_itemsize */
-    (destructor) presolver_dealloc, /* tp_dealloc */
+    (destructor) propagator_dealloc, /* tp_dealloc */
     0,                             /* tp_print */
     0,                             /* tp_getattr */
     0,                             /* tp_setattr */
@@ -104,26 +123,26 @@ static PyTypeObject presolver_type = {
     0,                             /* tp_hash */
     0,                             /* tp_call */
     0,                             /* tp_str */
-    presolver_getattr,             /* tp_getattro */
-    presolver_setattr,             /* tp_setattro */
+    propagator_getattr,             /* tp_getattro */
+    propagator_setattr,             /* tp_setattro */
     0,                             /* tp_as_buffer */
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /* tp_flags */
-    "SCIP presolvers",             /* tp_doc */
+    "SCIP propagators",             /* tp_doc */
     0,                             /* tp_traverse */
     0,                             /* tp_clear */
     0,                             /* tp_richcompare */
     0,                             /* tp_weaklistoffset */
     0,                             /* tp_iter */
     0,                             /* tp_iternext */
-    presolver_methods,             /* tp_methods */
-    presolver_members,             /* tp_members */
+    propagator_methods,             /* tp_methods */
+    propagator_members,             /* tp_members */
     0,                             /* tp_getset */
     0,                             /* tp_base */
     0,                             /* tp_dict */
     0,                             /* tp_descr_get */
     0,                             /* tp_descr_set */
     0,                             /* tp_dictoffset */
-    (initproc) presolver_init,     /* tp_init */
+    (initproc) propagator_init,     /* tp_init */
     0,                             /* tp_alloc */
     0 ,                            /* tp_new */
 };
@@ -131,20 +150,20 @@ static PyTypeObject presolver_type = {
 #ifndef PyMODINIT_FUNC    /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
-PyMODINIT_FUNC init_presol(void) {
+PyMODINIT_FUNC init_prop(void) {
     PyObject* m;
 
-    presolver_type.tp_new = PyType_GenericNew;
-    if (PyType_Ready(& presolver_type) < 0)
+    propagator_type.tp_new = PyType_GenericNew;
+    if (PyType_Ready(& propagator_type) < 0)
         return;
 
-    m = Py_InitModule3("_presol", presolver_methods, "SCIP Presolver");
+    m = Py_InitModule3("_prop", propagator_methods, "SCIP Propagator");
 
-    Py_INCREF(& presolver_type);
-    PyModule_AddObject(m, "presolver", (PyObject *) &presolver_type);
+    Py_INCREF(& propagator_type);
+    PyModule_AddObject(m, "propagator", (PyObject *) &propagator_type);
     
     // Initialize exception type
-    error = PyErr_NewException("_presol.error", NULL, NULL);
+    error = PyErr_NewException("_prop.error", NULL, NULL);
     Py_INCREF(error);
     PyModule_AddObject(m, "error", error);   
 }

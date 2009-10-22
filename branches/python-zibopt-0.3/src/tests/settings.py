@@ -1,4 +1,4 @@
-from zibopt import scip, _branch, _conflict, _heur, _nodesel, _sepa
+from zibopt import scip, _branch, _conflict, _heur, _nodesel, _presol, _prop, _sepa
 import unittest
 
 class SettingsTest(unittest.TestCase):
@@ -6,9 +6,11 @@ class SettingsTest(unittest.TestCase):
         '''Test loading a setting that doesn't exist'''
         solver = scip.solver()
         self.assertRaises(scip.BranchingError, _branch.branching_rule, solver, 'NOSUCHRULE')
-        self.assertRaises(scip.ConflictError,  _conflict.conflict, solver, 'NOSUCHRULE')
+        self.assertRaises(scip.ConflictError, _conflict.conflict, solver, 'NOSUCHRULE')
         self.assertRaises(scip.HeuristicError, _heur.heuristic, solver, 'NOSUCHRULE')
-        self.assertRaises(scip.SelectorError,  _nodesel.selector, solver, 'NOSUCHRULE')
+        self.assertRaises(scip.PresolverError, _presol.presolver, solver, 'NOSUCHRULE')
+        self.assertRaises(scip.PropagatorError, _prop.propagator, solver, 'NOSUCHRULE')
+        self.assertRaises(scip.SelectorError, _nodesel.selector, solver, 'NOSUCHRULE')
         self.assertRaises(scip.SeparatorError, _sepa.separator, solver, 'NOSUCHRULE')
 
     def testLoadSettingsNames(self):
@@ -17,6 +19,8 @@ class SettingsTest(unittest.TestCase):
         self.assertTrue(solver.branching_names())
         self.assertTrue(solver.conflict_names())
         self.assertTrue(solver.heuristic_names())
+        self.assertTrue(solver.presolver_names())
+        self.assertTrue(solver.propagator_names())
         self.assertTrue(solver.selector_names())
         self.assertTrue(solver.separator_names())
 
@@ -86,6 +90,23 @@ class SettingsTest(unittest.TestCase):
         solver = scip.solver()
         for p in solver.presolvers.values():
             self.assertRaises(scip.PresolverError, setattr, p, 'priority', 'foo')
+
+    def testPropagatorSettings(self):
+        '''Sets propagator priority and frequency'''
+        solver = scip.solver()
+        for p in solver.propagators.values():
+            for a in ('frequency', 'priority'):
+                x = getattr(p, a)
+                setattr(p, a, x + 1)
+                self.assertEqual(x+1, getattr(p, a))
+
+    def testPropagatorInvalidSettings(self):
+        '''Sets invalid propagator priority & frequency'''
+        solver = scip.solver()
+        for p in solver.propagators.values():
+            self.assertRaises(scip.PropagatorError, setattr, p, 'frequency', -2)
+            self.assertRaises(scip.PropagatorError, setattr, p, 'frequency', 'foo')
+            self.assertRaises(scip.PropagatorError, setattr, p, 'priority', 'foo')
 
     def testNodeSelectorSettings(self):
         '''Sets node selector priorities'''

@@ -55,7 +55,7 @@ Translated to python-zibopt this becomes:
 
 from zibopt import (
     _scip, _vars, _cons, _soln, 
-    _branch, _conflict, _heur, _nodesel, _presol, _sepa
+    _branch, _conflict, _heur, _nodesel, _presol, _prop, _sepa
 )
 
 __all__ = 'solver',
@@ -71,12 +71,13 @@ SolverError     = _scip.error
 VariableError   = _vars.error
 
 # Solver Settings Errors
-BranchingError = _branch.error
-ConflictError  = _conflict.error
-HeuristicError = _heur.error
-PresolverError = _presol.error
-SelectorError  = _nodesel.error
-SeparatorError = _sepa.error
+BranchingError  = _branch.error
+ConflictError   = _conflict.error
+HeuristicError  = _heur.error
+PresolverError  = _presol.error
+PropagatorError = _prop.error
+SelectorError   = _nodesel.error
+SeparatorError  = _sepa.error
 
 class solution(_soln.solution):
     '''
@@ -141,6 +142,11 @@ class solver(_scip.solver):
     
         solver.selectors['bfs'].stdpriority = 1000
         solver.selectors['bfs'].memsavepriority = 10
+    
+    Propagotors allow priority and frequencey to be set:
+    
+        solver.propagators['pseudoobj'].priority = 1000
+        solver.propagators['pseudoobj'].frequency = 10
         
     Priority can also be set on separators, conflict handlers, and presolvers:
     
@@ -160,12 +166,13 @@ class solver(_scip.solver):
         self.variables = set()
         self.constraints = set()
 
-        self.branching  = dict((n, _branch.branching_rule(self, n)) for n in self.branching_names())
-        self.conflict   = dict((n, _conflict.conflict(self, n)) for n in self.conflict_names())
-        self.heuristics = dict((n, _heur.heuristic(self, n)) for n in self.heuristic_names())
-        self.presolvers = dict((n, _presol.presolver(self, n)) for n in self.presolver_names())
-        self.selectors  = dict((n, _nodesel.selector(self, n)) for n in self.selector_names())
-        self.separators = dict((n, _sepa.separator(self, n)) for n in self.separator_names())
+        self.branching   = dict((n, _branch.branching_rule(self, n)) for n in self.branching_names())
+        self.conflict    = dict((n, _conflict.conflict(self, n)) for n in self.conflict_names())
+        self.heuristics  = dict((n, _heur.heuristic(self, n)) for n in self.heuristic_names())
+        self.presolvers  = dict((n, _presol.presolver(self, n)) for n in self.presolver_names())
+        self.propagators = dict((n, _prop.propagator(self, n)) for n in self.propagator_names())
+        self.selectors   = dict((n, _nodesel.selector(self, n)) for n in self.selector_names())
+        self.separators  = dict((n, _sepa.separator(self, n)) for n in self.separator_names())
 
     def variable(self, coefficient=0, vartype=CONTINUOUS, lower=0, **kwds):
         '''

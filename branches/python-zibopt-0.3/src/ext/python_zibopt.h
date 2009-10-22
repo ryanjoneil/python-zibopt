@@ -16,6 +16,7 @@
 #include <scip/struct_heur.h>
 #include <scip/struct_nodesel.h>
 #include <scip/struct_presol.h>
+#include <scip/struct_prop.h>
 #include <scip/struct_sepa.h>
 #include <scip/struct_stat.h>
 #include "structmember.h"
@@ -85,6 +86,12 @@ typedef struct {
     SCIP_PRESOL *presol;
     SCIP *scip;
 } presolver;
+
+typedef struct {
+    PyObject_HEAD
+    SCIP_PROP *prop;
+    SCIP *scip;
+} propagator;
 
 typedef struct {
     PyObject_HEAD
