@@ -60,7 +60,6 @@ static int propagator_setattr(propagator *self, PyObject *attr_name, PyObject *v
     // Check and make sure we have a string as attribute name...
     if (PyString_Check(attr_name)) {
         attr = PyString_AsString(attr_name);
-
         PY_SCIP_SET_INT_MIN("frequency", self->prop->freq, -1); 
         PY_SCIP_SET_PRIORITY(SCIPpropSetPriority, self->prop);
     }

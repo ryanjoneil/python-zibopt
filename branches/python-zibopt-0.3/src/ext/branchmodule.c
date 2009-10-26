@@ -63,7 +63,6 @@ static int branching_rule_setattr(branching_rule *self, PyObject *attr_name, PyO
     // Check and make sure we have a string as attribute name...
     if (PyString_Check(attr_name)) {
         attr = PyString_AsString(attr_name);
-
         PY_SCIP_SET_DBL_MIN("maxbounddist", self->branch->maxbounddist, -1); 
         PY_SCIP_SET_INT_MIN("maxdepth", self->branch->maxdepth, -1); 
         PY_SCIP_SET_PRIORITY(SCIPbranchruleSetPriority, self->branch);

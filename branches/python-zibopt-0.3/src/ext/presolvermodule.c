@@ -57,16 +57,7 @@ static int presolver_setattr(presolver *self, PyObject *attr_name, PyObject *val
     // Check and make sure we have a string as attribute name...
     if (PyString_Check(attr_name)) {
         attr = PyString_AsString(attr_name);
-
-        if (!strcmp(attr, "priority")) {
-            if (PyInt_Check(value)) {
-                SCIPpresolSetPriority(self->presol, self->scip->set, PyInt_AsLong(value));
-                return 0;
-            } else {
-                PyErr_SetString(error, "invalid value for priority");
-                return -1;
-            }
-        }
+        PY_SCIP_SET_PRIORITY(SCIPpresolSetPriority, self->presol);
     }
     return PyObject_GenericSetAttr(self, attr_name, value);
 }

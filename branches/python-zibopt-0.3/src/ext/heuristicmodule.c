@@ -64,61 +64,10 @@ static int heuristic_setattr(heuristic *self, PyObject *attr_name, PyObject *val
     // Check and make sure we have a string as attribute name...
     if (PyString_Check(attr_name)) {
         attr = PyString_AsString(attr_name);
-
-        if (!strcmp(attr, "freqofs")) {
-            if (PyInt_Check(value)) {
-                i = PyInt_AsLong(value);
-                if (i < 0) {
-                    PyErr_SetString(error, "frequency offset must be >= 0");
-                    return -1;
-                }
-                self->heur->freqofs = i;
-                return 0;
-            } else {
-                PyErr_SetString(error, "invalid value for frequency offset");
-                return -1;
-            }
-        }
-
-        if (!strcmp(attr, "frequency")) {
-            if (PyInt_Check(value)) {
-                i = PyInt_AsLong(value);
-                if (i < -1) {
-                    PyErr_SetString(error, "frequency must be >= -1");
-                    return -1;
-                }
-                self->heur->freq = i;
-                return 0;
-            } else {
-                PyErr_SetString(error, "invalid value for frequency");
-                return -1;
-            }
-        }
-        
-        if (!strcmp(attr, "maxdepth")) {
-            if (PyInt_Check(value)) {
-                i = PyInt_AsLong(value);
-                if (i < -1) {
-                    PyErr_SetString(error, "maxdepth must be >= -1");
-                    return -1;
-                }
-                self->heur->maxdepth = i;
-                return 0;
-            } else {
-                PyErr_SetString(error, "invalid value for maxdepth");
-                return -1;
-            }
-        }
-        
-        if (!strcmp(attr, "priority")) {
-            if (PyInt_Check(value)) {
-                SCIPheurSetPriority(self->heur, self->scip->set, PyInt_AsLong(value));
-                return 0;
-            } else {
-                PyErr_SetString(error, "invalid value for priority");
-                return -1;
-            }
-        }
+        PY_SCIP_SET_INT_MIN("freqofs", self->heur->freqofs, 0); 
+        PY_SCIP_SET_INT_MIN("frequency", self->heur->freq, -1); 
+        PY_SCIP_SET_INT_MIN("maxdepth", self->heur->maxdepth, -1); 
+        PY_SCIP_SET_PRIORITY(SCIPheurSetPriority, self->heur);
     }
     return PyObject_GenericSetAttr(self, attr_name, value);
 }
