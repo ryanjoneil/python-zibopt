@@ -98,5 +98,63 @@ static PyObject *function_name(solver *self) { \
     return rules; \
 }
 
+// SCIP settings modules: generic attribute setting functions
+#define PY_SCIP_SET_DBL_MIN(name, attribute, minimum) \
+        if (!strcmp(attr, name)) { \
+            if (PyFloat_Check(value) || PyInt_Check(value)) { \
+                if (PyFloat_Check(value) || PyInt_Check(value)) \
+                    d = (double) PyInt_AsLong(value); \
+                else \
+                    d = PyFloat_AsDouble(value); \
+                if (d < minimum) { \
+                    PyErr_SetString(error, "SCIP setting value too low"); \
+                    return -1; \
+                } \
+                attribute = d; \
+                return 0; \
+            } else { \
+                PyErr_SetString(error, "invalid value for SCIP setting"); \
+                return -1; \
+            } \
+        }
+
+#define PY_SCIP_SET_INT_MIN(name, attribute, minimum) \
+        if (!strcmp(attr, name)) { \
+            if (PyInt_Check(value)) { \
+                i = PyInt_AsLong(value); \
+                if (i < minimum) { \
+                    PyErr_SetString(error, "SCIP setting value too low"); \
+                    return -1; \
+                } \
+                attribute = i; \
+                return 0; \
+            } else { \
+                PyErr_SetString(error, "invalid value for SCIP setting"); \
+                return -1; \
+            } \
+        }
+
+#define PY_SCIP_SET_INT(name, attribute) \
+        if (!strcmp(attr, name)) { \
+            if (PyInt_Check(value)) { \
+                attribute = PyInt_AsLong(value); \
+                return 0; \
+            } else { \
+                PyErr_SetString(error, "invalid value for SCIP setting"); \
+                return -1; \
+            } \
+        }
+
+#define PY_SCIP_SET_PRIORITY(function, object) \
+        if (!strcmp(attr, "priority")) { \
+            if (PyInt_Check(value)) { \
+                function(object, self->scip->set, PyInt_AsLong(value)); \
+                return 0; \
+            } else { \
+                PyErr_SetString(error, "invalid value for priority"); \
+                return -1; \
+            } \
+        }
+
 #endif
 

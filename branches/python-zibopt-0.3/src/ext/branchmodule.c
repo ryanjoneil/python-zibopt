@@ -64,52 +64,9 @@ static int branching_rule_setattr(branching_rule *self, PyObject *attr_name, PyO
     if (PyString_Check(attr_name)) {
         attr = PyString_AsString(attr_name);
 
-        if (!strcmp(attr, "maxbounddist")) {
-            if (PyFloat_Check(value) || PyInt_Check(value)) {
-                // Convert to float if we have an int
-                if (PyInt_Check(value))
-                    d = (double) PyInt_AsLong(value);
-                else
-                    d = PyFloat_AsDouble(value);
-
-                // Make sure we have an acceptable value
-                if (d < -1) {
-                    PyErr_SetString(error, "maxbounddist must be >= -1");
-                    return -1;
-                }
-                
-                SCIPbranchruleSetMaxbounddist(self->branch, d);
-                return 0;
-            } else {
-                PyErr_SetString(error, "invalid value for maxbounddist");
-                return -1;
-            }
-        }
-        
-        if (!strcmp(attr, "maxdepth")) {
-            if (PyInt_Check(value)) {
-                i = PyInt_AsLong(value);
-                if (i < -1) {
-                    PyErr_SetString(error, "maxdepth must be >= -1");
-                    return -1;
-                }
-                SCIPbranchruleSetMaxdepth(self->branch, i);
-                return 0;
-            } else {
-                PyErr_SetString(error, "invalid value for maxdepth");
-                return -1;
-            }
-        }
-        
-        if (!strcmp(attr, "priority")) {
-            if (PyInt_Check(value)) {
-                SCIPbranchruleSetPriority(self->branch, self->scip->set, PyInt_AsLong(value));
-                return 0;
-            } else {
-                PyErr_SetString(error, "invalid value for priority");
-                return -1;
-            }
-        }
+        PY_SCIP_SET_DBL_MIN("maxbounddist", self->branch->maxbounddist, -1); 
+        PY_SCIP_SET_INT_MIN("maxdepth", self->branch->maxdepth, -1); 
+        PY_SCIP_SET_PRIORITY(SCIPbranchruleSetPriority, self->branch);
     }
     return PyObject_GenericSetAttr(self, attr_name, value);
 }
