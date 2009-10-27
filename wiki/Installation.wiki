@@ -93,7 +93,7 @@ object?   -> Details about 'object'. ?object also works, ?? prints more.
 In [1]: import zibopt
 
 In [2]: zibopt.__version__
-Out[2]: '0.1'
+Out[2]: '0.3'
 
 In [3]: zibopt.scip.solver()
 Out[3]: <zibopt.scip.solver object at 0x88272fc>
