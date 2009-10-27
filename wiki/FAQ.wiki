@@ -2,6 +2,13 @@
 #labels Featured
 
 = Frequently Asked Questions =
+==== Q: How do I change priorities of branching rules and set other settings? ====
+
+A: On instantiation, a SCIP solver is preloaded with dictionaries containing available branching rules, conflict handlers, heuristics, presolvers, heuristics, presolvers, domain propagators, and node selectors.  You can set properties such as priority and frequency on these directly.  See the module docs for complete examples:
+{{{
+solver.branching['fullstrong'].priority = 10
+}}}
+
 ==== Q: What's IMPLINT? ====
 
 A: This type is for variables that are supposed to take on integer values, but will do so implicitly since they only appear in constraints with other integer variables.  This can save SCIP some time.
