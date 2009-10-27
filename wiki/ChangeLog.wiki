@@ -2,18 +2,30 @@
 #labels Featured
 
 = 0.3 dev =
- * Issue 3 and Issue 4: added access for more solver settings
+  * Issue 3 and Issue 4: added access for more solver settings
 {{{
+solver.branching['inference'].priority = 10000
+solver.branching['inference'].maxdepth = -1
+solver.branching['inference'].maxbounddist = -1
+
+solver.conflict['logicor'].priority = 10000
+
 solver.heuristics['octane'].priority = 500
 solver.heuristics['octane'].maxdepth = -1
 solver.heuristics['octane'].frequency = 10
 solver.heuristics['octane'].freqofs = 5
 
+solver.presolvers['dualfix'].priority = 10000
+
+solver.propagators['pseudoobj'].priority = 1000s.branching.keys
+solver.propagators['pseudoobj'].frequency = 10
+
 solver.selectors['bfs'].stdpriority = 1000
 solver.selectors['bfs'].memsavepriority = 10
 
-solver.propagators['pseudoobj'].priority = 1000
-solver.propagators['pseudoobj'].frequency = 10
+solver.separators['clique'].priority = 10000
+solver.separators['clique'].maxbounddist = -1
+solver.separators['clique'].frequency = 10000
 }}}
 
 = 0.2 dev =
