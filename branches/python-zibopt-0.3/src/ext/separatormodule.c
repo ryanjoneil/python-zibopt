@@ -45,6 +45,10 @@ static PyObject* separator_getattr(separator *self, PyObject *attr_name) {
     if (PyString_Check(attr_name)) {
         attr = PyString_AsString(attr_name);
 
+        if (!strcmp(attr, "frequency"))
+            return Py_BuildValue("i", SCIPsepaGetFreq(self->sepa));
+        if (!strcmp(attr, "maxbounddist"))
+            return Py_BuildValue("d", SCIPsepaGetMaxbounddist(self->sepa));
         if (!strcmp(attr, "priority"))
             return Py_BuildValue("i", SCIPsepaGetPriority(self->sepa));
     }
@@ -53,10 +57,14 @@ static PyObject* separator_getattr(separator *self, PyObject *attr_name) {
 
 static int separator_setattr(separator *self, PyObject *attr_name, PyObject *value) {
     char *attr;
+    int i;
+    double d;
     
     // Check and make sure we have a string as attribute name...
     if (PyString_Check(attr_name)) {
         attr = PyString_AsString(attr_name);
+        PY_SCIP_SET_INT_MIN("frequency", self->sepa->freq, -1); 
+        PY_SCIP_SET_DBL_MIN("maxbounddist", self->sepa->maxbounddist, -1); 
         PY_SCIP_SET_PRIORITY(SCIPsepaSetPriority, self->sepa);
     }
     return PyObject_GenericSetAttr(self, attr_name, value);

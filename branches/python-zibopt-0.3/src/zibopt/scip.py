@@ -148,10 +148,15 @@ class solver(_scip.solver):
         solver.propagators['pseudoobj'].priority = 1000
         solver.propagators['pseudoobj'].frequency = 10
         
-    Priority can also be set on separators, conflict handlers, and presolvers:
+    Separators have settinsg for priority, maxbounddist, and frequency:
+
+        solver.separators['clique'].priority = 10000
+        solver.separators['clique'].maxbounddist = -1
+        solver.separators['clique'].frequency = 10000
+    
+    Priority can also be set on conflict handlers and presolvers:
     
         solver.conflict['logicor'].priority = 10000
-        solver.separators['clique'].priority = 10000
         solver.presolvers['dualfix'].priority = 10000
 
     See the SCIP documentation for available branching rules, heuristics, 

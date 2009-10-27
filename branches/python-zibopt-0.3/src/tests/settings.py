@@ -128,14 +128,19 @@ class SettingsTest(unittest.TestCase):
         '''Sets separator priority'''
         solver = scip.solver()
         for s in solver.separators.values():
-            x = s.priority
-            s.priority = x + 1
-            self.assertEqual(x+1, s.priority)
+            for a in ('frequency', 'maxbounddist', 'priority'):
+                x = getattr(s, a)
+                setattr(s, a, x + 1)
+                self.assertEqual(x+1, getattr(s, a))
 
     def testSeparatorInvalidSettings(self):
         '''Sets invalid separator priority'''
         solver = scip.solver()
         for s in solver.separators.values():
+            self.assertRaises(scip.SeparatorError, setattr, s, 'maxbounddist', -5)
+            self.assertRaises(scip.SeparatorError, setattr, s, 'frequency', -2)
+            self.assertRaises(scip.SeparatorError, setattr, s, 'maxbounddist', 'foo')
+            self.assertRaises(scip.SeparatorError, setattr, s, 'frequency', 'foo')
             self.assertRaises(scip.SeparatorError, setattr, s, 'priority', 'foo')
 
 if __name__ == '__main__':
