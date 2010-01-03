@@ -79,6 +79,120 @@ PropagatorError = _prop.error
 SelectorError   = _nodesel.error
 SeparatorError  = _sepa.error
 
+class variable(_vars.variable):
+    class __cons_builder(object):
+        # Constraint builder class: used for allowing mathematical operations 
+        # in generating constraints
+        def __init__(self, var):
+            if isinstance(var, type(self)):
+                self.coefficients = var.coefficients.copy()
+                self.lower = var.lower # bounds
+                self.upper = var.upper
+            else:
+                self.coefficients = {var: 1.0}
+                self.lower = self.upper = None
+        
+        def __add__(self, other):
+            # Filter out 0s from sum(...)
+            if other is 0:
+                return self
+        
+            # If we are adding a variable to a __cons_builder, convert it
+            if not isinstance(other, type(self)):
+                other = type(self)(other)
+            
+            # Add the coefficients of the other __cons_builder to our dict
+            for var, coeff in other.coefficients.iteritems():
+                try:
+                    self.coefficients[var] += coeff
+                except KeyError:
+                    self.coefficients[var] = coeff
+                    
+            return self
+
+        def __sub__(self, other):
+            # This looks a lot like __add__
+            if other is 0:
+                return self
+
+            if not isinstance(other, type(self)):
+                other = type(self)(other)
+            
+            for var, coeff in other.coefficients.iteritems():
+                try:
+                    self.coefficients[var] -= coeff
+                except KeyError:
+                    self.coefficients[var] = -coeff
+                    
+            return self
+
+        def __mul__(self, other):
+            # other should always be a number
+            other = float(other)
+            for var, coeff in self.coefficients.iteritems():
+                self.coefficients[var] *= other
+            return self
+
+        def __div__(self, other):
+            return self * (1.0 / other)
+
+        # Provide methods for reflected versions of the same operators
+        __radd__ = __add__
+        __rsub__ = __sub__
+        __rmul__ = __mul__
+        __rdiv__ = __div__
+ 
+        __truediv__  = __div__
+        __rtruediv__ = __div__
+        
+        # This part allows <=, >= and == to populate lower/upper bounds
+        def __le__(self, other):
+            self.upper = float(other)
+            return self            
+
+        def __ge__(self, other):
+            self.lower = float(other)
+            return self            
+
+        def __eq__(self, other):
+            self.lower = self.upper = float(other)
+            return self            
+        
+    # Convert variables into __cons_builder instances on all math ops
+    def __add__(self, other):
+        # Using sum(...) will put a 0 in the list
+        if other is 0:
+            return self.__cons_builder(self)
+        return self.__cons_builder(self) + self.__cons_builder(other)
+
+    def __sub__(self, other):
+        if other is 0:
+            return self.__cons_builder(self)
+        return self.__cons_builder(self) - self.__cons_builder(other)
+
+    def __mul__(self, other):
+        return self.__cons_builder(self) * other
+
+    def __div__(self, other):
+        return self.__cons_builder(self) / other
+
+    __radd__ = __add__
+    __rsub__ = __sub__
+    __rmul__ = __mul__
+    
+    __truediv__  = __div__
+    __rtruediv__ = __div__
+
+    # Addition of bounds
+    def __le__(self, other):
+        self.__cons_builder(self) <= other
+
+    def __ge__(self, other):
+        self.__cons_builder(self) >= other
+
+    def __eq__(self, other):
+        self.__cons_builder(self) == other
+
 class solution(_soln.solution):
     '''
     A solution to a mixed integer program from SCIP.  Solution values can
@@ -179,15 +293,36 @@ class solver(_scip.solver):
         self.selectors   = dict((n, _nodesel.selector(self, n)) for n in self.selector_names())
         self.separators  = dict((n, _sepa.separator(self, n)) for n in self.separator_names())
 
-    def variable(self, coefficient=0, vartype=CONTINUOUS, lower=0, **kwds):
+    def __iadd__(self, cons_info):
+        '''
+        Allows a constraint to be added using a more natural algebraic format:
+        
+            solver += 1 <= x1 + 2*x2 <= 2
+        '''
+        self.constraint(
+            lower = cons_info.lower,
+            upper = cons_info.upper,
+            coefficients = cons_info.coefficients
+        )
+        return self
+
+    def _update_coefficients(self, obj_info):
+        '''Allows use of algebraic format for objective functions'''
+        # Clear out old coefficients.  This may require freeing the transformed
+        # problem, thus the restart.
+        self.restart()
+        for v in self.variables:
+            v._set_coefficient(obj_info.coefficients.get(v, 0))
+
+    def variable(self, vartype=CONTINUOUS, coefficient=0, lower=0, **kwds):
         '''
         Adds a variable to the SCIP solver and returns it
-        @param coefficient=0:      objective function coefficient
         @param vartype=CONTINUOUS: type of variable
+        @param coefficient=0:      objective function coefficient
         @param lower=0:            lower bound on variable
         @param upper=+inf:         upper bound on variable
         '''
-        v = _vars.variable(self, coefficient, vartype, lower, **kwds)
+        v = variable(self, vartype, coefficient, lower, **kwds)
         self.variables.add(v)
         return v
 
@@ -205,6 +340,12 @@ class solver(_scip.solver):
         except KeyError:
             coefficients = {} 
 
+        # If upper or lower bounds are None, remove them to be polite
+        if 'lower' in kwds and kwds['lower'] is None:
+            del kwds['lower']
+        if 'upper' in kwds and kwds['upper'] is None:
+            del kwds['upper']
+            
         cons = _cons.constraint(self, **kwds)
         for k, v in coefficients.iteritems():
             cons.variable(k, v)
@@ -215,24 +356,34 @@ class solver(_scip.solver):
     def maximize(self, *args, **kwds):
         '''
         Maximizes the objective function and returns a solution instance.
+        @param objective:   optional algebraic representation of objective
+                            function.  Can also use variable coefficients.
         @param solution={}: optional primal solution dictionary.  Raises a
                             SolverError if the solution is infeasible.
         @param time=inf:    optional time limit for solving
         @param gap=0.0:     optional gap percentage to stop solving (ex: 0.05)
         @param absgap=0.0:  optional primal/dual gap to stop solving
         '''
+        if 'objective' in kwds:
+            self._update_coefficients(kwds['objective'])
+            del kwds['objective']
         super(solver, self).maximize(*args, **kwds)
         return solution(self)
         
     def minimize(self, *args, **kwds):
         '''
         Minimizes the objective function and returns a solution instance.
+        @param objective:   optional algebraic representation of objective
+                            function.  Can also use variable coefficients.
         @param solution={}: optional primal solution dictionary.  Raises a
                             SolverError if the solution is infeasible.
         @param time=inf:    optional time limit for solving
         @param gap=0.0:     optional gap percentage to stop solving (ex: 0.05)
         @param absgap=0.0:  optional primal/dual gap to stop solving
         '''
+        if 'objective' in kwds:
+            self._update_coefficients(kwds['objective'])
+            del kwds['objective']
         super(solver, self).minimize(*args, **kwds)
         return solution(self)
         

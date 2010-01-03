@@ -24,7 +24,7 @@
 #include "python_zibopt_util.h"
 
 #define SOLVER_TYPE_NAME "solver"
-#define VARIABLE_TYPE_NAME "_vars.variable"
+#define VARIABLE_TYPE_NAME "variable"
 
 // These are from set.c in SCIP code
 #define SCIP_DEFAULT_LIMIT_TIME 1e+20 /**< maximal time in seconds to run */

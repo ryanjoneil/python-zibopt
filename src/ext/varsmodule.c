@@ -6,7 +6,7 @@ static PyObject *error;
 /* PYTHON TYPE METHODS                                                       */
 /*****************************************************************************/
 static int variable_init(variable *self, PyObject *args, PyObject *kwds) {
-    static char *argnames[] = {"solver", "coefficient", "vartype", "lower", "upper", NULL};
+    static char *argnames[] = {"solver", "vartype", "coefficient", "lower", "upper", NULL};
     PyObject *s;     // solver Python object
     solver *solv;    // solver C object
     double c;        // coefficient
@@ -16,7 +16,7 @@ static int variable_init(variable *self, PyObject *args, PyObject *kwds) {
     t = SCIP_VARTYPE_CONTINUOUS;
 
     // SCIPinfinity requires self->scip, so we have to parse the args twice
-    if (!PyArg_ParseTuple(args, "Od|idd", &s, &c, &t, &lhs, &rhs))
+    if (!PyArg_ParseTuple(args, "O|iddd", &s, &t, &c, &lhs, &rhs))
         return -1;
 
     // Check solver type in the best way we seem to have available
@@ -27,12 +27,14 @@ static int variable_init(variable *self, PyObject *args, PyObject *kwds) {
     
     solv = (solver *) s;
     self->scip = solv->scip;
-    
+
+    // Defaults
+    t = SCIP_VARTYPE_CONTINUOUS;
     lhs = -SCIPinfinity(self->scip);
     rhs = SCIPinfinity(self->scip);
 
     // This time is just to get the upper and lower bounds out    
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "Od|idd", argnames, &s, &c, &t, &lhs, &rhs))
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|iddd", argnames, &s, &t, &c, &lhs, &rhs))
         return -1;
 
     // Variable type
@@ -60,7 +62,7 @@ static int variable_init(variable *self, PyObject *args, PyObject *kwds) {
         SCIPcreateVar(self->scip, &self->variable, NULL, lhs, rhs, c, t,
             TRUE, FALSE, NULL, NULL, NULL, NULL)
     );
-            
+
     PY_SCIP_CALL(error, -1, SCIPaddVar(self->scip, self->variable));
 
     // Put new variable at head of linked list
@@ -75,9 +77,35 @@ static void variable_dealloc(variable *self) {
 }
 
 /*****************************************************************************/
+/* ADDITONAL METHODS                                                         */
+/*****************************************************************************/
+static PyObject *variable_set_coefficient(variable *self, PyObject *arg) {
+    if (PyFloat_Check(arg) || PyInt_Check(arg)) {
+        // SCIPvarChgObj Arguments:
+        // var          variable to change
+        // blkmem       block memory
+        // set          global SCIP settings
+        // primal       primal data
+        // lp           current LP data
+        // eventqueue 	event queue
+        // newobj       new objective value for variable 
+        PY_SCIP_CALL(error, NULL, 
+            SCIPvarChgObj(self->variable, NULL, self->scip->set, NULL, NULL, NULL, 
+                (SCIP_Real) PyFloat_AsDouble(arg))
+        );
+        Py_RETURN_NONE;
+        
+    } else {
+        PyErr_SetString(error, "invalid objective coefficient");
+        return NULL;
+    }
+}
+
+/*****************************************************************************/
 /* MODULE INITIALIZATION                                                     */
 /*****************************************************************************/
 static PyMethodDef variable_methods[] = {
+    {"_set_coefficient", (PyCFunction) variable_set_coefficient, METH_O, "updates objective coefficient for a variable"},
     {NULL} /* Sentinel */
 };
 
