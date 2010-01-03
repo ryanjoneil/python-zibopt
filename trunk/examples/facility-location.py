@@ -48,24 +48,17 @@ if __name__ == '__main__':
 
     # Supply each customer from one facility
     for c in CUSTOMERS:
-        solver.constraint(
-            lower = 1,
-            upper = 1,
-            coefficients = dict((x[f][c], 1) for f in FACILITIES)
-        )
+        solver += sum(x[f][c] for f in FACILITIES) == 1
 
     # Using a facility incurs its fixed cost
     for f, c in product(FACILITIES, CUSTOMERS):
         # x[f][c] <= y[f]    <=>    x[f][c] - y[f] <= 0
-        solver.constraint(upper=0, coefficients={x[f][c]:1, y[f]:-1})
+        solver += x[f][c] - y[f] <= 0
 
     # Facilities cannot exceed their capacities
     for f in FACILITIES:
-        solver.constraint(
-            upper = CAPACITY[f],
-            coefficients = dict((x[f][c], DEMAND[c]) for c in CUSTOMERS)
-        )
-
+        solver += sum(DEMAND[c] * x[f][c] for c in CUSTOMERS) <= CAPACITY[f]
+        
     # All variables have 0 coefficients, so we can either max or min            
     solution = solver.minimize()
     if solution:

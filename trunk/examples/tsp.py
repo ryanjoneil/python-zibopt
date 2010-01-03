@@ -65,20 +65,16 @@ if __name__ == '__main__':
     
     arcs = []
     for d in distance:
-        arcs.append([solver.variable(c, scip.BINARY) for c in d])
+        arcs.append([solver.variable(scip.BINARY, coefficient=c) for c in d])
     
     # Assignment Problem Relaxation: each node connects to two other nodes
     l = len(distance)
     for i in range(l):
-        solver.constraint(
-            lower = 2,
-            upper = 2,
-            coefficients = dict((x,1) for x in 
-                [arcs[i][j] for j in range(i)] + 
-                [arcs[j][i] for j in range(i+1,l)]
-            )
-        )
-    
+        solver += sum(
+            [arcs[i][j] for j in range(i)] + 
+            [arcs[j][i] for j in range(i+1,l)]
+        ) == 2
+
     # Our formulation thus far only represents a combinatorial relaxation of
     # STSP as an assignment problem.  It is possible the solver will return
     # disconnected subtours.
@@ -101,18 +97,13 @@ if __name__ == '__main__':
                 # adding a knapsack constraint setting the sum of the arcs
                 # in each subtour to their cardinality minus one.
                 for subtour in subtours:
-                    coefficients = {}
                     # n points in a tour have n arcs, not n-1.  That means we
                     # have to include the arc going back to the start node.
-                    for pair in zip(subtour, subtour[1:]+[subtour[0]]):
+                    pairs = zip(subtour, subtour[1:]+[subtour[0]])
+                    solver += sum(
                         # Column # is the higher of the two
-                        i, j = max(*pair), min(*pair)
-                        coefficients[arcs[i][j]] = 1
-                    
-                    solver.constraint(
-                        upper = len(coefficients) - 1,
-                        coefficients = coefficients
-                    )
+                        arcs[max(*pair)][min(*pair)] for pair in pairs
+                    ) <= len(pairs) - 1
 
             elif solution.optimal:
                 # Optimal tour found.  Stop.

@@ -39,37 +39,19 @@ if __name__ == '__main__':
      
     # Each cell takes on exactly one value
     for i, j in product(rows, cols):
-        solver.constraint( 
-            lower = 1,
-            upper = 1,
-            coefficients = dict((x[i][j][k], 1) for k in vals)
-        )
+        solver += sum(x[i][j][k] for k in vals) == 1
 
     # Each value occurs in each row once
     for i, k in product(rows, vals):
-        solver.constraint(
-            lower = 1,
-            upper = 1,
-            coefficients = dict((x[i][j][k], 1) for j in cols)
-        )
+        solver += sum(x[i][j][k] for j in cols) == 1
 
     # Each value occurs in each column once
     for j, k in product(cols, vals):
-        solver.constraint( 
-            lower = 1,
-            upper = 1,
-            coefficients = dict((x[i][j][k], 1) for i in rows)
-        )
+        solver += sum(x[i][j][k] for i in rows) == 1
 
     # Each 3x3 group has all unique values    
     for m, n, k in product(groups, groups, vals):
-        solver.constraint(
-            lower = 1,
-            upper = 1,
-            coefficients = dict(
-                (x[i][j][k], 1) for i, j in product(range(m,m+3), range(n,n+3))
-            )
-        )    
+        solver += sum(x[i][j][k] for i, j in product(range(m,m+3), range(n,n+3))) == 1
 
     # All variables have 0 coefficients, so we can either max or min            
     solution = solver.maximize()

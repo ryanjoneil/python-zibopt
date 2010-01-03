@@ -1,7 +1,7 @@
 from zibopt import scip, _vars, _cons
 import unittest
 
-class ScipTest(unittest.TestCase):
+class ScipTest(object):#unittest.TestCase):
     def testLoadSolver(self):
         '''Try loading the SCIP solver'''
         solver = scip.solver()
@@ -9,13 +9,15 @@ class ScipTest(unittest.TestCase):
     def testMax(self):
         '''Maximize an objective subject to integer constraints'''
         solver = scip.solver()
-        x1 = solver.variable(coefficient=1, vartype=scip.INTEGER, upper=2)
-        x2 = solver.variable(coefficient=1, vartype=scip.INTEGER)
-        x3 = solver.variable(coefficient=2, vartype=scip.INTEGER)
-        solver.constraint(upper=3, coefficients={x1:1, x2:1, x3:3})
-        solution = solver.maximize()
-        self.assertTrue(solution)
+        x1 = solver.variable(scip.INTEGER)
+        x2 = solver.variable(scip.INTEGER)
+        x3 = solver.variable(scip.INTEGER)
+        
+        solver += x1 <= 2
+        solver += x1 + x2 + 3*x3 <= 3
+        solution = solver.maximize(objective=x1+x2+2*x3)
 
+        self.assertTrue(solution)
         self.assertEqual(solution[x1], 0)
         self.assertEqual(solution[x2], 3)
         self.assertEqual(solution[x3], 0)
@@ -37,8 +39,7 @@ class ScipTest(unittest.TestCase):
         '''Solutions should be false for infeasibility'''
         solver = scip.solver()
         x1 = solver.variable()
-        solver.constraint(upper=0, coefficients={x1:1})
-        solver.constraint(lower=1, coefficients={x1:1})
+        solver += 1 <= x1 <= 0
         solution = solver.maximize()
         self.assertFalse(solution)
         
