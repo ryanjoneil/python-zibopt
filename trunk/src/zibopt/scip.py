@@ -80,7 +80,7 @@ SelectorError   = _nodesel.error
 SeparatorError  = _sepa.error
 
 class variable(_vars.variable):
-    class __cons_builder(object):
+    class _cons_builder(object):
         # Constraint builder class: used for allowing mathematical operations 
         # in generating constraints
         def __init__(self, var):
@@ -97,11 +97,11 @@ class variable(_vars.variable):
             if other is 0:
                 return self
         
-            # If we are adding a variable to a __cons_builder, convert it
+            # If we are adding a variable to a _cons_builder, convert it
             if not isinstance(other, type(self)):
                 other = type(self)(other)
             
-            # Add the coefficients of the other __cons_builder to our dict
+            # Add the coefficients of the other _cons_builder to our dict
             for var, coeff in other.coefficients.iteritems():
                 try:
                     self.coefficients[var] += coeff
@@ -157,24 +157,29 @@ class variable(_vars.variable):
         def __eq__(self, other):
             self.lower = self.upper = float(other)
             return self            
-        
-    # Convert variables into __cons_builder instances on all math ops
+    
+    def __init__(self, *args, **kwds):
+        # Stores a few things locally that will not interfer with the C version
+        super(variable, self).__init__(*args, **kwds)
+        self._upper_bnd = self._lower_bnd = None # see __iadd__ below
+    
+    # Convert variables into _cons_builder instances on all math ops
     def __add__(self, other):
         # Using sum(...) will put a 0 in the list
         if other is 0:
-            return self.__cons_builder(self)
-        return self.__cons_builder(self) + self.__cons_builder(other)
+            return self._cons_builder(self)
+        return self._cons_builder(self) + self._cons_builder(other)
 
     def __sub__(self, other):
         if other is 0:
-            return self.__cons_builder(self)
-        return self.__cons_builder(self) - self.__cons_builder(other)
+            return self._cons_builder(self)
+        return self._cons_builder(self) - self._cons_builder(other)
 
     def __mul__(self, other):
-        return self.__cons_builder(self) * other
+        return self._cons_builder(self) * other
 
     def __div__(self, other):
-        return self.__cons_builder(self) / other
+        return self._cons_builder(self) / other
 
     __radd__ = __add__
     __rsub__ = __sub__
@@ -183,15 +188,20 @@ class variable(_vars.variable):
     __truediv__  = __div__
     __rtruediv__ = __div__
 
-    # Addition of bounds
+    # Single-variable bounds
     def __le__(self, other):
-        self.__cons_builder(self) <= other
-
+        # In cases with one variable, like:  0 <= x <= 1
+        # What we want to do is try adjusting its bounds.
+        self._upper_bnd = float(other)
+        return self
+        
     def __ge__(self, other):
-        self.__cons_builder(self) >= other
+        self._lower_bnd = float(other)
+        return self
 
     def __eq__(self, other):
-        self.__cons_builder(self) == other
+        self._lower_bnd = self._upper_bnd = float(other)
+        return self
 
 class solution(_soln.solution):
     '''
@@ -299,11 +309,26 @@ class solver(_scip.solver):
         
             solver += 1 <= x1 + 2*x2 <= 2
         '''
-        self.constraint(
-            lower = cons_info.lower,
-            upper = cons_info.upper,
-            coefficients = cons_info.coefficients
-        )
+        # This is some annoying magic here.  If we write a constraint like:
+        #     0 <= x <= 1
+        # Python will apply the variable instance to each inequality, losing
+        # anything done along the way.  Thus we have to store the new upper and
+        # lower bounds on the variable.  Sad.  This gets rid of them after the 
+        # boundes are updated.
+        if isinstance(cons_info, variable):
+            if cons_info._upper_bnd is not None:
+                cons_info.tighten_upper_bound(cons_info._upper_bnd)
+            if cons_info._lower_bnd is not None:
+                cons_info.tighten_lower_bound(cons_info._lower_bnd)
+            cons_info._upper_bnd = cons_info._lower_bnd = None
+            
+        else:
+            self.constraint(
+                lower = cons_info.lower,
+                upper = cons_info.upper,
+                coefficients = cons_info.coefficients
+            )
+            
         return self
 
     def _update_coefficients(self, obj_info):
@@ -312,7 +337,7 @@ class solver(_scip.solver):
         # problem, thus the restart.
         self.restart()
         for v in self.variables:
-            v._set_coefficient(obj_info.coefficients.get(v, 0))
+            v.set_coefficient(obj_info.coefficients.get(v, 0))
 
     def variable(self, vartype=CONTINUOUS, coefficient=0, lower=0, **kwds):
         '''

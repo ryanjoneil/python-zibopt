@@ -45,14 +45,6 @@ class ConstraintTest(unittest.TestCase):
         self.assertEqual((2 >= x1 + x2 >= 2).upper, 2.0)
         self.assertEqual((2 >= x1 + x2 >= 2).lower, 2.0)
 
-# TODO:    
-#    def testDirectComparisons(self):
-#        '''Inequalities involving <=, >=, or == with vars on both sides'''
-#        solver = scip.solver()
-#        x1 = solver.variable(scip.INTEGER)
-#        x2 = solver.variable(scip.INTEGER)
-#        print x1 == x2
-
     def testConstraintsAndObjective(self):
         '''Linear combinations of variables create constraints or objectives'''
         solver = scip.solver()
