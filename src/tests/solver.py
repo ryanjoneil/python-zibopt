@@ -1,7 +1,7 @@
 from zibopt import scip, _vars, _cons
 import unittest
 
-class ScipTest(object):#unittest.TestCase):
+class ScipTest(unittest.TestCase):
     def testLoadSolver(self):
         '''Try loading the SCIP solver'''
         solver = scip.solver()

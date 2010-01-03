@@ -63,6 +63,9 @@ static int variable_init(variable *self, PyObject *args, PyObject *kwds) {
             TRUE, FALSE, NULL, NULL, NULL, NULL)
     );
 
+    self->lower = lhs;
+    self->upper = rhs;
+
     PY_SCIP_CALL(error, -1, SCIPaddVar(self->scip, self->variable));
 
     // Put new variable at head of linked list
@@ -101,11 +104,49 @@ static PyObject *variable_set_coefficient(variable *self, PyObject *arg) {
     }
 }
 
+static PyObject *variable_tighten_lower(variable *self, PyObject *arg) {
+    double d;
+    if (PyFloat_Check(arg) || PyInt_Check(arg)) {
+        d = PyFloat_AsDouble(arg);
+        if (d > self->lower) {
+            PY_SCIP_CALL(error, NULL, 
+                SCIPchgVarLb(self->scip, self->variable, (SCIP_Real) d)
+            );
+            self->lower = d;
+        }
+        Py_RETURN_NONE;
+        
+    } else {
+        PyErr_SetString(error, "invalid lower bound");
+        return NULL;
+    }
+}
+
+static PyObject *variable_tighten_upper(variable *self, PyObject *arg) {
+    double d;
+    if (PyFloat_Check(arg) || PyInt_Check(arg)) {
+        d = PyFloat_AsDouble(arg);
+        if (d < self->upper) {
+            PY_SCIP_CALL(error, NULL, 
+                SCIPchgVarUb(self->scip, self->variable, (SCIP_Real) d)
+            );
+            self->upper = d;
+        }
+        Py_RETURN_NONE;
+        
+    } else {
+        PyErr_SetString(error, "invalid upper bound");
+        return NULL;
+    }
+}
+
 /*****************************************************************************/
 /* MODULE INITIALIZATION                                                     */
 /*****************************************************************************/
 static PyMethodDef variable_methods[] = {
-    {"_set_coefficient", (PyCFunction) variable_set_coefficient, METH_O, "updates objective coefficient for a variable"},
+    {"set_coefficient", (PyCFunction) variable_set_coefficient, METH_O, "updates objective coefficient for a variable"},
+    {"tighten_lower_bound", (PyCFunction) variable_tighten_lower, METH_O, "adds a possible tightened lower bound for a variable"},
+    {"tighten_upper_bound", (PyCFunction) variable_tighten_upper, METH_O, "adds a possible tightened upper bound for a variable"},
     {NULL} /* Sentinel */
 };
 

@@ -36,6 +36,8 @@ typedef struct {
     PyObject_HEAD
     SCIP_VAR *variable;
     SCIP *scip;
+    double upper;          // upper bound
+    double lower;          // lower bound
     struct variable *next; // linked list next
 } variable;
 
