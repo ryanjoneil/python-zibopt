@@ -68,3 +68,14 @@ The former example overrides += on the solver to add constraints.  Valid constra
 
 The syntax plays nicely with the Python builtin sum(...), example of which can be found in the source.
 
+==== Q: How can I set branching priority on a variable? ====
+
+A: Variables expose a priority attribute.  You can access that directly or pass in the priority to solver.variable(...):
+{{{
+x = solver.variable(scip.INTEGER)
+x.priority = 1000
+
+x = solver.variable(scip.INTEGER, priority=10)
+}}}
+This uses SCIP's SCIPvarChgBranchPriority function for setting the branching priority.  Depending on the state of the solver, what may actually get set is the priority on a transformed or aggregate variable, meaning that the value of x.priority may not look how you expect.
+

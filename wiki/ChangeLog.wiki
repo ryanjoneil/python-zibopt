@@ -1,8 +1,25 @@
 #summary python-zibopt change log
 #labels Featured
 
+= 0.4 dev =
+  * Issue 8: Added an algebraic interface for constraints and objective functions
+{{{
+solver += 4 <= 3*x1 + 4*x2 + 2*x3 <= 10
+solver.maximize(objective=x1 + 2*x2 + x3)
+
+solver += sum(x[i] for i in rows) == 1
+solver.minimize(objective=sum(cost[i] * x[i] for i in rows))
+}}}
+  * Issue 12: Added access to branching priority for variables
+{{{
+x = solver.variable(scip.INTEGER)
+x.priority = 1000
+
+x = solver.variable(scip.INTEGER, priority=10)
+}}}
+
 = 0.3 dev =
-  * Issue 3 and Issue 4: added access for more solver settings
+  * Issue 3 and Issue 4: Added access for more solver settings
 {{{
 solver.branching['inference'].priority = 10000
 solver.branching['inference'].maxdepth = -1
