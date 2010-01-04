@@ -33,17 +33,21 @@ Translated to python-zibopt this becomes:
     from zibopt import scip
     solver = scip.solver()
 
-    # Three integer variables with objective coefficients: z = x1 + x2 + 2*x3
-    # All variables have default lower bounds of 0.  x1 <= 2.
-    x1 = solver.variable(coefficient=1, vartype=scip.INTEGER, upper=2)
-    x2 = solver.variable(coefficient=1, vartype=scip.INTEGER)
-    x3 = solver.variable(coefficient=2, vartype=scip.INTEGER)
+    # All variables have default lower bounds of 0
+    x1 = solver.variable(scip.INTEGER)
+    x2 = solver.variable(scip.INTEGER)
+    x3 = solver.variable(scip.INTEGER)
+
+    # x1 has an upper bound of 2
+    solver += x1 <= 2
 
     # Add a constraint such that:  x1 + x2 + 3*x3 <= 3
-    solver.constraint(upper=3, coefficients={x1:1, x2:1, x3:3})
+    solver += x1 + x2 + 3*x3 <= 3
 
-    # Solve the IP and print the optimal solution if it is feasible.
-    solution = solver.maximize()
+    # The objective function is: z = x1 + x2 + 2*x3
+    solution = solver.maximize(objective=x1 + x2 + 2*x3)
+
+    # Print the optimal solution if it is feasible.
     if solution:
         print 'z  =', solution.objective
         print 'x1 =', solution[x1]
@@ -80,6 +84,10 @@ SelectorError   = _nodesel.error
 SeparatorError  = _sepa.error
 
 class variable(_vars.variable):
+    # This class exists solely to allow algebraic notation for constraints
+    # and objective functions.  It shouldn't be used directly.  Instead use
+    # the variable method on the solver.
+    
     class _cons_builder(object):
         # Constraint builder class: used for allowing mathematical operations 
         # in generating constraints
