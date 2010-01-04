@@ -6,17 +6,18 @@ static PyObject *error;
 /* PYTHON TYPE METHODS                                                       */
 /*****************************************************************************/
 static int variable_init(variable *self, PyObject *args, PyObject *kwds) {
-    static char *argnames[] = {"solver", "vartype", "coefficient", "lower", "upper", NULL};
+    static char *argnames[] = {"solver", "vartype", "coefficient", "lower", "upper", "priority", NULL};
     PyObject *s;     // solver Python object
     solver *solv;    // solver C object
     double c;        // coefficient
     int t;           // integer / binary / continuous
     double lhs, rhs; // lhs <= a'x <= rhs
+    int priority;    // variable branching priority
     
     t = SCIP_VARTYPE_CONTINUOUS;
 
     // SCIPinfinity requires self->scip, so we have to parse the args twice
-    if (!PyArg_ParseTuple(args, "O|iddd", &s, &t, &c, &lhs, &rhs))
+    if (!PyArg_ParseTuple(args, "O|idddi", &s, &t, &c, &lhs, &rhs, &priority))
         return -1;
 
     // Check solver type in the best way we seem to have available
@@ -32,9 +33,10 @@ static int variable_init(variable *self, PyObject *args, PyObject *kwds) {
     t = SCIP_VARTYPE_CONTINUOUS;
     lhs = -SCIPinfinity(self->scip);
     rhs = SCIPinfinity(self->scip);
-
-    // This time is just to get the upper and lower bounds out    
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|iddd", argnames, &s, &t, &c, &lhs, &rhs))
+    priority = 0;
+    
+    // This time is just to get the upper and lower bounds out, plus priority
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|idddi", argnames, &s, &t, &c, &lhs, &rhs, &priority))
         return -1;
 
     // Variable type
@@ -68,6 +70,9 @@ static int variable_init(variable *self, PyObject *args, PyObject *kwds) {
 
     PY_SCIP_CALL(error, -1, SCIPaddVar(self->scip, self->variable));
 
+    if (priority != 0)
+        PY_SCIP_CALL(error, -1, SCIPchgVarBranchPriority(self->scip, self->variable, priority));
+
     // Put new variable at head of linked list
     self->next = solv->first_var;
     solv->first_var = self;
@@ -77,6 +82,39 @@ static int variable_init(variable *self, PyObject *args, PyObject *kwds) {
 
 static void variable_dealloc(variable *self) {
     self->ob_type->tp_free((PyObject *) self);
+}
+
+static PyObject* variable_getattr(variable *self, PyObject *attr_name) {
+    char *attr;
+
+    // Check and make sure we have a string as attribute name...
+    if (PyString_Check(attr_name)) {
+        attr = PyString_AsString(attr_name);
+
+        if (!strcmp(attr, "priority"))
+            return Py_BuildValue("i", SCIPvarGetBranchPriority(self->variable));
+    }
+    return PyObject_GenericGetAttr(self, attr_name);
+}
+
+static int variable_setattr(variable *self, PyObject *attr_name, PyObject *value) {
+    char *attr;
+    int i;
+    
+    // Check and make sure we have a string as attribute name...
+    if (PyString_Check(attr_name)) {
+        attr = PyString_AsString(attr_name);
+        if (!strcmp(attr, "priority")) {
+            if (PyInt_Check(value)) {
+                PY_SCIP_CALL(error, -1, SCIPchgVarBranchPriority(self->scip, self->variable, PyInt_AsLong(value)));
+                return 0;
+            } else {
+                PyErr_SetString(error, "invalid value for variable branching priority");
+                return -1;
+            }
+        }
+    }
+    return PyObject_GenericSetAttr(self, attr_name, value);
 }
 
 /*****************************************************************************/
@@ -140,6 +178,8 @@ static PyObject *variable_tighten_upper(variable *self, PyObject *arg) {
     }
 }
 
+
+
 /*****************************************************************************/
 /* MODULE INITIALIZATION                                                     */
 /*****************************************************************************/
@@ -168,8 +208,8 @@ static PyTypeObject variable_type = {
     0,                             /* tp_hash */
     0,                             /* tp_call */
     0,                             /* tp_str */
-    0,                             /* tp_getattro */
-    0,                             /* tp_setattro */
+    variable_getattr,              /* tp_getattro */
+    variable_setattr,              /* tp_setattro */
     0,                             /* tp_as_buffer */
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /* tp_flags */
     "SCIP variable objects",       /* tp_doc */

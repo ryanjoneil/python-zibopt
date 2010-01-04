@@ -143,6 +143,7 @@ class SettingsTest(unittest.TestCase):
             self.assertRaises(scip.SeparatorError, setattr, s, 'frequency', 'foo')
             self.assertRaises(scip.SeparatorError, setattr, s, 'priority', 'foo')
 
+
 if __name__ == '__main__':
     unittest.main()
 

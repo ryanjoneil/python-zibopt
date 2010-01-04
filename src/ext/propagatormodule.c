@@ -99,8 +99,8 @@ static PyTypeObject propagator_type = {
     0,                             /* tp_hash */
     0,                             /* tp_call */
     0,                             /* tp_str */
-    propagator_getattr,             /* tp_getattro */
-    propagator_setattr,             /* tp_setattro */
+    propagator_getattr,            /* tp_getattro */
+    propagator_setattr,            /* tp_setattro */
     0,                             /* tp_as_buffer */
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /* tp_flags */
     "SCIP propagators",             /* tp_doc */

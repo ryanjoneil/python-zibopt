@@ -354,6 +354,7 @@ class solver(_scip.solver):
         @param coefficient=0:      objective function coefficient
         @param lower=0:            lower bound on variable
         @param upper=+inf:         upper bound on variable
+        @param priority=0:         branching priority for variable
         '''
         v = variable(self, vartype, coefficient, lower, **kwds)
         self.variables.add(v)
