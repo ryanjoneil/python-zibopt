@@ -16,6 +16,6 @@ http://zibopt.zib.de/ for more information about this license.
 
 from zibopt import scip
 
-__version__ = '0.4'
+__version__ = '0.5'
 __all__ = 'scip',
 
