@@ -5,51 +5,78 @@
 
 == Prerequisites ==
 
-The python-zibopt build script assumes that you have shared object files for ZIMPL, SoPlex and SCIP in your LIBRARY_PATH and header files for SCIP 1.2.0 in your C_INCLUDE_PATH.  Make sure these are in your environment before building it.  For example, if you put the ZIBOpt shared object files in $HOME/lib after building it in $HOME/src, your environment might contain: 
+This documentation was written with Ubuntu in mind, so you may need to translate the commands to your platform, but the procedure should be the same.  Before we can build python-zibopt, we need shared object libraries for SoPlex and SCIP as well as setuptools for Python 2.6:
 
 {{{
-LIBRARY_PATH=$HOME
-C_INCLUDE_PATH=$HOME/src/ziboptsuite-1.2.0/scip-1.2.0/src/
+$ sudo apt-get install build-essential libz-dev libreadline-dev python-dev python-setuptools
 }}}
 
-To build the shared library versions of ZIBOpt components, you'll need to use their opt-shared makefiles.  Look [http://scip.zib.de/doc/html/MAKE.html here] for more information.
-
-Other required libraries include:
-  * setuptools
-  * gmp
-  * ncurses
-  * readline
-  * z
-
-python-zibobt should be built against Python 2.6 or later.  It is not yet compatible with 3.0.
-
-== Option 1: easy_install ==
-
-python-zibopt is registered in the pypi index.  If you have easy_install and meet the above prerequisites, you should be able to do this:
+We'll assume you have a directory named src in your home for building things, and one named lib for putting the .so files in:
 
 {{{
-$ sudo easy_install python-zibopt
+$ mkdir ~/src
+$ mkdir ~/lib
 }}}
 
-== Option 2: Manual Installation ==
-
-Either download the latest stable release and uncompress it, or if you'd rather run the bleeding edge code, use svn to get the latest version:
-
-{{{ 
-$ svn checkout http://python-zibopt.googlecode.com/svn/trunk/ python-zibopt 
-}}}
-
-Now build the extension libraries:
+Download the latest version of [http://zibopt.zib.de/download.shtml ZIBopt] and the latest version of [http://code.google.com/p/python-zibopt/downloads/list python-zibopt] to the src directory referenced above.  Uncompress and build SoPlex and SCIP, then copy their .so files to your lib:
 
 {{{
-$ cd python-zibopt
+$ cd ~/src
+$ tar xvfz ziboptsuite-1.2.0.tgz
+$ cd ziboptsuite-1.2.0/
 
-python-zibopt$ python setup.py build 
-running build
-running build_py
-creating build
-[... snip ...]
-gcc -pthread -shared -Wl,-O1 -Wl,-Bsymbolic-functions build/temp.linux-i686-2.6/src/ext/solnmodule.o -llpispx -lobjscip -lscip -lsoplex -lzimpl -lreadline -lncurses -lgmp -lz -o build/lib.linux-i686-2.6/zibopt/_soln.so
+$ tar xvfz soplex-1.4.2.tgz
+$ cd soplex-1.4.2/
+$ make OPT=opt-shared
+$ cp lib/libsoplex-1.4.2.linux.x86.gnu.opt-shared.so $HOME/lib/libsoplex.so
+$ cd ../
+
+$ tar xvfz scip-1.2.0.tgz
+$ cd scip-1.2.0/
+$ make OPT=opt-shared ZIMPL=false
+}}}
+
+SCIP will issue you a series of prompts before building.  The second prompt, for a static version of libsoplex, should be left blank:
+
+{{{
+- preparing missing soft-link "lib/spxinc":
+> Enter soft-link target file or directory for "lib/spxinc" (return if not needed):
+> ../../soplex-1.4.2/src/
+
+- preparing missing soft-link "lib/libsoplex.linux.x86.gnu.opt.a":
+> Enter soft-link target file or directory for "lib/libsoplex.linux.x86.gnu.opt.a" (return if not needed):
+>
+
+- preparing missing soft-link "lib/libsoplex.linux.x86.gnu.opt.so":
+> Enter soft-link target file or directory for "lib/libsoplex.linux.x86.gnu.opt.so" (return if not needed):
+> ../../soplex-1.4.2/lib/libsoplex-1.4.2.linux.x86.gnu.opt-shared.so
+}}}
+
+Copy the .so files for SCIP to your lib as well:
+
+{{{
+$ cp lib/liblpispx-1.2.0.linux.x86.gnu.opt-shared.so ~/lib/liblpispx.so
+$ cp lib/libobjscip-1.2.0.linux.x86.gnu.opt-shared.so ~/lib/libobjscip.so
+$ cp lib/libscip-1.2.0.linux.x86.gnu.opt-shared.so ~/lib/libscip.so
+}}}
+
+== Building python-zibopt ==
+
+In order to build and use python-zibopt, we need to reference the C header files and .so files for ZIBopt in our environment.  Once it is built, you'll need to keep the LD_LIBRARY_PATH set, possibly in your .bashrc, in order to use it:
+
+{{{
+$ export LD_LIBRARY_PATH=$HOME/lib
+$ export LIBRARY_PATH=$HOME/lib
+$ export C_INCLUDE_PATH=$HOME/src/ziboptsuite-1.2.0/scip-1.2.0/src/
+}}}
+
+Now we build python-zibopt:
+
+{{{
+$ cd ~/src
+$ tar xvfz python-zibopt-0.5.beta-r97.tar.gz
+$ cd python-zibopt-0.5.beta-r97/
+$ python setup.py build
 }}}
 
 Test the library to make sure it is in working order:
@@ -64,7 +91,7 @@ Solutions should be false when unbounded ... ok
 Test incorrect mixing of variables and solvers ... ok
 
 ----------------------------------------------------------------------
-Ran 11 tests in 0.096s
+Ran 33 tests in 0.194s
 
 OK
 }}}
@@ -80,21 +107,26 @@ python-zibopt$ sudo python setup.py install
 You should now be able to do this without getting any errors:
 
 {{{
-python-zibopt$ ipython
+$ python
 Python 2.6.2 (release26-maint, Apr 19 2009, 01:56:41) 
-Type "copyright", "credits" or "license" for more information.
+[GCC 4.3.3] on linux2
+Type "help", "copyright", "credits" or "license" for more information.
 
-IPython 0.9.1 -- An enhanced Interactive Python.
-?         -> Introduction and overview of IPython's features.
-%quickref -> Quick reference.
-help      -> Python's own help system.
-object?   -> Details about 'object'. ?object also works, ?? prints more.
-
-In [1]: import zibopt
-
-In [2]: zibopt.__version__
-Out[2]: '0.3'
-
-In [3]: zibopt.scip.solver()
-Out[3]: <zibopt.scip.solver object at 0x88272fc>
-}}
+>>> import zibopt
+>>> zibopt.__version__
+'0.5'
+>>> zibopt.scip.solver()
+<zibopt.scip.solver object at 0xb7d28cd4>
+>>> exit()
+ 
+$ python examples/sudoku.py 
+[3, 1, 8, 6, 9, 2, 7, 4, 5]
+[7, 6, 4, 3, 5, 1, 8, 9, 2]
+[2, 9, 5, 8, 7, 4, 3, 1, 6]
+[6, 2, 9, 5, 1, 7, 4, 8, 3]
+[1, 4, 7, 2, 8, 3, 5, 6, 9]
+[8, 5, 3, 4, 6, 9, 1, 2, 7]
+[5, 7, 2, 1, 4, 6, 9, 3, 8]
+[4, 8, 6, 9, 3, 5, 2, 7, 1]
+[9, 3, 1, 7, 2, 8, 6, 5, 4]
+}}}

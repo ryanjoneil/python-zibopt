@@ -1,6 +1,10 @@
 #summary python-zibopt change log
 #labels Featured
 
+= 0.5 beta =
+  * Entered beta testing
+  * Removed dependency on ZIMPL libraries; improved installation docs
+  
 = 0.4 dev =
   * Issue 8: Added an algebraic interface for constraints and objective functions
 {{{
