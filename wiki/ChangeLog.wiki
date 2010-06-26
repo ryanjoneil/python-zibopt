@@ -1,6 +1,12 @@
 #summary python-zibopt change log
 #labels Featured
 
+= 0.6 dev =
+  * Issue 16: Added ability to stop the solver after a number of solutions are found
+{{{
+solver.maximize(nsol=30)
+}}}
+
 = 0.5 beta =
   * Entered beta testing
   * Removed dependency on ZIMPL libraries; improved installation docs
