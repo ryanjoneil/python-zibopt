@@ -397,6 +397,7 @@ class solver(_scip.solver):
         @param time=inf:    optional time limit for solving
         @param gap=0.0:     optional gap percentage to stop solving (ex: 0.05)
         @param absgap=0.0:  optional primal/dual gap to stop solving
+        @param nsol=-1:     number of solutions to find before stopping
         '''
         if 'objective' in kwds:
             self._update_coefficients(kwds['objective'])
@@ -414,6 +415,7 @@ class solver(_scip.solver):
         @param time=inf:    optional time limit for solving
         @param gap=0.0:     optional gap percentage to stop solving (ex: 0.05)
         @param absgap=0.0:  optional primal/dual gap to stop solving
+        @param nsol=-1:     number of solutions to find before stopping
         '''
         if 'objective' in kwds:
             self._update_coefficients(kwds['objective'])

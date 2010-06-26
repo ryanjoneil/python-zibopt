@@ -31,6 +31,7 @@
 #define SCIP_DEFAULT_LIMIT_GAP    0.0 /**< solving stops, if the gap is below the given value */
 #define SCIP_DEFAULT_LIMIT_ABSGAP 0.0 /**< solving stops, if the absolute difference between primal and dual
                                        *   bound reaches this value */
+#define SCIP_DEFAULT_LIMIT_SOLUTIONS -1 /** solving stops after this number of solutions */
 
 typedef struct {
     PyObject_HEAD
