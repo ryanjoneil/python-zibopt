@@ -34,6 +34,7 @@ setup (
         # Modules to adjust priority and settings
         zibopt_ext('_branch',   'branchmodule.c'),
         zibopt_ext('_conflict', 'conflictmodule.c'),
+        zibopt_ext('_disp',     'displaymodule.c'),
         zibopt_ext('_heur',     'heuristicmodule.c'),
         zibopt_ext('_nodesel',  'nodeselectormodule.c'),
         zibopt_ext('_presol',   'presolvermodule.c'),

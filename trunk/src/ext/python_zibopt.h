@@ -13,6 +13,7 @@
 #include <scip/sol.h>
 #include <scip/struct_branch.h>
 #include <scip/struct_conflict.h>
+#include <scip/struct_disp.h>
 #include <scip/struct_heur.h>
 #include <scip/struct_nodesel.h>
 #include <scip/struct_presol.h>
@@ -76,6 +77,7 @@ typedef struct { \
   
 PY_SCIP_SETTINGS_TYPE(SCIP_BRANCHRULE, branch, branching_rule);
 PY_SCIP_SETTINGS_TYPE(SCIP_CONFLICTHDLR, conflict, conflict);
+PY_SCIP_SETTINGS_TYPE(SCIP_DISP, display, display_column);
 PY_SCIP_SETTINGS_TYPE(SCIP_HEUR, heur, heuristic);
 PY_SCIP_SETTINGS_TYPE(SCIP_PRESOL, presol, presolver);
 PY_SCIP_SETTINGS_TYPE(SCIP_PROP, prop, propagator);
