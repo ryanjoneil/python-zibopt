@@ -6,6 +6,10 @@
 {{{
 solver.maximize(nsol=30)
 }}}
+  * Issue 14: Added ability to set display settings on the solver
+{{{
+solver.display['cuts'].width = 10
+}}}
 
 = 0.5 beta =
   * Entered beta testing
