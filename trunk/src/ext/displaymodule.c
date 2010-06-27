@@ -87,7 +87,7 @@ static PyMethodDef display_column_methods[] = {
 static PyTypeObject display_column_type = {
     PyObject_HEAD_INIT(NULL)
     0,                             /* ob_size */
-    "_disp.display",               /* tp_name */
+    "_disp.display_column",        /* tp_name */
     sizeof(display_column),        /* tp_basicsize */
     0,                             /* tp_itemsize */
     (destructor) display_column_dealloc, /* tp_dealloc */
@@ -129,7 +129,7 @@ static PyTypeObject display_column_type = {
 #ifndef PyMODINIT_FUNC    /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
-PyMODINIT_FUNC init_display(void) {
+PyMODINIT_FUNC init_disp(void) {
     PyObject* m;
 
     display_column_type.tp_new = PyType_GenericNew;
@@ -139,7 +139,7 @@ PyMODINIT_FUNC init_display(void) {
     m = Py_InitModule3("_disp", display_column_methods, "SCIP Display Column");
 
     Py_INCREF(&display_column_type);
-    PyModule_AddObject(m, "display", (PyObject *) &display_column_type);
+    PyModule_AddObject(m, "display_column", (PyObject *) &display_column_type);
     
     // Initialize exception type
     error = PyErr_NewException("disp.error", NULL, NULL);

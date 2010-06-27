@@ -59,7 +59,7 @@ Translated to python-zibopt this becomes:
 
 from zibopt import (
     _scip, _vars, _cons, _soln, 
-    _branch, _conflict, _heur, _nodesel, _presol, _prop, _sepa
+    _branch, _conflict, _disp, _heur, _nodesel, _presol, _prop, _sepa
 )
 
 __all__ = 'solver',
@@ -77,6 +77,7 @@ VariableError   = _vars.error
 # Solver Settings Errors
 BranchingError  = _branch.error
 ConflictError   = _conflict.error
+DisplayError    = _disp.error
 HeuristicError  = _heur.error
 PresolverError  = _presol.error
 PropagatorError = _prop.error
@@ -305,6 +306,7 @@ class solver(_scip.solver):
 
         self.branching   = dict((n, _branch.branching_rule(self, n)) for n in self.branching_names())
         self.conflict    = dict((n, _conflict.conflict(self, n)) for n in self.conflict_names())
+        self.display     = dict((n, _disp.display_column(self, n)) for n in self.display_names())
         self.heuristics  = dict((n, _heur.heuristic(self, n)) for n in self.heuristic_names())
         self.presolvers  = dict((n, _presol.presolver(self, n)) for n in self.presolver_names())
         self.propagators = dict((n, _prop.propagator(self, n)) for n in self.propagator_names())

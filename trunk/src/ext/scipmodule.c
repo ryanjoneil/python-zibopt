@@ -202,6 +202,7 @@ static PyObject *solver_restart(solver *self) {
 // Functions for pulling out lists of setting names by type
 PY_SCIP_SETTING_NAMES(branching_names, nbranchrules, branchrules);
 PY_SCIP_SETTING_NAMES(conflict_names, nconflicthdlrs, conflicthdlrs);
+PY_SCIP_SETTING_NAMES(display_names, ndisps, disps);
 PY_SCIP_SETTING_NAMES(heuristic_names, nheurs, heurs);
 PY_SCIP_SETTING_NAMES(presolver_names, npresols, presols);
 PY_SCIP_SETTING_NAMES(propagator_names, nprops, props);
@@ -217,6 +218,7 @@ static PyMethodDef solver_methods[] = {
     {"restart",  (PyCFunction) solver_restart,  METH_NOARGS,   "restart the solver"},
     {"branching_names",  (PyCFunction) branching_names,  METH_NOARGS, "returns a list of branching rule names"},
     {"conflict_names",   (PyCFunction) conflict_names,   METH_NOARGS, "returns a list of conflict handler names"},
+    {"display_names",    (PyCFunction) display_names,    METH_NOARGS, "returns a list of display column names"},
     {"heuristic_names",  (PyCFunction) heuristic_names,  METH_NOARGS, "returns a list of heuristic names"},
     {"presolver_names",  (PyCFunction) presolver_names,  METH_NOARGS, "returns a list of presolver names"},
     {"propagator_names", (PyCFunction) propagator_names, METH_NOARGS, "returns a list of propagator names"},
