@@ -292,6 +292,14 @@ class solver(_scip.solver):
         solver.conflict['logicor'].priority = 10000
         solver.presolvers['dualfix'].priority = 10000
 
+    Display settings can also be set for solver output.  These are
+    useful when passing quiet=False on solver instantiation:
+
+        solver = scip.solver()
+        solver.display['cuts'].priority = 5
+        solver.display['cuts'].width = 10
+        solver.display['cuts'].position = 3
+
     See the SCIP documentation for available branching rules, heuristics, 
     any other settings, and what they do.
     '''

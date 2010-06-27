@@ -1,4 +1,4 @@
-from zibopt import scip, _branch, _conflict, _heur, _nodesel, _presol, _prop, _sepa
+from zibopt import scip, _branch, _conflict, _disp, _heur, _nodesel, _presol, _prop, _sepa
 import unittest
 
 class SettingsTest(unittest.TestCase):
@@ -7,6 +7,7 @@ class SettingsTest(unittest.TestCase):
         solver = scip.solver()
         self.assertRaises(scip.BranchingError, _branch.branching_rule, solver, 'NOSUCHRULE')
         self.assertRaises(scip.ConflictError, _conflict.conflict, solver, 'NOSUCHRULE')
+        self.assertRaises(scip.DisplayError, _disp.display_column, solver, 'NOSUCHRULE')
         self.assertRaises(scip.HeuristicError, _heur.heuristic, solver, 'NOSUCHRULE')
         self.assertRaises(scip.PresolverError, _presol.presolver, solver, 'NOSUCHRULE')
         self.assertRaises(scip.PropagatorError, _prop.propagator, solver, 'NOSUCHRULE')
@@ -18,6 +19,7 @@ class SettingsTest(unittest.TestCase):
         solver = scip.solver()
         self.assertTrue(solver.branching_names())
         self.assertTrue(solver.conflict_names())
+        self.assertTrue(solver.display_names())
         self.assertTrue(solver.heuristic_names())
         self.assertTrue(solver.presolver_names())
         self.assertTrue(solver.propagator_names())
@@ -143,6 +145,22 @@ class SettingsTest(unittest.TestCase):
             self.assertRaises(scip.SeparatorError, setattr, s, 'frequency', 'foo')
             self.assertRaises(scip.SeparatorError, setattr, s, 'priority', 'foo')
 
+    def testDisplaySettings(self):
+        '''Sets display priority, position and width'''
+        solver = scip.solver()
+        for d in solver.display.values():
+            for a in ('position', 'priority', 'width'):
+                x = getattr(d, a)
+                setattr(d, a, x + 1)
+                self.assertEqual(x+1, getattr(d, a))
+
+    def testDisplayInvalidSettings(self):
+        '''Sets invalid display priority, position, and width'''
+        solver = scip.solver()
+        for d in solver.display.values():
+            self.assertRaises(scip.DisplayError, setattr, d, 'position', 'foo')
+            self.assertRaises(scip.DisplayError, setattr, d, 'priority', 'foo')
+            self.assertRaises(scip.DisplayError, setattr, d, 'width', 'foo')
 
 if __name__ == '__main__':
     unittest.main()
