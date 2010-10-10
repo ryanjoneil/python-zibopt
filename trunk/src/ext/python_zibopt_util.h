@@ -57,9 +57,6 @@ static void PyScipSetError(PyObject *error_type, SCIP_RETCODE err_code) {
         case SCIP_KEYALREADYEXISTING:
             PyErr_SetString(error_type, "the given key is already existing in table");
             break;
-        case SCIP_PARSEERROR:
-            PyErr_SetString(error_type, "invalid input given to the parser");
-            break;
         case SCIP_MAXDEPTHLEVEL:
             PyErr_SetString(error_type, "maximal branching depth level exceeded");
             break;

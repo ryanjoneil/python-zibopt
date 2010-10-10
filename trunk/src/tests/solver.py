@@ -18,8 +18,7 @@ class ScipTest(unittest.TestCase):
         solution = solver.maximize(objective=x1+x2+2*x3)
 
         self.assertTrue(solution)
-        self.assertEqual(solution[x1], 0)
-        self.assertEqual(solution[x2], 3)
+        self.assertEqual(solution.objective, 3)
         self.assertEqual(solution[x3], 0)
         
     def testAddVarConsError(self):

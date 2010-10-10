@@ -23,9 +23,10 @@ static PyObject *solver_new(PyTypeObject *type, PyObject *args, PyObject *kwds) 
         // probdeltrans callback to free that transformed problem
         // probinitsol  callback to create initial solution
         // probexitsol  callback to free initial solution
+        // probcopy     callback to copy data to a subscip
         // probdata     initial problem data (vars & constraints)
         PY_SCIP_CALL(error, NULL, 
-            SCIPcreateProb(self->scip, "python-zibobt", NULL, NULL, NULL, NULL, NULL, NULL)
+            SCIPcreateProb(self->scip, "python-zibobt", NULL, NULL, NULL, NULL, NULL, NULL, NULL)
         );
 
         // Keep SCIP from catching keyboard interrupts.  These go to python.
@@ -139,11 +140,12 @@ static int _seed_primal(solver *self, PyObject *solution) {
         // SCIPtrySolFree Arguments:
         // scip 	        SCIP data structure
         // sol           	pointer to primal CIP solution; is cleared in function call
+        // printreason      should all reasons of violations be printed
         // checkbounds 	    should the bounds of the variables be checked?
         // checkintegrality has integrality to be checked?
         // checklprows 	    have current LP rows to be checked?
         // stored           stores whether solution was feasible and good enough to keep 
-        SCIPtrySolFree(self->scip, &sol, FALSE, FALSE, FALSE, &stored);
+        SCIPtrySolFree(self->scip, &sol, FALSE, FALSE, FALSE, FALSE, &stored);
         
         // We don't actually do anything with the value of stored for the
         // time being.  Other programs do an assert(stored) but we have

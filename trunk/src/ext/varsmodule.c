@@ -59,10 +59,14 @@ static int variable_init(variable *self, PyObject *args, PyObject *kwds) {
     // vartype      type of variable
     // initial      should var's column be present in the initial root LP?
     // removable    is var's column removable from the LP?
+    // vardelorig   frees user data of original variable, or NULL
+    // vartrans     creates transformed user data by transforming original user data, or NULL
+    // vardeltrans  frees user data of transformed variable, or NULL
+    // varcopy      copies variable data if wanted to subscip, or NULL
     // vardata      user data for this specific variable 
     PY_SCIP_CALL(error, -1, 
         SCIPcreateVar(self->scip, &self->variable, NULL, lhs, rhs, c, t,
-            TRUE, FALSE, NULL, NULL, NULL, NULL)
+            TRUE, FALSE, NULL, NULL, NULL, NULL, NULL)
     );
 
     self->lower = lhs;
