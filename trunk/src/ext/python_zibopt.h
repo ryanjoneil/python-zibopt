@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include <scip/branch.h>
 #include <scip/clock.h>
 #include <scip/scip.h>
 #include <scip/scipdefplugins.h>

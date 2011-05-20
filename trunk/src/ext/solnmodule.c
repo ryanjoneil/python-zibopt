@@ -79,8 +79,7 @@ static PyMethodDef solution_methods[] = {
 };
 
 static PyTypeObject solution_type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                             /* ob_size */
+    PyVarObject_HEAD_INIT(NULL, 0)
     "_soln.solution",              /* tp_name */
     sizeof(solution),              /* tp_basicsize */
     0,                             /* tp_itemsize */
@@ -120,6 +119,14 @@ static PyTypeObject solution_type = {
     0 ,                            /* tp_new */
 };
 
+static PyModuleDef soln_module = {
+    PyModuleDef_HEAD_INIT,
+    "_soln",
+    "SCIP Solution",
+    -1,
+    NULL, NULL, NULL, NULL, NULL
+};
+
 #ifndef PyMODINIT_FUNC    /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
@@ -128,9 +135,9 @@ PyMODINIT_FUNC init_soln(void) {
 
     solution_type.tp_new = PyType_GenericNew;
     if (PyType_Ready(&solution_type) < 0)
-        return;
+        return NULL;
 
-    m = Py_InitModule3("_soln", solution_methods, "SCIP Solution");
+    m = PyModule_Create(&soln_module); 
 
     Py_INCREF(&solution_type);
     PyModule_AddObject(m, "solution", (PyObject *) &solution_type);
@@ -139,5 +146,7 @@ PyMODINIT_FUNC init_soln(void) {
     error = PyErr_NewException("_soln.error", NULL, NULL);
     Py_INCREF(error);
     PyModule_AddObject(m, "error", error);   
+
+    return m;
 }
 

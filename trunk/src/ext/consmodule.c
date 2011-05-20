@@ -1,4 +1,5 @@
 #include "python_zibopt.h"
+#include "python_zibopt_error.h"
 
 static PyObject *error;
 
@@ -71,7 +72,7 @@ static int constraint_init(constraint *self, PyObject *args, PyObject *kwds) {
     );
 
     // Put new constraint at head of linked list
-    self->next = solv->first_cons;
+    self->next = (struct constraint *) solv->first_cons;
     solv->first_cons = self;
 
     return 0;
@@ -126,8 +127,7 @@ static PyMethodDef constraint_methods[] = {
 };
 
 static PyTypeObject constraint_type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                               /* ob_size */
+    PyVarObject_HEAD_INIT(NULL, 0)
     "_cons.constraint",              /* tp_name */
     sizeof(constraint),              /* tp_basicsize */
     0,                               /* tp_itemsize */
@@ -167,6 +167,14 @@ static PyTypeObject constraint_type = {
     0,                               /* tp_new */
 };
 
+static PyModuleDef cons_module = {
+    PyModuleDef_HEAD_INIT,
+    "_cons",
+    "SCIP Constraint",
+    -1,
+    NULL, NULL, NULL, NULL, NULL
+};
+
 #ifndef PyMODINIT_FUNC    /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
@@ -175,9 +183,9 @@ PyMODINIT_FUNC init_cons(void) {
 
     constraint_type.tp_new = PyType_GenericNew;
     if (PyType_Ready(&constraint_type) < 0)
-        return;
+        return NULL;
 
-    m = Py_InitModule3("_cons", constraint_methods, "SCIP Constraint");
+    m = PyModule_Create(&cons_module); 
 
     Py_INCREF(&constraint_type);
     PyModule_AddObject(m, "constraint", (PyObject *) &constraint_type);
@@ -186,5 +194,7 @@ PyMODINIT_FUNC init_cons(void) {
     error = PyErr_NewException("_cons.error", NULL, NULL);
     Py_INCREF(error);
     PyModule_AddObject(m, "error", error);
+
+    return m;
 }
 

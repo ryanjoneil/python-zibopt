@@ -1,4 +1,5 @@
 #include "python_zibopt.h"
+#include "python_zibopt_error.h"
 
 static PyObject *error;
 

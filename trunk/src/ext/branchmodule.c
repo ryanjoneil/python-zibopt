@@ -42,8 +42,8 @@ static PyObject* branching_rule_getattr(branching_rule *self, PyObject *attr_nam
     char *attr;
 
     // Check and make sure we have a string as attribute name...
-    if (PyString_Check(attr_name)) {
-        attr = PyString_AsString(attr_name);
+    if (PyBytes_Check(attr_name)) {
+        attr = PyBytes_AsString(attr_name);
 
         if (!strcmp(attr, "maxbounddist"))
             return Py_BuildValue("d", SCIPbranchruleGetMaxbounddist(self->branch));
@@ -52,7 +52,7 @@ static PyObject* branching_rule_getattr(branching_rule *self, PyObject *attr_nam
         if (!strcmp(attr, "priority"))
             return Py_BuildValue("i", SCIPbranchruleGetPriority(self->branch));
     }
-    return PyObject_GenericGetAttr(self, attr_name);
+    return PyObject_GenericGetAttr((PyObject *) self, attr_name);
 }
 
 static int branching_rule_setattr(branching_rule *self, PyObject *attr_name, PyObject *value) {
@@ -61,13 +61,13 @@ static int branching_rule_setattr(branching_rule *self, PyObject *attr_name, PyO
     int i;
     
     // Check and make sure we have a string as attribute name...
-    if (PyString_Check(attr_name)) {
-        attr = PyString_AsString(attr_name);
+    if (PyBytes_Check(attr_name)) {
+        attr = PyBytes_AsString(attr_name);
         PY_SCIP_SET_DBL_MIN("maxbounddist", self->branch->maxbounddist, -1); 
         PY_SCIP_SET_INT_MIN("maxdepth", self->branch->maxdepth, -1); 
         PY_SCIP_SET_PRIORITY(SCIPbranchruleSetPriority, self->branch);
     }
-    return PyObject_GenericSetAttr(self, attr_name, value);
+    return PyObject_GenericSetAttr((PyObject *) self, attr_name, value);
 }
 
 /*****************************************************************************/
@@ -86,8 +86,7 @@ static PyMethodDef branching_rule_methods[] = {
 };
 
 static PyTypeObject branching_rule_type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                             /* ob_size */
+    PyVarObject_HEAD_INIT(NULL, 0)
     "_branch.branching_rule",      /* tp_name */
     sizeof(branching_rule),        /* tp_basicsize */
     0,                             /* tp_itemsize */
@@ -103,8 +102,8 @@ static PyTypeObject branching_rule_type = {
     0,                             /* tp_hash */
     0,                             /* tp_call */
     0,                             /* tp_str */
-    branching_rule_getattr,        /* tp_getattro */
-    branching_rule_setattr,        /* tp_setattro */
+    (getattrofunc) branching_rule_getattr, /* tp_getattro */
+    (setattrofunc) branching_rule_setattr, /* tp_setattro */
     0,                             /* tp_as_buffer */
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /* tp_flags */
     "SCIP branching rules",        /* tp_doc */
@@ -127,6 +126,14 @@ static PyTypeObject branching_rule_type = {
     0 ,                            /* tp_new */
 };
 
+static PyModuleDef branch_module = {
+    PyModuleDef_HEAD_INIT,
+    "_branch",
+    "SCIP Branching Rule",
+    -1,
+    NULL, NULL, NULL, NULL, NULL
+};
+
 #ifndef PyMODINIT_FUNC    /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
@@ -135,9 +142,9 @@ PyMODINIT_FUNC init_branch(void) {
 
     branching_rule_type.tp_new = PyType_GenericNew;
     if (PyType_Ready(& branching_rule_type) < 0)
-        return;
+        return NULL;
 
-    m = Py_InitModule3("_branch", branching_rule_methods, "SCIP Branching Rule");
+    m = PyModule_Create(&branch_module); 
 
     Py_INCREF(& branching_rule_type);
     PyModule_AddObject(m, "branching_rule", (PyObject *) &branching_rule_type);
@@ -146,5 +153,7 @@ PyMODINIT_FUNC init_branch(void) {
     error = PyErr_NewException("_branch.error", NULL, NULL);
     Py_INCREF(error);
     PyModule_AddObject(m, "error", error);   
+
+    return m;
 }
 
