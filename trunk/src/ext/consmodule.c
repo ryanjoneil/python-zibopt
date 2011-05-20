@@ -78,7 +78,7 @@ static int constraint_init(constraint *self, PyObject *args, PyObject *kwds) {
 }
 
 static void constraint_dealloc(constraint *self) {
-    ((PyObject *) self)->ob_type->tp_free((PyObject *) self);
+    ((PyObject *) self)->ob_type->tp_free(self);
 }
 
 /*****************************************************************************/

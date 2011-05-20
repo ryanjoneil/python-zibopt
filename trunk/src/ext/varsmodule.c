@@ -85,7 +85,7 @@ static int variable_init(variable *self, PyObject *args, PyObject *kwds) {
 }
 
 static void variable_dealloc(variable *self) {
-    ((PyObject *) self)->ob_type->tp_free((PyObject *) self);
+    ((PyObject *) self)->ob_type->tp_free(self);
 }
 
 static PyObject* variable_getattr(variable *self, PyObject *attr_name) {

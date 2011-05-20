@@ -75,7 +75,7 @@ static void solver_dealloc(solver *self) {
         self->scip = NULL;
     }
 
-    ((PyObject *) self)->ob_type->tp_free((PyObject *) self);
+    ((PyObject *) self)->ob_type->tp_free(self);
 }
 
 /*****************************************************************************/

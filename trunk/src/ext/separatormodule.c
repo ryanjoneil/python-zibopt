@@ -35,7 +35,7 @@ static int separator_init(separator *self, PyObject *args, PyObject *kwds) {
 }
 
 static void separator_dealloc(separator *self) {
-    ((PyObject *) self)->ob_type->tp_free((PyObject *) self);
+    ((PyObject *) self)->ob_type->tp_free(self);
 }
 
 static PyObject* separator_getattr(separator *self, PyObject *attr_name) {

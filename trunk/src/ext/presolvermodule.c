@@ -35,7 +35,7 @@ static int presolver_init(presolver *self, PyObject *args, PyObject *kwds) {
 }
 
 static void presolver_dealloc(presolver *self) {
-    ((PyObject *) self)->ob_type->tp_free((PyObject *) self);
+    ((PyObject *) self)->ob_type->tp_free(self);
 }
 
 static PyObject* presolver_getattr(presolver *self, PyObject *attr_name) {

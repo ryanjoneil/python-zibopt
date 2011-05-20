@@ -35,7 +35,7 @@ static int propagator_init(propagator *self, PyObject *args, PyObject *kwds) {
 }
 
 static void propagator_dealloc(propagator *self) {
-    ((PyObject *) self)->ob_type->tp_free((PyObject *) self);
+    ((PyObject *) self)->ob_type->tp_free(self);
 }
 
 static PyObject* propagator_getattr(propagator *self, PyObject *attr_name) {

@@ -35,7 +35,7 @@ static int selector_init(selector *self, PyObject *args, PyObject *kwds) {
 }
 
 static void selector_dealloc(selector *self) {
-    ((PyObject *) self)->ob_type->tp_free((PyObject *) self);
+    ((PyObject *) self)->ob_type->tp_free(self);
 }
 
 static PyObject* selector_getattr(selector *self, PyObject *attr_name) {

@@ -35,7 +35,7 @@ static int branching_rule_init(branching_rule *self, PyObject *args, PyObject *k
 }
 
 static void branching_rule_dealloc(branching_rule *self) {
-    ((PyObject *) self)->ob_type->tp_free((PyObject *) self);
+    ((PyObject *) self)->ob_type->tp_free(self);
 }
 
 static PyObject* branching_rule_getattr(branching_rule *self, PyObject *attr_name) {
