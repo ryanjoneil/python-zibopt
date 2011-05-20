@@ -35,7 +35,7 @@ static int conflict_init(conflict *self, PyObject *args, PyObject *kwds) {
 }
 
 static void conflict_dealloc(conflict *self) {
-    self->ob_type->tp_free((PyObject *) self);
+    ((PyObject *) self)->ob_type->tp_free((PyObject *) self);
 }
 
 static PyObject* conflict_getattr(conflict *self, PyObject *attr_name) {

@@ -35,7 +35,7 @@ static int display_column_init(display_column *self, PyObject *args, PyObject *k
 }
 
 static void display_column_dealloc(display_column *self) {
-    self->ob_type->tp_free((PyObject *) self);
+    ((PyObject *) self)->ob_type->tp_free((PyObject *) self);
 }
 
 static PyObject* display_column_getattr(display_column *self, PyObject *attr_name) {

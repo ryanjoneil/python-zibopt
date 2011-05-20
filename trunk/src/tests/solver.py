@@ -72,7 +72,7 @@ class ScipTest(unittest.TestCase):
         solver.constraint(upper=2, coefficients={v1:1})
         
         # Pass known solution to the solver
-        solution = solver.maximize(solution={v1:2, v2:1L, v3:5.4})
+        solution = solver.maximize(solution={v1:2, v2:1, v3:5.4})
         self.assertEqual(solution.objective, 2)
     
     def testPrimalErrors(self):

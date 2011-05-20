@@ -59,14 +59,14 @@ static void solver_dealloc(solver *self) {
         // Free all variables
         while (self->first_var != NULL) {
             SCIPreleaseVar(self->scip, &self->first_var->variable);
-            self->first_var = self->first_var->next;
+            self->first_var = (variable *) self->first_var->next;
         }
         self->first_var = NULL;
         
         // Free constraints
         while (self->first_cons != NULL) {
             SCIPreleaseCons(self->scip, &self->first_cons->constraint);
-            self->first_cons = self->first_cons->next;
+            self->first_cons = (constraint *) self->first_cons->next;
         }
         self->first_cons = NULL;
         
@@ -75,7 +75,7 @@ static void solver_dealloc(solver *self) {
         self->scip = NULL;
     }
 
-    self->ob_type->tp_free((PyObject *) self);
+    ((PyObject *) self)->ob_type->tp_free((PyObject *) self);
 }
 
 /*****************************************************************************/
@@ -97,19 +97,19 @@ static int _seed_primal(solver *self, PyObject *solution) {
             // Check and make sure we have a real variable type
             if (strcmp(key->ob_type->tp_name, VARIABLE_TYPE_NAME)) {
                 PyErr_SetString(error, "invalid variable type");
-                return NULL;
+                return 0;
             }
             
             // Verify that the variable is associated with this solver
             if (((variable *) key)->scip != self->scip) {
                 PyErr_SetString(error, "variable not associated with solver");
-                return NULL;
+                return 0;
             }
         
             // Check and make sure we have a number as the value
-            if (!(PyFloat_Check(value) || PyInt_Check(value) || PyLong_Check(value))) {
+            if (!(PyFloat_Check(value) || PyLong_Check(value))) {
                 PyErr_SetString(error, "solution values must be numeric");
-                return NULL;
+                return 0;
             }
         }
 
@@ -123,8 +123,6 @@ static int _seed_primal(solver *self, PyObject *solution) {
             // Convert the value to a C double
             if (PyFloat_Check(value))
                 d = PyFloat_AsDouble(value);
-            else if (PyInt_Check(value))
-                d = (double) PyInt_AsLong(value);
             else
                 d = (double) PyLong_AsLong(value);
             
@@ -133,7 +131,7 @@ static int _seed_primal(solver *self, PyObject *solution) {
                 SCIPsetSolVal(self->scip, sol, ((variable *) key)->variable, d); 
         }
 
-        PY_SCIP_CALL(error, NULL, SCIPcheckSolOrig(self->scip, sol, &feasible, TRUE, FALSE));
+        PY_SCIP_CALL(error, 0, SCIPcheckSolOrig(self->scip, sol, &feasible, TRUE, FALSE));
         if (!feasible)
             PyErr_SetString(error, "infeasible primal solution");
         
@@ -153,7 +151,7 @@ static int _seed_primal(solver *self, PyObject *solution) {
         // error if the primal objective value is too poor to use.
     }
     
-    return NULL;
+    return 0;
 }
 
 static int _optimize(solver *self, PyObject *args, PyObject *kwds) {
@@ -168,11 +166,11 @@ static int _optimize(solver *self, PyObject *args, PyObject *kwds) {
     // See if we were given a primal solution dict
     solution = NULL;
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "|O!dddi", argnames, &PyDict_Type, &solution, &time, &gap, &absgap, &nsol))
-        return NULL;
+        return 0;
 
     _seed_primal(self, solution);
     if (PyErr_Occurred())
-        return NULL;
+        return 0;
 
     // Set timeout & gap values
     SCIPclockReset(self->scip->stat->solvingtime);
@@ -181,19 +179,21 @@ static int _optimize(solver *self, PyObject *args, PyObject *kwds) {
     self->scip->set->limit_absgap = absgap;
     self->scip->set->limit_solutions = nsol;
     
-    PY_SCIP_CALL(error, NULL, SCIPsolve(self->scip));
-    Py_RETURN_NONE;
+    PY_SCIP_CALL(error, 0, SCIPsolve(self->scip));
+    return 0;
 }
 
 static PyObject *solver_maximize(solver *self, PyObject *args, PyObject *kwds) {
     PY_SCIP_CALL(error, NULL, SCIPsetObjsense(self->scip, SCIP_OBJSENSE_MAXIMIZE));
-    return _optimize(self, args, kwds);
+    _optimize(self, args, kwds);
+    Py_RETURN_NONE;
 }
 
 
 static PyObject *solver_minimize(solver *self, PyObject *args, PyObject *kwds) {
     PY_SCIP_CALL(error, NULL, SCIPsetObjsense(self->scip, SCIP_OBJSENSE_MINIMIZE));
-    return _optimize(self, args, kwds);
+    _optimize(self, args, kwds);
+    Py_RETURN_NONE;
 }
 
 static PyObject *solver_restart(solver *self) {
@@ -230,8 +230,7 @@ static PyMethodDef solver_methods[] = {
 };
 
 static PyTypeObject solver_type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                           /* ob_size */
+    PyVarObject_HEAD_INIT(NULL, 0)
     "_scip.solver",              /* tp_name */
     sizeof(solver),              /* tp_basicsize */
     0,                           /* tp_itemsize */
@@ -271,16 +270,24 @@ static PyTypeObject solver_type = {
     solver_new,                  /* tp_new */
 };
 
+static PyModuleDef scip_module = {
+    PyModuleDef_HEAD_INIT,
+    "_scip",
+    "SCIP Solver",
+    -1,
+    NULL, NULL, NULL, NULL, NULL
+};
+
 #ifndef PyMODINIT_FUNC    /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
-PyMODINIT_FUNC init_scip(void) {
+PyMODINIT_FUNC PyInit_scip(void) {
     PyObject* m;
 
     if (PyType_Ready(&solver_type) < 0)
-        return;
+        return NULL;
 
-    m = Py_InitModule3("_scip", solver_methods, "SCIP Solver");
+    m = PyModule_Create(&scip_module); //"_scip", solver_methods, "SCIP Solver");
 
     // Constants on scip module
     PyModule_AddIntConstant(m, "BINARY", SCIP_VARTYPE_BINARY);
@@ -295,5 +302,7 @@ PyMODINIT_FUNC init_scip(void) {
     error = PyErr_NewException("_scip.error", NULL, NULL);
     Py_INCREF(error);
     PyModule_AddObject(m, "error", error);
+
+    return m;
 }
 

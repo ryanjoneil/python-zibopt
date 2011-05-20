@@ -1,4 +1,8 @@
 from setuptools import setup, find_packages, Extension
+import sys
+
+# Require at least Python 3.2
+assert sys.version_info >= (3, 2)
 
 def zibopt_ext(name, c_file):
     # ZIBOpt headers and shared objects will must be in the user's

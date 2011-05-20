@@ -85,7 +85,7 @@ static PyObject *function_name(solver *self) { \
         return NULL; \
     } \
     for (i = 0; i < self->scip->set->setting_count; i++) { \
-        PyObject *r = PyString_FromString(self->scip->set->setting[i]->name); \
+        PyObject *r = PyBytes_FromString(self->scip->set->setting[i]->name); \
         if (!r) { \
             Py_DECREF(rules); \
             return NULL; \

@@ -36,7 +36,7 @@ static int solution_init(solution *self, PyObject *args, PyObject *kwds) {
 }
 
 static void solution_dealloc(solution *self) {
-    self->ob_type->tp_free((PyObject *) self);
+    ((PyObject *) self)->ob_type->tp_free((PyObject *) self);
 }
 
 /*****************************************************************************/

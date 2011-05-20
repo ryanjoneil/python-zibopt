@@ -35,7 +35,7 @@ static int heuristic_init(heuristic *self, PyObject *args, PyObject *kwds) {
 }
 
 static void heuristic_dealloc(heuristic *self) {
-    self->ob_type->tp_free((PyObject *) self);
+    ((PyObject *) self)->ob_type->tp_free((PyObject *) self);
 }
 
 static PyObject* heuristic_getattr(heuristic *self, PyObject *attr_name) {
