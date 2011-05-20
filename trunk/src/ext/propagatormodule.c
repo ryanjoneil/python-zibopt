@@ -42,15 +42,15 @@ static PyObject* propagator_getattr(propagator *self, PyObject *attr_name) {
     char *attr;
 
     // Check and make sure we have a string as attribute name...
-    if (PyString_Check(attr_name)) {
-        attr = PyString_AsString(attr_name);
+    if (PyBytes_Check(attr_name)) {
+        attr = PyBytes_AsString(attr_name);
 
         if (!strcmp(attr, "frequency"))
             return Py_BuildValue("i", SCIPpropGetFreq(self->prop));
         if (!strcmp(attr, "priority"))
             return Py_BuildValue("i", SCIPpropGetPriority(self->prop));
     }
-    return PyObject_GenericGetAttr(self, attr_name);
+    return PyObject_GenericGetAttr((PyObject *) self, attr_name);
 }
 
 static int propagator_setattr(propagator *self, PyObject *attr_name, PyObject *value) {
@@ -58,12 +58,12 @@ static int propagator_setattr(propagator *self, PyObject *attr_name, PyObject *v
     int i;
     
     // Check and make sure we have a string as attribute name...
-    if (PyString_Check(attr_name)) {
-        attr = PyString_AsString(attr_name);
+    if (PyBytes_Check(attr_name)) {
+        attr = PyBytes_AsString(attr_name);
         PY_SCIP_SET_INT_MIN("frequency", self->prop->freq, -1); 
         PY_SCIP_SET_PRIORITY(SCIPpropSetPriority, self->prop);
     }
-    return PyObject_GenericSetAttr(self, attr_name, value);
+    return PyObject_GenericSetAttr((PyObject *) self, attr_name, value);
 }
 
 /*****************************************************************************/
@@ -82,8 +82,7 @@ static PyMethodDef propagator_methods[] = {
 };
 
 static PyTypeObject propagator_type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                             /* ob_size */
+    PyVarObject_HEAD_INIT(NULL, 0)
     "_prop.propagator",             /* tp_name */
     sizeof(propagator),             /* tp_basicsize */
     0,                             /* tp_itemsize */
@@ -99,8 +98,8 @@ static PyTypeObject propagator_type = {
     0,                             /* tp_hash */
     0,                             /* tp_call */
     0,                             /* tp_str */
-    propagator_getattr,            /* tp_getattro */
-    propagator_setattr,            /* tp_setattro */
+    (getattrofunc) propagator_getattr, /* tp_getattro */
+    (setattrofunc) propagator_setattr, /* tp_setattro */
     0,                             /* tp_as_buffer */
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /* tp_flags */
     "SCIP propagators",             /* tp_doc */
@@ -123,6 +122,14 @@ static PyTypeObject propagator_type = {
     0 ,                            /* tp_new */
 };
 
+static PyModuleDef prop_module = {
+    PyModuleDef_HEAD_INIT,
+    "_prop",
+    "SCIP Propagator",
+    -1,
+    NULL, NULL, NULL, NULL, NULL
+};
+
 #ifndef PyMODINIT_FUNC    /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
@@ -131,9 +138,9 @@ PyMODINIT_FUNC init_prop(void) {
 
     propagator_type.tp_new = PyType_GenericNew;
     if (PyType_Ready(& propagator_type) < 0)
-        return;
+        return NULL;
 
-    m = Py_InitModule3("_prop", propagator_methods, "SCIP Propagator");
+    m = PyModule_Create(&prop_module); 
 
     Py_INCREF(& propagator_type);
     PyModule_AddObject(m, "propagator", (PyObject *) &propagator_type);
@@ -142,5 +149,7 @@ PyMODINIT_FUNC init_prop(void) {
     error = PyErr_NewException("_prop.error", NULL, NULL);
     Py_INCREF(error);
     PyModule_AddObject(m, "error", error);   
+
+    return m;
 }
 

@@ -42,27 +42,27 @@ static PyObject* selector_getattr(selector *self, PyObject *attr_name) {
     char *attr;
 
     // Check and make sure we have a string as attribute name...
-    if (PyString_Check(attr_name)) {
-        attr = PyString_AsString(attr_name);
+    if (PyBytes_Check(attr_name)) {
+        attr = PyBytes_AsString(attr_name);
 
         if (!strcmp(attr, "memsavepriority"))
             return Py_BuildValue("i", SCIPnodeselGetMemsavePriority(self->nodesel));
         if (!strcmp(attr, "stdpriority"))
             return Py_BuildValue("i", SCIPnodeselGetStdPriority(self->nodesel));
     }
-    return PyObject_GenericGetAttr(self, attr_name);
+    return PyObject_GenericGetAttr((PyObject *) self, attr_name);
 }
 
 static int selector_setattr(selector *self, PyObject *attr_name, PyObject *value) {
     char *attr;
     
     // Check and make sure we have a string as attribute name...
-    if (PyString_Check(attr_name)) {
-        attr = PyString_AsString(attr_name);
+    if (PyBytes_Check(attr_name)) {
+        attr = PyBytes_AsString(attr_name);
 
         if (!strcmp(attr, "memsavepriority")) {
-            if (PyInt_Check(value)) {
-                SCIPnodeselSetMemsavePriority(self->nodesel, self->scip->set, PyInt_AsLong(value));
+            if (PyLong_Check(value)) {
+                SCIPnodeselSetMemsavePriority(self->nodesel, self->scip->set, PyLong_AsLong(value));
                 return 0;
             } else {
                 PyErr_SetString(error, "invalid value for priority");
@@ -71,8 +71,8 @@ static int selector_setattr(selector *self, PyObject *attr_name, PyObject *value
         }
 
         if (!strcmp(attr, "stdpriority")) {
-            if (PyInt_Check(value)) {
-                SCIPnodeselSetStdPriority(self->nodesel, self->scip->set, PyInt_AsLong(value));
+            if (PyLong_Check(value)) {
+                SCIPnodeselSetStdPriority(self->nodesel, self->scip->set, PyLong_AsLong(value));
                 return 0;
             } else {
                 PyErr_SetString(error, "invalid value for priority");
@@ -80,7 +80,7 @@ static int selector_setattr(selector *self, PyObject *attr_name, PyObject *value
             }
         }
     }
-    return PyObject_GenericSetAttr(self, attr_name, value);
+    return PyObject_GenericSetAttr((PyObject *) self, attr_name, value);
 }
 
 /*****************************************************************************/
@@ -99,9 +99,8 @@ static PyMethodDef selector_methods[] = {
 };
 
 static PyTypeObject selector_type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                             /* ob_size */
-    "_sepa.selector",              /* tp_name */
+    PyVarObject_HEAD_INIT(NULL, 0)
+    "_nodesel.selector",           /* tp_name */
     sizeof(selector),              /* tp_basicsize */
     0,                             /* tp_itemsize */
     (destructor) selector_dealloc, /* tp_dealloc */
@@ -116,8 +115,8 @@ static PyTypeObject selector_type = {
     0,                             /* tp_hash */
     0,                             /* tp_call */
     0,                             /* tp_str */
-    selector_getattr,              /* tp_getattro */
-    selector_setattr,              /* tp_setattro */
+    (getattrofunc) selector_getattr, /* tp_getattro */
+    (setattrofunc) selector_setattr, /* tp_setattro */
     0,                             /* tp_as_buffer */
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /* tp_flags */
     "SCIP selectors",              /* tp_doc */
@@ -140,6 +139,14 @@ static PyTypeObject selector_type = {
     0 ,                            /* tp_new */
 };
 
+static PyModuleDef nodesel_module = {
+    PyModuleDef_HEAD_INIT,
+    "_nodesel",
+    "SCIP Node Selector",
+    -1,
+    NULL, NULL, NULL, NULL, NULL
+};
+
 #ifndef PyMODINIT_FUNC    /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
@@ -148,9 +155,9 @@ PyMODINIT_FUNC init_nodesel(void) {
 
     selector_type.tp_new = PyType_GenericNew;
     if (PyType_Ready(& selector_type) < 0)
-        return;
+        return NULL;
 
-    m = Py_InitModule3("_nodesel", selector_methods, "SCIP Node Selector");
+    m = PyModule_Create(&nodesel_module); 
 
     Py_INCREF(& selector_type);
     PyModule_AddObject(m, "selector", (PyObject *) &selector_type);
@@ -159,5 +166,7 @@ PyMODINIT_FUNC init_nodesel(void) {
     error = PyErr_NewException("_nodesel.error", NULL, NULL);
     Py_INCREF(error);
     PyModule_AddObject(m, "error", error);   
+
+    return m;
 }
 

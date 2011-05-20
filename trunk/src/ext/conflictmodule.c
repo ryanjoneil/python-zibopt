@@ -42,24 +42,24 @@ static PyObject* conflict_getattr(conflict *self, PyObject *attr_name) {
     char *attr;
 
     // Check and make sure we have a string as attribute name...
-    if (PyString_Check(attr_name)) {
-        attr = PyString_AsString(attr_name);
+    if (PyBytes_Check(attr_name)) {
+        attr = PyBytes_AsString(attr_name);
 
         if (!strcmp(attr, "priority"))
             return Py_BuildValue("i", SCIPconflicthdlrGetPriority(self->conflict));
     }
-    return PyObject_GenericGetAttr(self, attr_name);
+    return PyObject_GenericGetAttr((PyObject *) self, attr_name);
 }
 
 static int conflict_setattr(conflict *self, PyObject *attr_name, PyObject *value) {
     char *attr;
     
     // Check and make sure we have a string as attribute name...
-    if (PyString_Check(attr_name)) {
-        attr = PyString_AsString(attr_name);
+    if (PyBytes_Check(attr_name)) {
+        attr = PyBytes_AsString(attr_name);
         PY_SCIP_SET_PRIORITY(SCIPconflicthdlrSetPriority, self->conflict);
     }
-    return PyObject_GenericSetAttr(self, attr_name, value);
+    return PyObject_GenericSetAttr((PyObject *) self, attr_name, value);
 }
 
 /*****************************************************************************/
@@ -78,8 +78,7 @@ static PyMethodDef conflict_methods[] = {
 };
 
 static PyTypeObject conflict_type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                             /* ob_size */
+    PyVarObject_HEAD_INIT(NULL, 0)
     "_conflict.conflict",             /* tp_name */
     sizeof(conflict),             /* tp_basicsize */
     0,                             /* tp_itemsize */
@@ -95,8 +94,8 @@ static PyTypeObject conflict_type = {
     0,                             /* tp_hash */
     0,                             /* tp_call */
     0,                             /* tp_str */
-    conflict_getattr,             /* tp_getattro */
-    conflict_setattr,             /* tp_setattro */
+    (getattrofunc) conflict_getattr, /* tp_getattro */
+    (setattrofunc) conflict_setattr, /* tp_setattro */
     0,                             /* tp_as_buffer */
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /* tp_flags */
     "SCIP conflicts",             /* tp_doc */
@@ -119,6 +118,14 @@ static PyTypeObject conflict_type = {
     0 ,                            /* tp_new */
 };
 
+static PyModuleDef conflict_module = {
+    PyModuleDef_HEAD_INIT,
+    "_conflict",
+    "SCIP Conflict Handler",
+    -1,
+    NULL, NULL, NULL, NULL, NULL
+};
+
 #ifndef PyMODINIT_FUNC    /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
@@ -127,9 +134,9 @@ PyMODINIT_FUNC init_conflict(void) {
 
     conflict_type.tp_new = PyType_GenericNew;
     if (PyType_Ready(& conflict_type) < 0)
-        return;
+        return NULL;
 
-    m = Py_InitModule3("_conflict", conflict_methods, "SCIP conflict handler");
+    m = PyModule_Create(&conflict_module); 
 
     Py_INCREF(& conflict_type);
     PyModule_AddObject(m, "conflict", (PyObject *) &conflict_type);
@@ -138,5 +145,7 @@ PyMODINIT_FUNC init_conflict(void) {
     error = PyErr_NewException("_conflict.error", NULL, NULL);
     Py_INCREF(error);
     PyModule_AddObject(m, "error", error);   
+
+    return m;
 }
 

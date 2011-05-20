@@ -42,8 +42,8 @@ static PyObject* heuristic_getattr(heuristic *self, PyObject *attr_name) {
     char *attr;
 
     // Check and make sure we have a string as attribute name...
-    if (PyString_Check(attr_name)) {
-        attr = PyString_AsString(attr_name);
+    if (PyBytes_Check(attr_name)) {
+        attr = PyBytes_AsString(attr_name);
 
         if (!strcmp(attr, "freqofs"))
             return Py_BuildValue("i", SCIPheurGetFreqofs(self->heur));
@@ -54,7 +54,7 @@ static PyObject* heuristic_getattr(heuristic *self, PyObject *attr_name) {
         if (!strcmp(attr, "priority"))
             return Py_BuildValue("i", SCIPheurGetPriority(self->heur));
     }
-    return PyObject_GenericGetAttr(self, attr_name);
+    return PyObject_GenericGetAttr((PyObject *) self, attr_name);
 }
 
 static int heuristic_setattr(heuristic *self, PyObject *attr_name, PyObject *value) {
@@ -62,14 +62,14 @@ static int heuristic_setattr(heuristic *self, PyObject *attr_name, PyObject *val
     int i;
     
     // Check and make sure we have a string as attribute name...
-    if (PyString_Check(attr_name)) {
-        attr = PyString_AsString(attr_name);
+    if (PyBytes_Check(attr_name)) {
+        attr = PyBytes_AsString(attr_name);
         PY_SCIP_SET_INT_MIN("freqofs", self->heur->freqofs, 0); 
         PY_SCIP_SET_INT_MIN("frequency", self->heur->freq, -1); 
         PY_SCIP_SET_INT_MIN("maxdepth", self->heur->maxdepth, -1); 
         PY_SCIP_SET_PRIORITY(SCIPheurSetPriority, self->heur);
     }
-    return PyObject_GenericSetAttr(self, attr_name, value);
+    return PyObject_GenericSetAttr((PyObject *) self, attr_name, value);
 }
 
 /*****************************************************************************/
@@ -88,8 +88,7 @@ static PyMethodDef heuristic_methods[] = {
 };
 
 static PyTypeObject heuristic_type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                             /* ob_size */
+    PyVarObject_HEAD_INIT(NULL, 0)
     "_heur.heuristic",             /* tp_name */
     sizeof(heuristic),             /* tp_basicsize */
     0,                             /* tp_itemsize */
@@ -105,8 +104,8 @@ static PyTypeObject heuristic_type = {
     0,                             /* tp_hash */
     0,                             /* tp_call */
     0,                             /* tp_str */
-    heuristic_getattr,             /* tp_getattro */
-    heuristic_setattr,             /* tp_setattro */
+    (getattrofunc) heuristic_getattr, /* tp_getattro */
+    (setattrofunc) heuristic_setattr, /* tp_setattro */
     0,                             /* tp_as_buffer */
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /* tp_flags */
     "SCIP heuristics",             /* tp_doc */
@@ -129,6 +128,14 @@ static PyTypeObject heuristic_type = {
     0 ,                            /* tp_new */
 };
 
+static PyModuleDef heur_module = {
+    PyModuleDef_HEAD_INIT,
+    "_heur",
+    "SCIP Heuristic",
+    -1,
+    NULL, NULL, NULL, NULL, NULL
+};
+
 #ifndef PyMODINIT_FUNC    /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
@@ -137,9 +144,9 @@ PyMODINIT_FUNC init_heur(void) {
 
     heuristic_type.tp_new = PyType_GenericNew;
     if (PyType_Ready(& heuristic_type) < 0)
-        return;
+        return NULL;
 
-    m = Py_InitModule3("_heur", heuristic_methods, "SCIP heuristic");
+    m = PyModule_Create(&heur_module); 
 
     Py_INCREF(& heuristic_type);
     PyModule_AddObject(m, "heuristic", (PyObject *) &heuristic_type);
@@ -148,5 +155,7 @@ PyMODINIT_FUNC init_heur(void) {
     error = PyErr_NewException("_heur.error", NULL, NULL);
     Py_INCREF(error);
     PyModule_AddObject(m, "error", error);   
+
+    return m;
 }
 

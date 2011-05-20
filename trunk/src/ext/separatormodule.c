@@ -42,8 +42,8 @@ static PyObject* separator_getattr(separator *self, PyObject *attr_name) {
     char *attr;
 
     // Check and make sure we have a string as attribute name...
-    if (PyString_Check(attr_name)) {
-        attr = PyString_AsString(attr_name);
+    if (PyBytes_Check(attr_name)) {
+        attr = PyBytes_AsString(attr_name);
 
         if (!strcmp(attr, "frequency"))
             return Py_BuildValue("i", SCIPsepaGetFreq(self->sepa));
@@ -52,7 +52,7 @@ static PyObject* separator_getattr(separator *self, PyObject *attr_name) {
         if (!strcmp(attr, "priority"))
             return Py_BuildValue("i", SCIPsepaGetPriority(self->sepa));
     }
-    return PyObject_GenericGetAttr(self, attr_name);
+    return PyObject_GenericGetAttr((PyObject *) self, attr_name);
 }
 
 static int separator_setattr(separator *self, PyObject *attr_name, PyObject *value) {
@@ -61,13 +61,13 @@ static int separator_setattr(separator *self, PyObject *attr_name, PyObject *val
     double d;
     
     // Check and make sure we have a string as attribute name...
-    if (PyString_Check(attr_name)) {
-        attr = PyString_AsString(attr_name);
+    if (PyBytes_Check(attr_name)) {
+        attr = PyBytes_AsString(attr_name);
         PY_SCIP_SET_INT_MIN("frequency", self->sepa->freq, -1); 
         PY_SCIP_SET_DBL_MIN("maxbounddist", self->sepa->maxbounddist, -1); 
         PY_SCIP_SET_PRIORITY(SCIPsepaSetPriority, self->sepa);
     }
-    return PyObject_GenericSetAttr(self, attr_name, value);
+    return PyObject_GenericSetAttr((PyObject *) self, attr_name, value);
 }
 
 /*****************************************************************************/
@@ -86,8 +86,7 @@ static PyMethodDef separator_methods[] = {
 };
 
 static PyTypeObject separator_type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                             /* ob_size */
+    PyVarObject_HEAD_INIT(NULL, 0)
     "_sepa.separator",             /* tp_name */
     sizeof(separator),             /* tp_basicsize */
     0,                             /* tp_itemsize */
@@ -103,8 +102,8 @@ static PyTypeObject separator_type = {
     0,                             /* tp_hash */
     0,                             /* tp_call */
     0,                             /* tp_str */
-    separator_getattr,             /* tp_getattro */
-    separator_setattr,             /* tp_setattro */
+    (getattrofunc) separator_getattr, /* tp_getattro */
+    (setattrofunc) separator_setattr, /* tp_setattro */
     0,                             /* tp_as_buffer */
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /* tp_flags */
     "SCIP separators",             /* tp_doc */
@@ -127,6 +126,14 @@ static PyTypeObject separator_type = {
     0 ,                            /* tp_new */
 };
 
+static PyModuleDef sepa_module = {
+    PyModuleDef_HEAD_INIT,
+    "_sepa",
+    "SCIP Separator",
+    -1,
+    NULL, NULL, NULL, NULL, NULL
+};
+
 #ifndef PyMODINIT_FUNC    /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
@@ -135,9 +142,9 @@ PyMODINIT_FUNC init_sepa(void) {
 
     separator_type.tp_new = PyType_GenericNew;
     if (PyType_Ready(& separator_type) < 0)
-        return;
+        return NULL;
 
-    m = Py_InitModule3("_sepa", separator_methods, "SCIP Separator");
+    m = PyModule_Create(&sepa_module); 
 
     Py_INCREF(& separator_type);
     PyModule_AddObject(m, "separator", (PyObject *) &separator_type);
@@ -146,5 +153,7 @@ PyMODINIT_FUNC init_sepa(void) {
     error = PyErr_NewException("_sepa.error", NULL, NULL);
     Py_INCREF(error);
     PyModule_AddObject(m, "error", error);   
+
+    return m;
 }
 

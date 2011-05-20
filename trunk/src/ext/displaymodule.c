@@ -42,8 +42,8 @@ static PyObject* display_column_getattr(display_column *self, PyObject *attr_nam
     char *attr;
 
     // Check and make sure we have a string as attribute name...
-    if (PyString_Check(attr_name)) {
-        attr = PyString_AsString(attr_name);
+    if (PyBytes_Check(attr_name)) {
+        attr = PyBytes_AsString(attr_name);
 
         if (!strcmp(attr, "position"))
             return Py_BuildValue("i", SCIPdispGetPosition(self->display));
@@ -52,7 +52,7 @@ static PyObject* display_column_getattr(display_column *self, PyObject *attr_nam
         if (!strcmp(attr, "width"))
             return Py_BuildValue("i", SCIPdispGetWidth(self->display));
     }
-    return PyObject_GenericGetAttr(self, attr_name);
+    return PyObject_GenericGetAttr((PyObject *) self, attr_name);
 }
 
 static int display_column_setattr(display_column *self, PyObject *attr_name, PyObject *value) {
@@ -60,13 +60,13 @@ static int display_column_setattr(display_column *self, PyObject *attr_name, PyO
     int i;
     
     // Check and make sure we have a string as attribute name...
-    if (PyString_Check(attr_name)) {
-        attr = PyString_AsString(attr_name);
+    if (PyBytes_Check(attr_name)) {
+        attr = PyBytes_AsString(attr_name);
          PY_SCIP_SET_INT_MIN("position", self->display->position, -1);
          PY_SCIP_SET_INT_MIN("priority", self->display->priority, -1);
          PY_SCIP_SET_INT_MIN("width", self->display->width, -1);
     }
-    return PyObject_GenericSetAttr(self, attr_name, value);
+    return PyObject_GenericSetAttr((PyObject *) self, attr_name, value);
 }
 
 /*****************************************************************************/
@@ -85,8 +85,7 @@ static PyMethodDef display_column_methods[] = {
 };
 
 static PyTypeObject display_column_type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                             /* ob_size */
+    PyVarObject_HEAD_INIT(NULL, 0)
     "_disp.display_column",        /* tp_name */
     sizeof(display_column),        /* tp_basicsize */
     0,                             /* tp_itemsize */
@@ -102,8 +101,8 @@ static PyTypeObject display_column_type = {
     0,                             /* tp_hash */
     0,                             /* tp_call */
     0,                             /* tp_str */
-    display_column_getattr,        /* tp_getattro */
-    display_column_setattr,        /* tp_setattro */
+    (getattrofunc) display_column_getattr, /* tp_getattro */
+    (setattrofunc) display_column_setattr, /* tp_setattro */
     0,                             /* tp_as_buffer */
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /* tp_flags */
     "SCIP display column",         /* tp_doc */
@@ -126,6 +125,14 @@ static PyTypeObject display_column_type = {
     0 ,                            /* tp_new */
 };
 
+static PyModuleDef disp_module = {
+    PyModuleDef_HEAD_INIT,
+    "_disp",
+    "SCIP Display Column",
+    -1,
+    NULL, NULL, NULL, NULL, NULL
+};
+
 #ifndef PyMODINIT_FUNC    /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
@@ -134,9 +141,9 @@ PyMODINIT_FUNC init_disp(void) {
 
     display_column_type.tp_new = PyType_GenericNew;
     if (PyType_Ready(&display_column_type) < 0)
-        return;
+        return NULL;
 
-    m = Py_InitModule3("_disp", display_column_methods, "SCIP Display Column");
+    m = PyModule_Create(&disp_module); 
 
     Py_INCREF(&display_column_type);
     PyModule_AddObject(m, "display_column", (PyObject *) &display_column_type);
@@ -145,5 +152,7 @@ PyMODINIT_FUNC init_disp(void) {
     error = PyErr_NewException("disp.error", NULL, NULL);
     Py_INCREF(error);
     PyModule_AddObject(m, "error", error);   
+
+    return m;
 }
 

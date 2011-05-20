@@ -7,10 +7,15 @@
 
 #include <scip/branch.h>
 #include <scip/clock.h>
+#include <scip/conflict.h>
+#include <scip/heur.h>
+#include <scip/misc.h>
+#include <scip/nodesel.h>
+#include <scip/presol.h>
+#include <scip/prop.h>
+#include <scip/sepa.h>
 #include <scip/scip.h>
 #include <scip/scipdefplugins.h>
-#include <scip/misc.h>
-#include <scip/prob.h>
 #include <scip/sol.h>
 #include <scip/var.h>
 

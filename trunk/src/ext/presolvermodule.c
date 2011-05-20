@@ -42,24 +42,24 @@ static PyObject* presolver_getattr(presolver *self, PyObject *attr_name) {
     char *attr;
 
     // Check and make sure we have a string as attribute name...
-    if (PyString_Check(attr_name)) {
-        attr = PyString_AsString(attr_name);
+    if (PyBytes_Check(attr_name)) {
+        attr = PyBytes_AsString(attr_name);
 
         if (!strcmp(attr, "priority"))
             return Py_BuildValue("i", SCIPpresolGetPriority(self->presol));
     }
-    return PyObject_GenericGetAttr(self, attr_name);
+    return PyObject_GenericGetAttr((PyObject *) self, attr_name);
 }
 
 static int presolver_setattr(presolver *self, PyObject *attr_name, PyObject *value) {
     char *attr;
     
     // Check and make sure we have a string as attribute name...
-    if (PyString_Check(attr_name)) {
-        attr = PyString_AsString(attr_name);
+    if (PyBytes_Check(attr_name)) {
+        attr = PyBytes_AsString(attr_name);
         PY_SCIP_SET_PRIORITY(SCIPpresolSetPriority, self->presol);
     }
-    return PyObject_GenericSetAttr(self, attr_name, value);
+    return PyObject_GenericSetAttr((PyObject *) self, attr_name, value);
 }
 
 /*****************************************************************************/
@@ -78,8 +78,7 @@ static PyMethodDef presolver_methods[] = {
 };
 
 static PyTypeObject presolver_type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                             /* ob_size */
+    PyVarObject_HEAD_INIT(NULL, 0)
     "_presol.presolver",             /* tp_name */
     sizeof(presolver),             /* tp_basicsize */
     0,                             /* tp_itemsize */
@@ -95,8 +94,8 @@ static PyTypeObject presolver_type = {
     0,                             /* tp_hash */
     0,                             /* tp_call */
     0,                             /* tp_str */
-    presolver_getattr,             /* tp_getattro */
-    presolver_setattr,             /* tp_setattro */
+    (getattrofunc) presolver_getattr, /* tp_getattro */
+    (setattrofunc) presolver_setattr, /* tp_setattro */
     0,                             /* tp_as_buffer */
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /* tp_flags */
     "SCIP presolvers",             /* tp_doc */
@@ -119,6 +118,14 @@ static PyTypeObject presolver_type = {
     0 ,                            /* tp_new */
 };
 
+static PyModuleDef presol_module = {
+    PyModuleDef_HEAD_INIT,
+    "_presol",
+    "SCIP Presolver",
+    -1,
+    NULL, NULL, NULL, NULL, NULL
+};
+
 #ifndef PyMODINIT_FUNC    /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
@@ -127,9 +134,9 @@ PyMODINIT_FUNC init_presol(void) {
 
     presolver_type.tp_new = PyType_GenericNew;
     if (PyType_Ready(& presolver_type) < 0)
-        return;
+        return NULL;
 
-    m = Py_InitModule3("_presol", presolver_methods, "SCIP Presolver");
+    m = PyModule_Create(&presol_module); 
 
     Py_INCREF(& presolver_type);
     PyModule_AddObject(m, "presolver", (PyObject *) &presolver_type);
@@ -138,5 +145,7 @@ PyMODINIT_FUNC init_presol(void) {
     error = PyErr_NewException("_presol.error", NULL, NULL);
     Py_INCREF(error);
     PyModule_AddObject(m, "error", error);   
+
+    return m;
 }
 
