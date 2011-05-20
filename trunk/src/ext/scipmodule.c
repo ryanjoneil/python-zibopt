@@ -287,7 +287,7 @@ PyMODINIT_FUNC PyInit_scip(void) {
     if (PyType_Ready(&solver_type) < 0)
         return NULL;
 
-    m = PyModule_Create(&scip_module); //"_scip", solver_methods, "SCIP Solver");
+    m = PyModule_Create(&scip_module); 
 
     // Constants on scip module
     PyModule_AddIntConstant(m, "BINARY", SCIP_VARTYPE_BINARY);

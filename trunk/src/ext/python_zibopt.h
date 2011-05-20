@@ -11,6 +11,8 @@
 #include <scip/misc.h>
 #include <scip/prob.h>
 #include <scip/sol.h>
+#include <scip/var.h>
+
 #include <scip/struct_branch.h>
 #include <scip/struct_conflict.h>
 #include <scip/struct_disp.h>

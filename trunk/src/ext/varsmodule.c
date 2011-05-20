@@ -78,7 +78,7 @@ static int variable_init(variable *self, PyObject *args, PyObject *kwds) {
         PY_SCIP_CALL(error, -1, SCIPchgVarBranchPriority(self->scip, self->variable, priority));
 
     // Put new variable at head of linked list
-    self->next = solv->first_var;
+    self->next = (struct variable *) solv->first_var;
     solv->first_var = self;
 
     return 0;
@@ -92,25 +92,24 @@ static PyObject* variable_getattr(variable *self, PyObject *attr_name) {
     char *attr;
 
     // Check and make sure we have a string as attribute name...
-    if (PyString_Check(attr_name)) {
-        attr = PyString_AsString(attr_name);
+    if (PyBytes_Check(attr_name)) {
+        attr = PyBytes_AsString(attr_name);
 
         if (!strcmp(attr, "priority"))
             return Py_BuildValue("i", SCIPvarGetBranchPriority(self->variable));
     }
-    return PyObject_GenericGetAttr(self, attr_name);
+    return PyObject_GenericGetAttr((PyObject *) self, attr_name);
 }
 
 static int variable_setattr(variable *self, PyObject *attr_name, PyObject *value) {
     char *attr;
-    int i;
     
     // Check and make sure we have a string as attribute name...
-    if (PyString_Check(attr_name)) {
-        attr = PyString_AsString(attr_name);
+    if (PyBytes_Check(attr_name)) {
+        attr = PyBytes_AsString(attr_name);
         if (!strcmp(attr, "priority")) {
-            if (PyInt_Check(value)) {
-                PY_SCIP_CALL(error, -1, SCIPchgVarBranchPriority(self->scip, self->variable, PyInt_AsLong(value)));
+            if (PyLong_Check(value)) {
+                PY_SCIP_CALL(error, -1, SCIPchgVarBranchPriority(self->scip, self->variable, PyLong_AsLong(value)));
                 return 0;
             } else {
                 PyErr_SetString(error, "invalid value for variable branching priority");
@@ -118,14 +117,14 @@ static int variable_setattr(variable *self, PyObject *attr_name, PyObject *value
             }
         }
     }
-    return PyObject_GenericSetAttr(self, attr_name, value);
+    return PyObject_GenericSetAttr((PyObject *) self, attr_name, value);
 }
 
 /*****************************************************************************/
 /* ADDITONAL METHODS                                                         */
 /*****************************************************************************/
 static PyObject *variable_set_coefficient(variable *self, PyObject *arg) {
-    if (PyFloat_Check(arg) || PyInt_Check(arg)) {
+    if (PyFloat_Check(arg) || PyLong_Check(arg)) {
         // SCIPvarChgObj Arguments:
         // var          variable to change
         // blkmem       block memory
@@ -148,7 +147,7 @@ static PyObject *variable_set_coefficient(variable *self, PyObject *arg) {
 
 static PyObject *variable_tighten_lower(variable *self, PyObject *arg) {
     double d;
-    if (PyFloat_Check(arg) || PyInt_Check(arg)) {
+    if (PyFloat_Check(arg) || PyLong_Check(arg)) {
         d = PyFloat_AsDouble(arg);
         if (d > self->lower) {
             PY_SCIP_CALL(error, NULL, 
@@ -166,7 +165,7 @@ static PyObject *variable_tighten_lower(variable *self, PyObject *arg) {
 
 static PyObject *variable_tighten_upper(variable *self, PyObject *arg) {
     double d;
-    if (PyFloat_Check(arg) || PyInt_Check(arg)) {
+    if (PyFloat_Check(arg) || PyLong_Check(arg)) {
         d = PyFloat_AsDouble(arg);
         if (d < self->upper) {
             PY_SCIP_CALL(error, NULL, 
@@ -195,8 +194,7 @@ static PyMethodDef variable_methods[] = {
 };
 
 static PyTypeObject variable_type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                             /* ob_size */
+    PyVarObject_HEAD_INIT(NULL, 0)
     "_vars.variable",              /* tp_name */
     sizeof(variable),              /* tp_basicsize */
     0,                             /* tp_itemsize */
@@ -212,8 +210,8 @@ static PyTypeObject variable_type = {
     0,                             /* tp_hash */
     0,                             /* tp_call */
     0,                             /* tp_str */
-    variable_getattr,              /* tp_getattro */
-    variable_setattr,              /* tp_setattro */
+    (getattrofunc) variable_getattr, /* tp_getattro */
+    (setattrofunc) variable_setattr, /* tp_setattro */
     0,                             /* tp_as_buffer */
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /* tp_flags */
     "SCIP variable objects",       /* tp_doc */
@@ -236,6 +234,14 @@ static PyTypeObject variable_type = {
     0,                             /* tp_new */
 };
 
+static PyModuleDef vars_module = {
+    PyModuleDef_HEAD_INIT,
+    "_vars",
+    "SCIP Variable",
+    -1,
+    NULL, NULL, NULL, NULL, NULL
+};
+
 #ifndef PyMODINIT_FUNC    /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
@@ -244,9 +250,9 @@ PyMODINIT_FUNC init_vars(void) {
 
     variable_type.tp_new = PyType_GenericNew;
     if (PyType_Ready(&variable_type) < 0)
-        return;
+        return NULL;
 
-    m = Py_InitModule3("_vars", variable_methods, "SCIP Variable");
+    m = PyModule_Create(&vars_module); 
 
     Py_INCREF(&variable_type);
     PyModule_AddObject(m, "variable", (PyObject *) &variable_type);
@@ -255,5 +261,7 @@ PyMODINIT_FUNC init_vars(void) {
     error = PyErr_NewException("_vars.error", NULL, NULL);
     Py_INCREF(error);
     PyModule_AddObject(m, "error", error);
+
+    return m;
 }
 
