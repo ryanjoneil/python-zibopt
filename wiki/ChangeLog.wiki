@@ -2,6 +2,7 @@
 #labels Featured
 
 = 0.6 dev =
+  * Issue 9: Ported to Python 3.2 and resolved all build warnings
   * Issue 16: Added ability to stop the solver after a number of solutions are found
 {{{
 solver.maximize(nsol=30)
