@@ -178,7 +178,7 @@ static PyModuleDef cons_module = {
 #ifndef PyMODINIT_FUNC    /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
-PyMODINIT_FUNC init_cons(void) {
+PyMODINIT_FUNC PyInit__cons(void) {
     PyObject* m;
 
     constraint_type.tp_new = PyType_GenericNew;

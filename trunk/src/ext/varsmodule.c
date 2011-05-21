@@ -246,7 +246,7 @@ static PyModuleDef vars_module = {
 #ifndef PyMODINIT_FUNC    /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
-PyMODINIT_FUNC init_vars(void) {
+PyMODINIT_FUNC PyInit__vars(void) {
     PyObject* m;
 
     variable_type.tp_new = PyType_GenericNew;

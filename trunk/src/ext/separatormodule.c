@@ -137,7 +137,7 @@ static PyModuleDef sepa_module = {
 #ifndef PyMODINIT_FUNC    /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
-PyMODINIT_FUNC init_sepa(void) {
+PyMODINIT_FUNC PyInit__sepa(void) {
     PyObject* m;
 
     separator_type.tp_new = PyType_GenericNew;

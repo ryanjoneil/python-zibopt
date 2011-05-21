@@ -282,7 +282,7 @@ static PyModuleDef scip_module = {
 #ifndef PyMODINIT_FUNC    /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
-PyMODINIT_FUNC PyInit_scip(void) {
+PyMODINIT_FUNC PyInit__scip(void) {
     PyObject* m;
 
     if (PyType_Ready(&solver_type) < 0)

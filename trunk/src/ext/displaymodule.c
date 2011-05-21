@@ -136,7 +136,7 @@ static PyModuleDef disp_module = {
 #ifndef PyMODINIT_FUNC    /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
-PyMODINIT_FUNC init_disp(void) {
+PyMODINIT_FUNC PyInit__disp(void) {
     PyObject* m;
 
     display_column_type.tp_new = PyType_GenericNew;

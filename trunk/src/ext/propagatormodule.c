@@ -133,7 +133,7 @@ static PyModuleDef prop_module = {
 #ifndef PyMODINIT_FUNC    /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
-PyMODINIT_FUNC init_prop(void) {
+PyMODINIT_FUNC PyInit__prop(void) {
     PyObject* m;
 
     propagator_type.tp_new = PyType_GenericNew;

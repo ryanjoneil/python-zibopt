@@ -129,7 +129,7 @@ static PyModuleDef conflict_module = {
 #ifndef PyMODINIT_FUNC    /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
-PyMODINIT_FUNC init_conflict(void) {
+PyMODINIT_FUNC PyInit__conflict(void) {
     PyObject* m;
 
     conflict_type.tp_new = PyType_GenericNew;

@@ -137,7 +137,7 @@ static PyModuleDef branch_module = {
 #ifndef PyMODINIT_FUNC    /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
-PyMODINIT_FUNC init_branch(void) {
+PyMODINIT_FUNC PyInit__branch(void) {
     PyObject* m;
 
     branching_rule_type.tp_new = PyType_GenericNew;

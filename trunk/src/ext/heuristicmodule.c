@@ -139,7 +139,7 @@ static PyModuleDef heur_module = {
 #ifndef PyMODINIT_FUNC    /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
-PyMODINIT_FUNC init_heur(void) {
+PyMODINIT_FUNC PyInit__heur(void) {
     PyObject* m;
 
     heuristic_type.tp_new = PyType_GenericNew;
