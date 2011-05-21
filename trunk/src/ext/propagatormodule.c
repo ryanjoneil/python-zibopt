@@ -39,11 +39,11 @@ static void propagator_dealloc(propagator *self) {
 }
 
 static PyObject* propagator_getattr(propagator *self, PyObject *attr_name) {
-    char *attr;
+    const char *attr;
 
     // Check and make sure we have a string as attribute name...
-    if (PyBytes_Check(attr_name)) {
-        attr = PyBytes_AsString(attr_name);
+    if (PyUnicode_Check(attr_name)) {
+        attr = PyUnicode_AS_DATA(attr_name);
 
         if (!strcmp(attr, "frequency"))
             return Py_BuildValue("i", SCIPpropGetFreq(self->prop));
@@ -54,12 +54,12 @@ static PyObject* propagator_getattr(propagator *self, PyObject *attr_name) {
 }
 
 static int propagator_setattr(propagator *self, PyObject *attr_name, PyObject *value) {
-    char *attr;
+    const char *attr;
     int i;
     
     // Check and make sure we have a string as attribute name...
-    if (PyBytes_Check(attr_name)) {
-        attr = PyBytes_AsString(attr_name);
+    if (PyUnicode_Check(attr_name)) {
+        attr = PyUnicode_AS_DATA(attr_name);
         PY_SCIP_SET_INT_MIN("frequency", self->prop->freq, -1); 
         PY_SCIP_SET_PRIORITY(SCIPpropSetPriority, self->prop);
     }

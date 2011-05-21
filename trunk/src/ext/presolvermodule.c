@@ -39,11 +39,11 @@ static void presolver_dealloc(presolver *self) {
 }
 
 static PyObject* presolver_getattr(presolver *self, PyObject *attr_name) {
-    char *attr;
+    const char *attr;
 
     // Check and make sure we have a string as attribute name...
-    if (PyBytes_Check(attr_name)) {
-        attr = PyBytes_AsString(attr_name);
+    if (PyUnicode_Check(attr_name)) {
+        attr = PyUnicode_AS_DATA(attr_name);
 
         if (!strcmp(attr, "priority"))
             return Py_BuildValue("i", SCIPpresolGetPriority(self->presol));
@@ -52,11 +52,11 @@ static PyObject* presolver_getattr(presolver *self, PyObject *attr_name) {
 }
 
 static int presolver_setattr(presolver *self, PyObject *attr_name, PyObject *value) {
-    char *attr;
+    const char *attr;
     
     // Check and make sure we have a string as attribute name...
-    if (PyBytes_Check(attr_name)) {
-        attr = PyBytes_AsString(attr_name);
+    if (PyUnicode_Check(attr_name)) {
+        attr = PyUnicode_AS_DATA(attr_name);
         PY_SCIP_SET_PRIORITY(SCIPpresolSetPriority, self->presol);
     }
     return PyObject_GenericSetAttr((PyObject *) self, attr_name, value);

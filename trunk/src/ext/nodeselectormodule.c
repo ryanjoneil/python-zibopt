@@ -39,11 +39,11 @@ static void selector_dealloc(selector *self) {
 }
 
 static PyObject* selector_getattr(selector *self, PyObject *attr_name) {
-    char *attr;
+    const char *attr;
 
     // Check and make sure we have a string as attribute name...
-    if (PyBytes_Check(attr_name)) {
-        attr = PyBytes_AsString(attr_name);
+    if (PyUnicode_Check(attr_name)) {
+        attr = PyUnicode_AS_DATA(attr_name);
 
         if (!strcmp(attr, "memsavepriority"))
             return Py_BuildValue("i", SCIPnodeselGetMemsavePriority(self->nodesel));
@@ -54,11 +54,11 @@ static PyObject* selector_getattr(selector *self, PyObject *attr_name) {
 }
 
 static int selector_setattr(selector *self, PyObject *attr_name, PyObject *value) {
-    char *attr;
+    const char *attr;
     
     // Check and make sure we have a string as attribute name...
-    if (PyBytes_Check(attr_name)) {
-        attr = PyBytes_AsString(attr_name);
+    if (PyUnicode_Check(attr_name)) {
+        attr = PyUnicode_AS_DATA(attr_name);
 
         if (!strcmp(attr, "memsavepriority")) {
             if (PyLong_Check(value)) {

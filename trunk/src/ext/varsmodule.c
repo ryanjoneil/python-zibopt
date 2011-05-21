@@ -90,11 +90,11 @@ static void variable_dealloc(variable *self) {
 }
 
 static PyObject* variable_getattr(variable *self, PyObject *attr_name) {
-    char *attr;
+    const char *attr;
 
     // Check and make sure we have a string as attribute name...
-    if (PyBytes_Check(attr_name)) {
-        attr = PyBytes_AsString(attr_name);
+    if (PyUnicode_Check(attr_name)) {
+        attr = PyUnicode_AS_DATA(attr_name);
 
         if (!strcmp(attr, "priority"))
             return Py_BuildValue("i", SCIPvarGetBranchPriority(self->variable));
@@ -103,11 +103,11 @@ static PyObject* variable_getattr(variable *self, PyObject *attr_name) {
 }
 
 static int variable_setattr(variable *self, PyObject *attr_name, PyObject *value) {
-    char *attr;
+    const char *attr;
     
     // Check and make sure we have a string as attribute name...
-    if (PyBytes_Check(attr_name)) {
-        attr = PyBytes_AsString(attr_name);
+    if (PyUnicode_Check(attr_name)) {
+        attr = PyUnicode_AS_DATA(attr_name);
         if (!strcmp(attr, "priority")) {
             if (PyLong_Check(value)) {
                 PY_SCIP_CALL(error, -1, SCIPchgVarBranchPriority(self->scip, self->variable, PyLong_AsLong(value)));

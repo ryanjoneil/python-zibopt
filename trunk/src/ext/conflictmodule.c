@@ -39,11 +39,11 @@ static void conflict_dealloc(conflict *self) {
 }
 
 static PyObject* conflict_getattr(conflict *self, PyObject *attr_name) {
-    char *attr;
+    const char *attr;
 
     // Check and make sure we have a string as attribute name...
-    if (PyBytes_Check(attr_name)) {
-        attr = PyBytes_AsString(attr_name);
+    if (PyUnicode_Check(attr_name)) {
+        attr = PyUnicode_AS_DATA(attr_name);
 
         if (!strcmp(attr, "priority"))
             return Py_BuildValue("i", SCIPconflicthdlrGetPriority(self->conflict));
@@ -52,11 +52,11 @@ static PyObject* conflict_getattr(conflict *self, PyObject *attr_name) {
 }
 
 static int conflict_setattr(conflict *self, PyObject *attr_name, PyObject *value) {
-    char *attr;
+    const char *attr;
     
     // Check and make sure we have a string as attribute name...
-    if (PyBytes_Check(attr_name)) {
-        attr = PyBytes_AsString(attr_name);
+    if (PyUnicode_Check(attr_name)) {
+        attr = PyUnicode_AS_DATA(attr_name);
         PY_SCIP_SET_PRIORITY(SCIPconflicthdlrSetPriority, self->conflict);
     }
     return PyObject_GenericSetAttr((PyObject *) self, attr_name, value);

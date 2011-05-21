@@ -39,11 +39,11 @@ static void heuristic_dealloc(heuristic *self) {
 }
 
 static PyObject* heuristic_getattr(heuristic *self, PyObject *attr_name) {
-    char *attr;
+    const char *attr;
 
     // Check and make sure we have a string as attribute name...
-    if (PyBytes_Check(attr_name)) {
-        attr = PyBytes_AsString(attr_name);
+    if (PyUnicode_Check(attr_name)) {
+        attr = PyUnicode_AS_DATA(attr_name);
 
         if (!strcmp(attr, "freqofs"))
             return Py_BuildValue("i", SCIPheurGetFreqofs(self->heur));
@@ -58,12 +58,12 @@ static PyObject* heuristic_getattr(heuristic *self, PyObject *attr_name) {
 }
 
 static int heuristic_setattr(heuristic *self, PyObject *attr_name, PyObject *value) {
-    char *attr;
+    const char *attr;
     int i;
     
     // Check and make sure we have a string as attribute name...
-    if (PyBytes_Check(attr_name)) {
-        attr = PyBytes_AsString(attr_name);
+    if (PyUnicode_Check(attr_name)) {
+        attr = PyUnicode_AS_DATA(attr_name);
         PY_SCIP_SET_INT_MIN("freqofs", self->heur->freqofs, 0); 
         PY_SCIP_SET_INT_MIN("frequency", self->heur->freq, -1); 
         PY_SCIP_SET_INT_MIN("maxdepth", self->heur->maxdepth, -1); 
