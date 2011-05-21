@@ -111,7 +111,7 @@ class variable(_vars.variable):
                 other = type(self)(other)
             
             # Add the coefficients of the other _cons_builder to our dict
-            for var, coeff in other.coefficients.iteritems():
+            for var, coeff in other.coefficients.items():
                 try:
                     self.coefficients[var] += coeff
                 except KeyError:
@@ -127,7 +127,7 @@ class variable(_vars.variable):
             if not isinstance(other, type(self)):
                 other = type(self)(other)
             
-            for var, coeff in other.coefficients.iteritems():
+            for var, coeff in other.coefficients.items():
                 try:
                     self.coefficients[var] -= coeff
                 except KeyError:
@@ -138,7 +138,7 @@ class variable(_vars.variable):
         def __mul__(self, other):
             # other should always be a number
             other = float(other)
-            for var, coeff in self.coefficients.iteritems():
+            for var, coeff in self.coefficients.items():
                 self.coefficients[var] *= other
             return self
 
@@ -211,6 +211,10 @@ class variable(_vars.variable):
     def __eq__(self, other):
         self._lower_bnd = self._upper_bnd = float(other)
         return self
+
+    def __hash__(self):
+        # TODO: figure out if this is the right way to provide hashing on variables
+        return hash(id(self))
 
 class solution(_soln.solution):
     '''
@@ -391,7 +395,7 @@ class solver(_scip.solver):
             del kwds['upper']
             
         cons = _cons.constraint(self, **kwds)
-        for k, v in coefficients.iteritems():
+        for k, v in coefficients.items():
             cons.variable(k, v)
 
         cons.register()
