@@ -58,7 +58,7 @@ if __name__ == '__main__':
     try:
         distance = json.load(open(sys.argv[1]))
     except IndexError:
-        print 'usage: %s data.json' % sys.argv[0]
+        print('usage: %s data.json' % sys.argv[0])
         sys.exit()
 
     solver = scip.solver()#quiet=False)
@@ -84,10 +84,10 @@ if __name__ == '__main__':
 
         if solution:
             subtours = walk_subtours(arcs, solution)
-            print '-' * 80
-            print '[%d] LENGTH:' % n, solution.objective, '/ SUBTOURS:', len(subtours)
+            print('-' * 80)
+            print('[%d] LENGTH:' % n, solution.objective, '/ SUBTOURS:', len(subtours))
             for s in subtours:
-                print '   ', s
+                print('   ', s)
  
             n += 1
             if len(subtours) > 1:
@@ -99,7 +99,7 @@ if __name__ == '__main__':
                 for subtour in subtours:
                     # n points in a tour have n arcs, not n-1.  That means we
                     # have to include the arc going back to the start node.
-                    pairs = zip(subtour, subtour[1:]+[subtour[0]])
+                    pairs = list(zip(subtour, subtour[1:]+[subtour[0]]))
                     solver += sum(
                         # Column # is the higher of the two
                         arcs[max(*pair)][min(*pair)] for pair in pairs
@@ -110,6 +110,6 @@ if __name__ == '__main__':
                 break
 
         else:
-            print 'infeasible'
+            print('infeasible')
             break
 

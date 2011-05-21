@@ -192,7 +192,6 @@ static PyObject *solver_maximize(solver *self, PyObject *args, PyObject *kwds) {
     Py_RETURN_NONE;
 }
 
-
 static PyObject *solver_minimize(solver *self, PyObject *args, PyObject *kwds) {
     PY_SCIP_CALL(error, NULL, SCIPsetObjsense(self->scip, SCIP_OBJSENSE_MINIMIZE));
     _optimize(self, args, kwds);

@@ -62,14 +62,14 @@ if __name__ == '__main__':
     # All variables have 0 coefficients, so we can either max or min            
     solution = solver.minimize()
     if solution:
-        print 'TOTAL COST:', solution.objective
+        print('TOTAL COST:', solution.objective)
         for f in FACILITIES:
             if solution[y[f]] > 0.5:
-                print 'FACTILITY', f, 'CUSTOMERS:',
+                print('FACTILITY', f, 'CUSTOMERS:', end='')
                 for c in CUSTOMERS:
                     if solution[x[f][c]] > 0.5:
-                        print c,
-                print
+                        print(c, end='')
+                print()
     else:
-        print 'invalid'
+        print('invalid')
 

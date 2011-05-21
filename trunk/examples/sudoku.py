@@ -64,8 +64,8 @@ if __name__ == '__main__':
                     break
                 
         for row in problem:
-            print row
+            print(row)
 
     else:
-        print 'invalid'
+        print('invalid')
 
