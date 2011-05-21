@@ -241,7 +241,7 @@ class solution(_soln.solution):
         super(solution, self).__init__(solver)
         self.solver = solver
 
-    def __nonzero__(self):
+    def __bool__(self):
         return not (self.infeasible or self.unbounded or self.inforunbd)
     
     def __getitem__(self, key):
