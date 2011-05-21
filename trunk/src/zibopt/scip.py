@@ -49,12 +49,12 @@ Translated to python-zibopt this becomes:
 
     # Print the optimal solution if it is feasible.
     if solution:
-        print 'z  =', solution.objective
-        print 'x1 =', solution[x1]
-        print 'x3 =', solution[x2]
-        print 'x2 =', solution[x3]
+        print('z  =', solution.objective)
+        print('x1 =', solution[x1])
+        print('x3 =', solution[x2])
+        print('x2 =', solution[x3])
     else:
-        print 'invalid problem'
+        print('invalid problem')
 '''
 
 from zibopt import (
@@ -217,7 +217,6 @@ class variable(_vars.variable):
         return hash(id(self))
 
     def __getattr__(self, attr):
-        print("FOO 0 %r" % attr)
         return super(variable, self).__getattr__(attr)
 
 class solution(_soln.solution):
