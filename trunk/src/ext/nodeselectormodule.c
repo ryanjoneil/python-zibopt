@@ -39,28 +39,20 @@ static void selector_dealloc(selector *self) {
 }
 
 static PyObject* selector_getattr(selector *self, PyObject *attr_name) {
-    const char *attr;
-
     // Check and make sure we have a string as attribute name...
     if (PyUnicode_Check(attr_name)) {
-        attr = PyUnicode_AS_DATA(attr_name);
-
-        if (!strcmp(attr, "memsavepriority"))
+        if (PyUnicode_CompareWithASCIIString(attr_name, "memsavepriority") == 0)
             return Py_BuildValue("i", SCIPnodeselGetMemsavePriority(self->nodesel));
-        if (!strcmp(attr, "stdpriority"))
+        if (PyUnicode_CompareWithASCIIString(attr_name, "stdpriority") == 0)
             return Py_BuildValue("i", SCIPnodeselGetStdPriority(self->nodesel));
     }
     return PyObject_GenericGetAttr((PyObject *) self, attr_name);
 }
 
 static int selector_setattr(selector *self, PyObject *attr_name, PyObject *value) {
-    const char *attr;
-    
     // Check and make sure we have a string as attribute name...
     if (PyUnicode_Check(attr_name)) {
-        attr = PyUnicode_AS_DATA(attr_name);
-
-        if (!strcmp(attr, "memsavepriority")) {
+        if (PyUnicode_CompareWithASCIIString(attr_name, "memsavepriority") == 0) {
             if (PyLong_Check(value)) {
                 SCIPnodeselSetMemsavePriority(self->nodesel, self->scip->set, PyLong_AsLong(value));
                 return 0;
@@ -70,7 +62,7 @@ static int selector_setattr(selector *self, PyObject *attr_name, PyObject *value
             }
         }
 
-        if (!strcmp(attr, "stdpriority")) {
+        if (PyUnicode_CompareWithASCIIString(attr_name, "stdpriority") == 0) {
             if (PyLong_Check(value)) {
                 SCIPnodeselSetStdPriority(self->nodesel, self->scip->set, PyLong_AsLong(value));
                 return 0;

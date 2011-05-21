@@ -35,7 +35,7 @@ static PyObject *function_name(solver *self) { \
 
 // SCIP settings modules: generic attribute setting functions
 #define PY_SCIP_SET_DBL_MIN(name, attribute, minimum) \
-        if (!strcmp(attr, name)) { \
+        if (PyUnicode_CompareWithASCIIString(attr_name, name) == 0) { \
             if (PyFloat_Check(value) || PyLong_Check(value)) { \
                 if (PyFloat_Check(value) || PyLong_Check(value)) \
                     d = (double) PyLong_AsLong(value); \
@@ -54,7 +54,7 @@ static PyObject *function_name(solver *self) { \
         }
 
 #define PY_SCIP_SET_INT_MIN(name, attribute, minimum) \
-        if (!strcmp(attr, name)) { \
+        if (PyUnicode_CompareWithASCIIString(attr_name, name) == 0) { \
             if (PyLong_Check(value)) { \
                 i = PyLong_AsLong(value); \
                 if (i < minimum) { \
@@ -70,7 +70,7 @@ static PyObject *function_name(solver *self) { \
         }
 
 #define PY_SCIP_SET_INT(name, attribute) \
-        if (!strcmp(attr, name)) { \
+        if (PyUnicode_CompareWithASCIIString(attr_name, name) == 0) { \
             if (PyLong_Check(value)) { \
                 attribute = PyLong_AsLong(value); \
                 return 0; \
@@ -81,7 +81,7 @@ static PyObject *function_name(solver *self) { \
         }
 
 #define PY_SCIP_SET_PRIORITY(function, object) \
-        if (!strcmp(attr, "priority")) { \
+        if (PyUnicode_CompareWithASCIIString(attr_name, "priority") == 0) { \
             if (PyLong_Check(value)) { \
                 function(object, self->scip->set, PyLong_AsLong(value)); \
                 return 0; \

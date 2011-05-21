@@ -39,30 +39,24 @@ static void separator_dealloc(separator *self) {
 }
 
 static PyObject* separator_getattr(separator *self, PyObject *attr_name) {
-    const char *attr;
-
     // Check and make sure we have a string as attribute name...
     if (PyUnicode_Check(attr_name)) {
-        attr = PyUnicode_AS_DATA(attr_name);
-
-        if (!strcmp(attr, "frequency"))
+        if (PyUnicode_CompareWithASCIIString(attr_name, "frequency") == 0)
             return Py_BuildValue("i", SCIPsepaGetFreq(self->sepa));
-        if (!strcmp(attr, "maxbounddist"))
+        if (PyUnicode_CompareWithASCIIString(attr_name, "maxbounddist") == 0)
             return Py_BuildValue("d", SCIPsepaGetMaxbounddist(self->sepa));
-        if (!strcmp(attr, "priority"))
+        if (PyUnicode_CompareWithASCIIString(attr_name, "priority") == 0)
             return Py_BuildValue("i", SCIPsepaGetPriority(self->sepa));
     }
     return PyObject_GenericGetAttr((PyObject *) self, attr_name);
 }
 
 static int separator_setattr(separator *self, PyObject *attr_name, PyObject *value) {
-    const char *attr;
     int i;
     double d;
     
     // Check and make sure we have a string as attribute name...
     if (PyUnicode_Check(attr_name)) {
-        attr = PyUnicode_AS_DATA(attr_name);
         PY_SCIP_SET_INT_MIN("frequency", self->sepa->freq, -1); 
         PY_SCIP_SET_DBL_MIN("maxbounddist", self->sepa->maxbounddist, -1); 
         PY_SCIP_SET_PRIORITY(SCIPsepaSetPriority, self->sepa);

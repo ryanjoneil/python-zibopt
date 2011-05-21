@@ -39,29 +39,23 @@ static void display_column_dealloc(display_column *self) {
 }
 
 static PyObject* display_column_getattr(display_column *self, PyObject *attr_name) {
-    const char *attr;
-
     // Check and make sure we have a string as attribute name...
     if (PyUnicode_Check(attr_name)) {
-        attr = PyUnicode_AS_DATA(attr_name);
-
-        if (!strcmp(attr, "position"))
+        if (PyUnicode_CompareWithASCIIString(attr_name, "position") == 0)
             return Py_BuildValue("i", SCIPdispGetPosition(self->display));
-        if (!strcmp(attr, "priority"))
+        if (PyUnicode_CompareWithASCIIString(attr_name, "priority") == 0)
             return Py_BuildValue("i", SCIPdispGetPriority(self->display));
-        if (!strcmp(attr, "width"))
+        if (PyUnicode_CompareWithASCIIString(attr_name, "width") == 0)
             return Py_BuildValue("i", SCIPdispGetWidth(self->display));
     }
     return PyObject_GenericGetAttr((PyObject *) self, attr_name);
 }
 
 static int display_column_setattr(display_column *self, PyObject *attr_name, PyObject *value) {
-    const char *attr;
     int i;
     
     // Check and make sure we have a string as attribute name...
     if (PyUnicode_Check(attr_name)) {
-        attr = PyUnicode_AS_DATA(attr_name);
          PY_SCIP_SET_INT_MIN("position", self->display->position, -1);
          PY_SCIP_SET_INT_MIN("priority", self->display->priority, -1);
          PY_SCIP_SET_INT_MIN("width", self->display->width, -1);

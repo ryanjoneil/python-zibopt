@@ -39,30 +39,24 @@ static void branching_rule_dealloc(branching_rule *self) {
 }
 
 static PyObject* branching_rule_getattr(branching_rule *self, PyObject *attr_name) {
-    const char *attr;
-
     // Check and make sure we have a string as attribute name...
     if (PyUnicode_Check(attr_name)) {
-        attr = PyUnicode_AS_DATA(attr_name);
-
-        if (!strcmp(attr, "maxbounddist"))
+        if (PyUnicode_CompareWithASCIIString(attr_name, "maxbounddist") == 0)
             return Py_BuildValue("d", SCIPbranchruleGetMaxbounddist(self->branch));
-        if (!strcmp(attr, "maxdepth"))
+        if (PyUnicode_CompareWithASCIIString(attr_name, "maxdepth") == 0)
             return Py_BuildValue("i", SCIPbranchruleGetMaxdepth(self->branch));
-        if (!strcmp(attr, "priority"))
+        if (PyUnicode_CompareWithASCIIString(attr_name, "priority") == 0)
             return Py_BuildValue("i", SCIPbranchruleGetPriority(self->branch));
     }
     return PyObject_GenericGetAttr((PyObject *) self, attr_name);
 }
 
 static int branching_rule_setattr(branching_rule *self, PyObject *attr_name, PyObject *value) {
-    const char *attr;
     double d;
     int i;
     
     // Check and make sure we have a string as attribute name...
     if (PyUnicode_Check(attr_name)) {
-        attr = PyUnicode_AS_DATA(attr_name);
         PY_SCIP_SET_DBL_MIN("maxbounddist", self->branch->maxbounddist, -1); 
         PY_SCIP_SET_INT_MIN("maxdepth", self->branch->maxdepth, -1); 
         PY_SCIP_SET_PRIORITY(SCIPbranchruleSetPriority, self->branch);

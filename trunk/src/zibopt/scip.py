@@ -216,6 +216,10 @@ class variable(_vars.variable):
         # TODO: figure out if this is the right way to provide hashing on variables
         return hash(id(self))
 
+    def __getattr__(self, attr):
+        print("FOO 0 %r" % attr)
+        return super(variable, self).__getattr__(attr)
+
 class solution(_soln.solution):
     '''
     A solution to a mixed integer program from SCIP.  Solution values can

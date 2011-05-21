@@ -39,31 +39,25 @@ static void heuristic_dealloc(heuristic *self) {
 }
 
 static PyObject* heuristic_getattr(heuristic *self, PyObject *attr_name) {
-    const char *attr;
-
     // Check and make sure we have a string as attribute name...
     if (PyUnicode_Check(attr_name)) {
-        attr = PyUnicode_AS_DATA(attr_name);
-
-        if (!strcmp(attr, "freqofs"))
+        if (PyUnicode_CompareWithASCIIString(attr_name, "freqofs") == 0)
             return Py_BuildValue("i", SCIPheurGetFreqofs(self->heur));
-        if (!strcmp(attr, "frequency"))
+        if (PyUnicode_CompareWithASCIIString(attr_name, "frequency") == 0)
             return Py_BuildValue("i", SCIPheurGetFreq(self->heur));
-        if (!strcmp(attr, "maxdepth"))
+        if (PyUnicode_CompareWithASCIIString(attr_name, "maxdepth") == 0)
             return Py_BuildValue("i", SCIPheurGetMaxdepth(self->heur));
-        if (!strcmp(attr, "priority"))
+        if (PyUnicode_CompareWithASCIIString(attr_name, "priority") == 0)
             return Py_BuildValue("i", SCIPheurGetPriority(self->heur));
     }
     return PyObject_GenericGetAttr((PyObject *) self, attr_name);
 }
 
 static int heuristic_setattr(heuristic *self, PyObject *attr_name, PyObject *value) {
-    const char *attr;
     int i;
     
     // Check and make sure we have a string as attribute name...
     if (PyUnicode_Check(attr_name)) {
-        attr = PyUnicode_AS_DATA(attr_name);
         PY_SCIP_SET_INT_MIN("freqofs", self->heur->freqofs, 0); 
         PY_SCIP_SET_INT_MIN("frequency", self->heur->freq, -1); 
         PY_SCIP_SET_INT_MIN("maxdepth", self->heur->maxdepth, -1); 
