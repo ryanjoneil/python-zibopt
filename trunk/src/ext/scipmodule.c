@@ -187,6 +187,8 @@ static int _optimize(solver *self, PyObject *args, PyObject *kwds) {
 static PyObject *solver_maximize(solver *self, PyObject *args, PyObject *kwds) {
     PY_SCIP_CALL(error, NULL, SCIPsetObjsense(self->scip, SCIP_OBJSENSE_MAXIMIZE));
     _optimize(self, args, kwds);
+    if (PyErr_Occurred())
+        return NULL;
     Py_RETURN_NONE;
 }
 
@@ -194,6 +196,8 @@ static PyObject *solver_maximize(solver *self, PyObject *args, PyObject *kwds) {
 static PyObject *solver_minimize(solver *self, PyObject *args, PyObject *kwds) {
     PY_SCIP_CALL(error, NULL, SCIPsetObjsense(self->scip, SCIP_OBJSENSE_MINIMIZE));
     _optimize(self, args, kwds);
+    if (PyErr_Occurred())
+        return NULL;
     Py_RETURN_NONE;
 }
 
@@ -216,8 +220,8 @@ PY_SCIP_SETTING_NAMES(separator_names, nsepas, sepas);
 /* MODULE INITIALIZATION                                                     */
 /*****************************************************************************/
 static PyMethodDef solver_methods[] = {
-    {"maximize", (PyCFunction) solver_maximize, METH_KEYWORDS, "maximize the objective value"},
-    {"minimize", (PyCFunction) solver_minimize, METH_KEYWORDS, "minimize the objective value"},
+    {"maximize", (PyCFunction) solver_maximize, METH_VARARGS | METH_KEYWORDS, "maximize the objective value"},
+    {"minimize", (PyCFunction) solver_minimize, METH_VARARGS | METH_KEYWORDS, "minimize the objective value"},
     {"restart",  (PyCFunction) solver_restart,  METH_NOARGS,   "restart the solver"},
     {"branching_names",  (PyCFunction) branching_names,  METH_NOARGS, "returns a list of branching rule names"},
     {"conflict_names",   (PyCFunction) conflict_names,   METH_NOARGS, "returns a list of conflict handler names"},
