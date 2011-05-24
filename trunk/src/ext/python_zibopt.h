@@ -5,9 +5,11 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include <blockmemshell/memory.h>
 #include <scip/branch.h>
 #include <scip/clock.h>
 #include <scip/conflict.h>
+#include <scip/cons.h>
 #include <scip/heur.h>
 #include <scip/misc.h>
 #include <scip/nodesel.h>
@@ -23,6 +25,7 @@
 #include <scip/struct_conflict.h>
 #include <scip/struct_disp.h>
 #include <scip/struct_heur.h>
+#include <scip/struct_mem.h>
 #include <scip/struct_nodesel.h>
 #include <scip/struct_presol.h>
 #include <scip/struct_prop.h>
@@ -32,6 +35,7 @@
 #include "structmember.h"
 #include "python_zibopt_util.h"
 
+#define CONSTRAINT_TYPE_NAME "constraint"
 #define SOLVER_TYPE_NAME "solver"
 #define VARIABLE_TYPE_NAME "variable"
 

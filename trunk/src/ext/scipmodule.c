@@ -205,6 +205,25 @@ static PyObject *solver_restart(solver *self) {
     Py_RETURN_NONE;
 }
 
+static PyObject *solver_unconstrain(solver *self, PyObject *c) {
+    // Removes a constraint from the solver
+    constraint *cons; // constraint C object
+
+    // Check solver type in the best way we seem to have available
+    if (strcmp(c->ob_type->tp_name, CONSTRAINT_TYPE_NAME)) {
+        PyErr_SetString(error, "invalid constraint type");
+        return NULL;
+    }
+    
+    cons = (constraint *) c;
+
+    // Restart solver prior to removing the constraint so state is ok
+    solver_restart(self);
+    PY_SCIP_CALL(error, NULL, SCIPdelCons(self->scip, cons->constraint));
+
+    Py_RETURN_NONE;
+}
+
 // Functions for pulling out lists of setting names by type
 PY_SCIP_SETTING_NAMES(branching_names, nbranchrules, branchrules);
 PY_SCIP_SETTING_NAMES(conflict_names, nconflicthdlrs, conflicthdlrs);
@@ -222,6 +241,7 @@ static PyMethodDef solver_methods[] = {
     {"maximize", (PyCFunction) solver_maximize, METH_VARARGS | METH_KEYWORDS, "maximize the objective value"},
     {"minimize", (PyCFunction) solver_minimize, METH_VARARGS | METH_KEYWORDS, "minimize the objective value"},
     {"restart",  (PyCFunction) solver_restart,  METH_NOARGS,   "restart the solver"},
+    {"unconstrain",  (PyCFunction) solver_unconstrain,  METH_O,   "remove a constraint"},
     {"branching_names",  (PyCFunction) branching_names,  METH_NOARGS, "returns a list of branching rule names"},
     {"conflict_names",   (PyCFunction) conflict_names,   METH_NOARGS, "returns a list of conflict handler names"},
     {"display_names",    (PyCFunction) display_names,    METH_NOARGS, "returns a list of display column names"},

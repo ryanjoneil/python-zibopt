@@ -70,6 +70,42 @@ class ConstraintTest(unittest.TestCase):
         self.assertEqual(solution[x2], 1.0)
         self.assertEqual(solution.objective, 0.25)
 
+class ConstraintRemovalTest(unittest.TestCase):
+    def setUp(self):
+        self.solver = scip.solver()
+        self.x1 = self.solver.variable(scip.INTEGER)
+        self.x2 = self.solver.variable(scip.INTEGER)
+
+        self.c1 = self.solver.constraint(
+            upper = 4,
+            coefficients = {self.x1: 2, self.x2: 2}
+        )
+        self.c2 = self.solver.constraint(
+            upper = 3,
+            coefficients = {self.x1: 2, self.x2: 2}
+        )
+
+    def testBasicConstraintRemoval(self):
+        '''Tests basic removal of a constraint'''
+        # Test with both constraints active
+        self.assertEqual(1.0, self.solver.maximize(objective=self.x1+self.x2).objective)
+
+        # Remove c2 and test again
+        self.solver -= self.c2
+        self.assertEqual(2.0, self.solver.maximize(objective=self.x1+self.x2).objective)
+        
+        self.solver += self.c2
+
+    def testConstraintDuplication(self):
+        '''Tests multiple additions/deletions of the same constraint'''
+        self.solver -= self.c2
+        self.solver -= self.c2
+        self.assertEqual(2.0, self.solver.maximize(objective=self.x1+self.x2).objective)
+
+        self.solver += self.c2
+        self.solver += self.c2
+        self.assertEqual(1.0, self.solver.maximize(objective=self.x1+self.x2).objective)
+
 if __name__ == '__main__':
     unittest.main()
 

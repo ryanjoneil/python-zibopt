@@ -89,9 +89,16 @@ class solver(_scip.solver):
 
     def __iadd__(self, cons_info):
         '''
-        Allows a constraint to be added using a more natural algebraic format:
-        
+        Allows a constraint to be added using a more natural algebraic format.
+        Note that this does *not* return the constraint, so if you want to
+        remove the constraint later, use solver.constraint(...).
+
             solver += 1 <= x1 + 2*x2 <= 2
+
+        Alternatively, if the constraint already exists in a variable and
+        has been removed, it may be reintroduced into the solver this way.
+
+            solver += some_constraint
         '''
         # This is some annoying magic here.  If we write a constraint like:
         #     0 <= x <= 1
@@ -106,6 +113,9 @@ class solver(_scip.solver):
                 cons_info.tighten_lower_bound(cons_info._lower_bnd)
             cons_info._upper_bnd = cons_info._lower_bnd = None
             
+        elif isinstance(cons_info, constraint):
+            self.constrain(cons_info)
+
         else:
             self.constraint(
                 lower = cons_info.lower,
@@ -113,6 +123,22 @@ class solver(_scip.solver):
                 coefficients = cons_info.coefficients
             )
             
+        return self
+
+    def __isub__(self, constraint):
+        '''
+        Allows a constraint to be removed after it was added.  Note that
+        the only way to properly construct and store constraints in variables
+        is using the solver.constraint(...) method.
+
+            some_constraint = solver.constraint(
+                upper = 4,
+                coefficients = {x1: 2, x2: 2}
+            )
+            solver.maximize(objective=x1+x2)
+            solver -= some_constraint
+        '''
+        self.unconstrain(constraint)
         return self
 
     def _update_coefficients(self, obj_info):
@@ -138,7 +164,7 @@ class solver(_scip.solver):
 
     def constraint(self, **kwds):
         '''
-        Adds a constraint to the solver.  Returns None.
+        Adds a constraint to the solver.  Returns the constraint.
         @param lower=-inf:      lhs of constraint (lhs <= a'x)
         @param upper=+inf:      rhs of constraint (a'x <= rhs)
         @param coefficients={}: variable coefficients
@@ -160,8 +186,26 @@ class solver(_scip.solver):
         for k, v in coefficients.items():
             cons.variable(k, v)
 
-        cons.register()
-        self.constraints.add(cons)
+        self.constrain(cons)
+        return cons
+
+    def constrain(self, constraint):
+        '''
+        Adds a constraint back into the solver. Returns None.
+        @param constraint: constraint instance to reinstall
+        '''
+        if constraint not in self.constraints:
+            constraint.register()
+            self.constraints.add(constraint)
+
+    def unconstrain(self, constraint):
+        '''
+        Removes a constraint from the solver.  Returns None.
+        @param constraint: constraint instance to remove
+        '''
+        if constraint in self.constraints:
+            self.constraints.remove(constraint)
+            super(solver, self).unconstrain(constraint)
 
     def maximize(self, *args, **kwds):
         '''

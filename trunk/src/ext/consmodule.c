@@ -113,6 +113,9 @@ static PyObject *constraint_variable(constraint *self, PyObject *args) {
 }
 
 static PyObject *constraint_register(constraint *self) {
+    // In case a constraint is being re-added after optimization,
+    // it may be necessary to restart the solver.
+    PY_SCIP_CALL(error, NULL, SCIPfreeTransform(self->scip));
     PY_SCIP_CALL(error, NULL, SCIPaddCons(self->scip, self->constraint));
     Py_RETURN_NONE;
 }
