@@ -2,6 +2,26 @@
 #labels Featured
 
 = 0.6 dev =
+  * Issue 13: Added the ability to remove and reinstall constraints into the solver
+{{{
+from zibopt import scip
+
+solver = scip.solver()
+
+x1 = solver.variable(scip.INTEGER)
+x2 = solver.variable(scip.INTEGER)
+
+c1 = solver.constraint(upper=4, coefficients={x1:2, x2:2})
+c2 = solver.constraint(upper=3, coefficients={x1:2, x2:2})
+
+print(solver.maximize(objective=x1+x2).objective) # 1.0
+
+solver -= c2
+print(solver.maximize(objective=x1+x2).objective) # 2.0
+
+solver += c2
+print(solver.maximize(objective=x1+x2).objective) # 1.0
+}}}
   * Issue 9: Ported to Python 3.2 and resolved all build warnings
   * Issue 16: Added ability to stop the solver after a number of solutions are found
 {{{
