@@ -70,20 +70,26 @@ class ConstraintTest(unittest.TestCase):
         self.assertEqual(solution[x2], 1.0)
         self.assertEqual(solution.objective, 0.25)
 
+    def testAlgebraicConstraints(self):
+        solver = scip.solver()
+
+        x1 = solver.variable(scip.INTEGER)
+        x2 = solver.variable(scip.INTEGER)
+        c  = solver.constraint(1 <= x1 + 2*x2 <= 4)
+        
+        self.assertEqual(c.lower, 1.0)
+        self.assertEqual(c.upper, 4.0)
+        self.assertEqual(c.coefficients[x1], 1.0)
+        self.assertEqual(c.coefficients[x2], 2.0)
+
 class ConstraintRemovalTest(unittest.TestCase):
     def setUp(self):
         self.solver = scip.solver()
         self.x1 = self.solver.variable(scip.INTEGER)
         self.x2 = self.solver.variable(scip.INTEGER)
 
-        self.c1 = self.solver.constraint(
-            upper = 4,
-            coefficients = {self.x1: 2, self.x2: 2}
-        )
-        self.c2 = self.solver.constraint(
-            upper = 3,
-            coefficients = {self.x1: 2, self.x2: 2}
-        )
+        self.c1 = self.solver.constraint(2*self.x1 + 2*self.x2 <= 4)
+        self.c2 = self.solver.constraint(2*self.x1 + 2*self.x2 <= 3)
 
     def testBasicConstraintRemoval(self):
         '''Tests basic removal of a constraint'''

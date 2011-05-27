@@ -114,14 +114,12 @@ class solver(_scip.solver):
             cons_info._upper_bnd = cons_info._lower_bnd = None
             
         elif isinstance(cons_info, constraint):
+            # Is already a constraint
             self.constrain(cons_info)
 
         else:
-            self.constraint(
-                lower = cons_info.lower,
-                upper = cons_info.upper,
-                coefficients = cons_info.coefficients
-            )
+            # Is a zibopt._variable._cons_builder instance
+            self.constraint(cons_info)
             
         return self
 
@@ -162,30 +160,31 @@ class solver(_scip.solver):
         self.variables.add(v)
         return v
 
-    def constraint(self, **kwds):
+    def constraint(self, *args, **kwds):
         '''
-        Adds a constraint to the solver.  Returns the constraint.
+        Adds a constraint to the solver.  Returns the constraint. The user 
+        can create the constraint out of keyword arguments or algebraically.
+        For instance, the following two statements are equivalent:
+
+            solver.constraint(upper=4, coefficients={x1:1, x2:2})
+            solver.constraint(x1 + 2*x2 <= 4)
+
         @param lower=-inf:      lhs of constraint (lhs <= a'x)
         @param upper=+inf:      rhs of constraint (a'x <= rhs)
         @param coefficients={}: variable coefficients
         '''
-        # Yank out variable coefficients since C code isn't expecting them
-        try:
-            coefficients = kwds['coefficients']
-            del kwds['coefficients']
-        except KeyError:
-            coefficients = {} 
-
-        # If upper or lower bounds are None, remove them to be polite
-        if 'lower' in kwds and kwds['lower'] is None:
-            del kwds['lower']
-        if 'upper' in kwds and kwds['upper'] is None:
-            del kwds['upper']
-            
+        if args:
+            # Take information from the algebraic version as though 
+            # it were passed via keywords.
+            cons_builder = args[0]
+            kwds['lower'] = kwds.get('lower') or cons_builder.lower
+            kwds['upper'] = kwds.get('upper') or cons_builder.upper
+            if 'coefficients' in kwds:
+                kwds['coefficients'].update(cons_builder.coefficients)
+            else:
+                kwds['coefficients'] = cons_builder.coefficients.copy()
+        
         cons = constraint(self, **kwds)
-        for k, v in coefficients.items():
-            cons.variable(k, v)
-
         self.constrain(cons)
         return cons
 
