@@ -2,6 +2,10 @@
 #labels Featured
 
 = 0.6 dev =
+  * Issue 21: Allow better expression of constraints in solver.constraint(...)
+{{{
+c = solver.constraint(x1 + 2*x2 <= 4)
+}}}
   * Issue 13: Added the ability to remove and reinstall constraints into the solver
 {{{
 from zibopt import scip
