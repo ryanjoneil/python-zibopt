@@ -15,8 +15,8 @@ solver = scip.solver()
 x1 = solver.variable(scip.INTEGER)
 x2 = solver.variable(scip.INTEGER)
 
-c1 = solver.constraint(upper=4, coefficients={x1:2, x2:2})
-c2 = solver.constraint(upper=3, coefficients={x1:2, x2:2})
+c1 = solver.constraint(2*x1 + 2*x2 <= 4)
+c2 = solver.constraint(2*x1 + 2*x2 <= 3)
 
 print(solver.maximize(objective=x1+x2).objective) # 1.0
 
