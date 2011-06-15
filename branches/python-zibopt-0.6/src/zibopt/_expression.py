@@ -18,6 +18,7 @@ class expression(object):
 
     def __add__(self, other):
         if isinstance(other, type(self)):
+            # x + y
             terms = self.terms.copy()
             for v, c in other.terms.items():
                 terms[v] = terms.get(v, 0.0) + c
@@ -31,6 +32,11 @@ class expression(object):
             return type(self)(terms)
 
         return NotImplemented
+        
+    def __sub__(self, other):
+        # x - y
+        # x - 2
+        return self + (-1) * other
 
     def __mul__(self, other):
         if isinstance(other, type(self)):
@@ -41,7 +47,7 @@ class expression(object):
             for v1, v2 in product(self.terms, other.terms):
                 v = tuple(sorted(v1 + v2))
                 c = self.terms.get(v1, 1.0) * other.terms.get(v2, 1.0)
-                terms[v] = terms.get(v, 1.0) * c
+                terms[v] = terms.get(v, 0.0) + c
             
             return type(self)(terms)
 
@@ -54,16 +60,12 @@ class expression(object):
         return NotImplemented
 
     def __div__(self, other):
-        # x / 2
         if isinstance(other, int) or isinstance(other, float):
-            return type(self)({
-                v:c/float(other) for v, c in self.terms.items()
-            })
+            # x / 2
+            return self * (1.0/other)
 
         return NotImplemented
-        
-    def __sub__(self, other):
-        return self + (-1) * other
+
     
     __radd__ = __add__
     __rsub__ = __sub__

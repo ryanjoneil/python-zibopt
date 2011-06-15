@@ -132,14 +132,17 @@ class variable(_vars.variable):
     def __le__(self, other):
         # In cases with one variable, like:  0 <= x <= 1
         # What we want to do is try adjusting its bounds.
+        # TODO: allow for x2 <= 4, x2 <= x1, etc
         self._upper_bnd = float(other)
         return self
         
     def __ge__(self, other):
+        # TODO: allow for x2 >= 4, x2 >= x1, etc
         self._lower_bnd = float(other)
         return self
 
     def __eq__(self, other):
+        # TODO: allow for x2 == 4, x2 == x1, etc
         self._lower_bnd = self._upper_bnd = float(other)
         return self
 

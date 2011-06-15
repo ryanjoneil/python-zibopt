@@ -11,8 +11,10 @@ class ExpressionTest(unittest.TestCase):
 
         self.set_x1   = tuple(sorted([self.x1]))
         self.set_x2   = tuple(sorted([self.x2]))
+        self.set_x11  = tuple(sorted([self.x1, self.x1]))
         self.set_x12  = tuple(sorted([self.x1, self.x2]))
         self.set_x14  = tuple(sorted([self.x1, self.x4]))
+        self.set_x22  = tuple(sorted([self.x2, self.x2]))
         self.set_x23  = tuple(sorted([self.x2, self.x3]))
         self.set_x34  = tuple(sorted([self.x3, self.x4]))
         self.set_x123 = tuple(sorted([self.x1, self.x2, self.x3]))
@@ -84,47 +86,30 @@ class ExpressionTest(unittest.TestCase):
         self.assertEqual(e2[self.set_x12],  28.0)
         self.assertEqual(e2[self.set_x123],  4.0)
 
-#HERE:
+        e3 = 2 * (self.x1 + self.x1 + 3 * self.x2) * 1
+        self.assertEqual(e3[self.set_x1], 4.0)
+        self.assertEqual(e3[self.set_x2], 6.0)
 
-#        e0 = 2 * (self.x1 + self.x1 + 3 * self.x2) * 1
-#        self.assertEqual(e0[self.set_x1], 4.0)
-#        self.assertEqual(e0[self.set_x2], 6.0)
+    def testQuadraticBilinearExpressions(self):
+        '''Tests quadratic and bilinear expressions'''
+        e0 = (self.x1 + self.x2) * (2*self.x1 + self.x2)
+        self.assertEqual(len(e0.terms), 3)
+        self.assertEqual(e0[self.set_x11], 2.0) 
+        self.assertEqual(e0[self.set_x12], 3.0) 
+        self.assertEqual(e0[self.set_x22], 1.0) 
 
-        # EXPONENTS!
-        # TODO: (x1 + x2) * (2x1 + x2)
-        # TODO: (x1 + x2) * (2x1 - x2)
-        # TODO: (x1 + x2) / (2x1 + x2)
+        e1 = (self.x1 + self.x2) * (2*self.x1 - self.x2)
+        self.assertEqual(len(e1.terms), 3)
+        self.assertEqual(e1[self.set_x11],  2.0) 
+        self.assertEqual(e1[self.set_x12],  1.0) 
+        self.assertEqual(e1[self.set_x22], -1.0) 
 
-        # TODO: self.x1 / self.x2 -> x2 exponent == -1
-        # TODO: 4 / self.x1 -> exponent == -1
-
-        # TODO: self.x1 + self.x1 -> coefficient == 2
-        # TODO: self.x1 * self.x2 + self.x1 * self.x2 / 2 -> coefficient == 1.5
-
-        # TODO: self.x1 * (self.x1 + self.x2)
-
-        # TODO: self.x1 + 3
-        # TODO: self.x1 * self.x2 + 3
-
-#    def testNonlinearConstraint(self):
-#        '''Tests bilinear constraints with coefficients'''
-#        solver = scip.solver()
-#        x1 = solver.variable(scip.INTEGER)
-#        x2 = solver.variable(scip.INTEGER)
-#        
-#        # Terms are stored by combinations of variables
-#        term = frozenset([x1, x2])        
-#
-#        self.assertEqual((2*x1*x2).terms[term], 2.0)
-#        self.assertEqual((2*x1*3*x2).terms[term], 6.0)
-#        
-#        #self.assertEqual((2*x1*3*x2**2).terms[0], 6.0)
-#
-#        # TODO:
-#        # x1/4 + 2*x1 + 3*x1*x2 + 2*x1*x2**2
-#        # 3*x1*x2 + 4*x1*x2**2
-#        # 3*x1*x2 + (4*x1*x2)**2
-        
+        e2 = (self.x1 + self.x2) * (2*self.x1 - 4)
+        self.assertEqual(len(e2.terms), 4)
+        self.assertEqual(e2[self.set_x1], -4.0) 
+        self.assertEqual(e2[self.set_x2], -4.0) 
+        self.assertEqual(e2[self.set_x11], 2.0) 
+        self.assertEqual(e2[self.set_x12], 2.0) 
 
 if __name__ == '__main__':
     unittest.main()
