@@ -111,6 +111,47 @@ class ExpressionTest(unittest.TestCase):
         self.assertEqual(e2[self.set_x11], 2.0) 
         self.assertEqual(e2[self.set_x12], 2.0) 
 
+    def testExpressionBounds(self):
+        '''Tests <=, >= and == for expressions'''
+        e0 = self.x1 + self.x2 - 1 <= self.x1 * self.x2 + 2
+        self.assertEqual(len(e0.terms), 3)
+        self.assertEqual(e0[self.set_x1], 1.0)
+        self.assertEqual(e0[self.set_x2], 1.0)
+        self.assertEqual(e0[self.set_x12], -1.0)
+        self.assertEqual(e0.upper, 3.0)
+
+        e1 = self.x1 + self.x2 - 1 >= self.x1 * self.x2 + 2
+        self.assertEqual(len(e1.terms), 3)
+        self.assertEqual(e1[self.set_x1], 1.0)
+        self.assertEqual(e1[self.set_x2], 1.0)
+        self.assertEqual(e1[self.set_x12], -1.0)
+        self.assertEqual(e1.lower, 3.0)
+
+        e2 = self.x1 + self.x2 - 1 == self.x1 * self.x2 + 2
+        self.assertEqual(len(e2.terms), 3)
+        self.assertEqual(e2[self.set_x1], 1.0)
+        self.assertEqual(e2[self.set_x2], 1.0)
+        self.assertEqual(e2[self.set_x12], -1.0)
+        self.assertEqual(e2.lower, 3.0)
+        self.assertEqual(e2.upper, 3.0)
+
+    def testVariableBounds(self):
+        '''Tests <=, >= and == for variables'''
+        e0 = self.x1 <= 3
+        self.assertEqual(len(e0.terms), 1)
+        self.assertEqual(e0.upper, 3.0)
+
+        e1 = self.x1 >= 3
+        self.assertEqual(len(e1.terms), 1)
+        self.assertEqual(e1.lower, 3.0)
+
+        e2 = self.x1 == 3
+        self.assertEqual(len(e2.terms), 1)
+        self.assertEqual(e2.lower, 3.0)
+        self.assertEqual(e2.upper, 3.0)
+
+    # TODO: 4 <= x1 + x2 <= 5
+
 if __name__ == '__main__':
     unittest.main()
 

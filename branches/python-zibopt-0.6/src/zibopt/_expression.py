@@ -3,15 +3,19 @@ from itertools import product
 __all__ = 'expression',
 
 class expression(object):
-    def __init__(self, terms={}):
+    def __init__(self, terms={}, lower=None, upper=None):
         '''
         Instantiates an algebraic expression.  This is assumed to be a 
         sum of sets of variables which are multiplied.
 
         @param terms: {(tuple of variables): coefficient, ...}
+        @param lower: lower bound
+        @param lower: upper bound
         '''
         # Terms should be {(variable sequence): coefficient}
         self.terms = {tuple(sorted(v)):c for v, c in terms.items()}
+        self.lower = lower
+        self.upper = upper
 
     def __getitem__(self, key):
         return self.terms[key]
@@ -74,4 +78,61 @@ class expression(object):
  
     __truediv__  = __div__
     __rtruediv__ = __div__
+
+    # This part allows <=, >= and == to populate lower/upper bounds
+    def __le__(self, other):
+        from zibopt._variable import variable
+        if isinstance(other, type(self)):
+            # x + y <= y + z
+            e = self - other
+            e.upper = 0.0 - e.terms.pop((), 0.0)
+            return e
+
+        elif isinstance(other, variable):
+            # x + y <= x
+            return self <= type(self)({other:1.0})
+
+        elif isinstance(other, int) or isinstance(other, float):
+            # x + y <= 1
+            return self <= type(self)({():other})
+
+        return NotImplemented
+
+    def __ge__(self, other):
+        from zibopt._variable import variable
+        if isinstance(other, type(self)):
+            # x + y >= y + z
+            e = self - other
+            e.lower = 0.0 - e.terms.pop((), 0.0)
+            return e
+
+        elif isinstance(other, variable):
+            # x + y >= x
+            return self >= type(self)({other:1.0})
+
+        elif isinstance(other, int) or isinstance(other, float):
+            # x + y >= 1
+            return self >= type(self)({():other})         
+
+        return NotImplemented
+
+    def __eq__(self, other):
+        from zibopt._variable import variable
+        if isinstance(other, type(self)):
+            # x + y == y + z
+            e = self - other
+            e.upper = e.lower = 0.0 - e.terms.pop((), 0.0)
+            return e
+
+        elif isinstance(other, variable):
+            # x + y == x
+            return self == type(self)({other:1.0})
+
+        elif isinstance(other, int) or isinstance(other, float):
+            # x + y == 1
+            return self == type(self)({():other})         
+
+        return NotImplemented           
+
+    # TODO: __neg__, __pos__, __abs__?
 
