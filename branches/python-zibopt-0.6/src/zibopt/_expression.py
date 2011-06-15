@@ -44,6 +44,8 @@ class term(object):
                 self.variables.union(other.variables), 
                 self.coefficient * other.coefficient
             )
+        elif isinstance(other, expression):
+            return other * self
         elif isinstance(other, variable):
             return type(self)(self.variables.union([other]), self.coefficient)
         else:

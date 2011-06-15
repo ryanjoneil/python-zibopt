@@ -73,6 +73,11 @@ class ExpressionTest(unittest.TestCase):
         self.assertEqual(e1[self.set_x23].coefficient,  6.0)
         self.assertEqual(e1[self.set_x34].coefficient, -3.0)
 
+        e2 = 4 * self.x1 * (self.x2*self.x3 + 7*self.x2 )# / 2
+        self.assertEqual(len(e2.terms), 2)
+        self.assertEqual(e2[self.set_x12].coefficient,  28.0)
+        self.assertEqual(e2[self.set_x123].coefficient,  4.0)
+
 #        e0 = 2 * (self.x1 + self.x1 + 3 * self.x2) * 1
 #        self.assertEqual(e0[self.set_x1].coefficient, 4.0)
 #        self.assertEqual(e0[self.set_x2].coefficient, 6.0)
