@@ -9,78 +9,86 @@ class ExpressionTest(unittest.TestCase):
         self.x3 = self.solver.variable()
         self.x4 = self.solver.variable()
 
-        self.set_x1   = frozenset([self.x1])
-        self.set_x2   = frozenset([self.x2])
-        self.set_x12  = frozenset([self.x1, self.x2])
-        self.set_x14  = frozenset([self.x1, self.x4])
-        self.set_x23  = frozenset([self.x2, self.x3])
-        self.set_x34  = frozenset([self.x3, self.x4])
-        self.set_x123 = frozenset([self.x1, self.x2, self.x3])
+        self.set_x1   = tuple(sorted([self.x1]))
+        self.set_x2   = tuple(sorted([self.x2]))
+        self.set_x12  = tuple(sorted([self.x1, self.x2]))
+        self.set_x14  = tuple(sorted([self.x1, self.x4]))
+        self.set_x23  = tuple(sorted([self.x2, self.x3]))
+        self.set_x34  = tuple(sorted([self.x3, self.x4]))
+        self.set_x123 = tuple(sorted([self.x1, self.x2, self.x3]))
 
-    def testSimpleTerms(self):
-        '''Tests that simple terms are constructed properly via * and /'''
-        t0 = 4 * self.x1
-        self.assertEqual(t0.variables, self.set_x1)
-        self.assertEqual(t0.coefficient, 4.0)
-        self.assertEqual((t0/4).coefficient, 1.0)
+    def testSimpleExpressions(self):
+        '''Tests that simple expressions are constructed via * and /'''
+        e0 = 4 * self.x1
+        self.assertEqual(len(e0.terms), 1)
+        self.assertEqual(e0[self.set_x1], 4.0)
+        self.assertEqual((e0/4)[self.set_x1], 1.0)
 
-        t1 = 2 * self.x1 * self.x2 * 3.0
-        self.assertEqual(t1.variables, self.set_x12)
-        self.assertEqual(t1.coefficient, 6.0)
+        e1 = 2 * self.x1 * self.x2 * 3.0
+        self.assertEqual(e1[self.set_x12], 6.0)
 
-        t2 = self.x1 * self.x2 / 4 
-        self.assertEqual(t2.variables, self.set_x12)
-        self.assertEqual(t2.coefficient, 0.25)
+        e2 = self.x1 * self.x2 / 4 
+        self.assertEqual(e2[self.set_x12], 0.25)
         
-        t3 = 8 * self.x1 * self.x2 / 4 
-        self.assertEqual(t3.variables, self.set_x12)
-        self.assertEqual(t3.coefficient, 2.0)
+        e3 = 8 * self.x1 * self.x2 / 4 
+        self.assertEqual(e3[self.set_x12], 2.0)
+
+    def testConstants(self):
+        '''Tests that constants can be added to expressions'''
+        e0 = self.x1 + 4
+        self.assertEqual(len(e0.terms), 2)
+        self.assertEqual(e0[self.set_x1], 1.0)
+        self.assertEqual(e0[()], 4.0)
+
+        e1 = 3 * (self.x1 - 2)
+        self.assertEqual(e1[self.set_x1], 3.0)
+        self.assertEqual(e1[()], -6.0)
 
     def testSingleTermAdditionSubtraction(self):
         '''Tests that same terms are added/subtracted properly'''
-        t0 = self.x1 + self.x1
-        self.assertEqual(t0.variables, self.set_x1)
-        self.assertEqual(t0.coefficient, 2.0)
+        e0 = self.x1 + self.x1
+        self.assertEqual(len(e0.terms), 1)
+        self.assertEqual(e0[self.set_x1], 2.0)
         
-        t1 = self.x1 + 2 * self.x1
-        self.assertEqual(t1.variables, self.set_x1)
-        self.assertEqual(t1.coefficient, 3.0)
+        e1 = self.x1 + 2 * self.x1
+        self.assertEqual(e1[self.set_x1], 3.0)
 
-        t2 = self.x1 * self.x2 - self.x2 * self.x1
-        self.assertEqual(t2.variables, self.set_x12)
-        self.assertEqual(t2.coefficient, 0.0)
+        e2 = self.x1 * self.x2 - self.x2 * self.x1
+        self.assertEqual(e2[self.set_x12], 0.0)
 
     def testExpressionAdditionSubtraction(self):
         '''Tests that simple expressions are added/subtracted properly'''
         e0 = 2 * self.x1 + self.x1 * self.x2
-        self.assertEqual(e0[self.set_x1].coefficient, 2.0)
-        self.assertEqual(e0[self.set_x12].coefficient, 1.0)
+        self.assertEqual(e0[self.set_x1], 2.0)
+        self.assertEqual(e0[self.set_x12], 1.0)
 
         e1 = self.x1 + self.x1 + 3 * self.x2
-        self.assertEqual(e1[self.set_x1].coefficient, 2.0)
-        self.assertEqual(e1[self.set_x2].coefficient, 3.0)
+        self.assertEqual(e1[self.set_x1], 2.0)
+        self.assertEqual(e1[self.set_x2], 3.0)
 
     def testExpressionMultiplication(self):
         '''Tests that simple expressions/terms can be multiplied'''
         e0 = 2 * (self.x1 + self.x1 + 3 * self.x2) * 1
-        self.assertEqual(e0[self.set_x1].coefficient, 4.0)
-        self.assertEqual(e0[self.set_x2].coefficient, 6.0)
+        self.assertEqual(e0[self.set_x1], 4.0)
+        self.assertEqual(e0[self.set_x2], 6.0)
 
         e1 = 3 * (self.x1 + self.x3) * (2*self.x2 - self.x4)
         self.assertEqual(len(e1.terms), 4)
-        self.assertEqual(e1[self.set_x12].coefficient,  6.0)
-        self.assertEqual(e1[self.set_x14].coefficient, -3.0)
-        self.assertEqual(e1[self.set_x23].coefficient,  6.0)
-        self.assertEqual(e1[self.set_x34].coefficient, -3.0)
+        self.assertEqual(e1[self.set_x12],  6.0)
+        self.assertEqual(e1[self.set_x14], -3.0)
+        self.assertEqual(e1[self.set_x23],  6.0)
+        self.assertEqual(e1[self.set_x34], -3.0)
 
         e2 = 4 * self.x1 * (self.x2*self.x3 + 7*self.x2 )# / 2
         self.assertEqual(len(e2.terms), 2)
-        self.assertEqual(e2[self.set_x12].coefficient,  28.0)
-        self.assertEqual(e2[self.set_x123].coefficient,  4.0)
+        self.assertEqual(e2[self.set_x12],  28.0)
+        self.assertEqual(e2[self.set_x123],  4.0)
+
+#HERE:
 
 #        e0 = 2 * (self.x1 + self.x1 + 3 * self.x2) * 1
-#        self.assertEqual(e0[self.set_x1].coefficient, 4.0)
-#        self.assertEqual(e0[self.set_x2].coefficient, 6.0)
+#        self.assertEqual(e0[self.set_x1], 4.0)
+#        self.assertEqual(e0[self.set_x2], 6.0)
 
         # EXPONENTS!
         # TODO: (x1 + x2) * (2x1 + x2)
@@ -107,10 +115,10 @@ class ExpressionTest(unittest.TestCase):
 #        # Terms are stored by combinations of variables
 #        term = frozenset([x1, x2])        
 #
-#        self.assertEqual((2*x1*x2).terms[term].coefficient, 2.0)
-#        self.assertEqual((2*x1*3*x2).terms[term].coefficient, 6.0)
+#        self.assertEqual((2*x1*x2).terms[term], 2.0)
+#        self.assertEqual((2*x1*3*x2).terms[term], 6.0)
 #        
-#        #self.assertEqual((2*x1*3*x2**2).terms[0].coefficient, 6.0)
+#        #self.assertEqual((2*x1*3*x2**2).terms[0], 6.0)
 #
 #        # TODO:
 #        # x1/4 + 2*x1 + 3*x1*x2 + 2*x1*x2**2
