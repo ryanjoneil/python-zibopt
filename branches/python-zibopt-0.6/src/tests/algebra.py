@@ -213,10 +213,35 @@ class ExpressionTest(unittest.TestCase):
         self.assertEqual(e2.lower.lower, e2)
         self.assertEqual(e2.lower.upper, e2)
 
-#    def testChainedExpressionInequalities(self):
-#        '''Tests chained <= and >= for expressions'''
-#        i0 = 1 + 3*self.x1 <= self.x1*self.x2 <= 4*self.x3 + 5
-#        print(i0.expression.terms, i0.lower, i0.upper)
+    def testChainedExpressionInequalities(self):
+        '''Tests chained <= and >= for expressions'''
+        e0 = 1 + 3*self.x1
+        e1 = self.x1*self.x2 
+        e2 = 4*self.x3 + 5
+
+        e0 <= e1 <= e2
+        self.assertEqual(e0.lower, None)
+        self.assertEqual(e0.upper, e1)
+        self.assertEqual(e1.lower, e0)
+        self.assertEqual(e1.upper, e2)
+        self.assertEqual(e2.lower, e1)
+        self.assertEqual(e2.upper, None)
+
+        e0.lower = e0.upper = None
+        e1.lower = e1.upper = None
+        e2.lower = e2.upper = None
+
+        e0 >= e1 >= e2
+        self.assertEqual(e0.lower, e1)
+        self.assertEqual(e0.upper, None)
+        self.assertEqual(e1.lower, e2)
+        self.assertEqual(e1.upper, e0)
+        self.assertEqual(e2.lower, None)
+        self.assertEqual(e2.upper, e1)
+
+        e0.lower = e0.upper = None
+        e1.lower = e1.upper = None
+        e2.lower = e2.upper = None
 
 if __name__ == '__main__':
     unittest.main()

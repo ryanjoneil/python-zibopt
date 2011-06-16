@@ -2,6 +2,7 @@ from zibopt import _scip
 from zibopt import (
     _branch, _conflict, _disp, _heur, _nodesel, _presol, _prop, _sepa
 )
+from zibopt._algebra import expression
 from zibopt._constraint import constraint
 from zibopt._solution import solution
 from zibopt._variable import variable
@@ -78,14 +79,14 @@ class solver(_scip.solver):
         self.variables = set()
         self.constraints = set()
 
-        self.branching   = dict((n, _branch.branching_rule(self, n)) for n in self.branching_names())
-        self.conflict    = dict((n, _conflict.conflict(self, n)) for n in self.conflict_names())
-        self.display     = dict((n, _disp.display_column(self, n)) for n in self.display_names())
-        self.heuristics  = dict((n, _heur.heuristic(self, n)) for n in self.heuristic_names())
-        self.presolvers  = dict((n, _presol.presolver(self, n)) for n in self.presolver_names())
-        self.propagators = dict((n, _prop.propagator(self, n)) for n in self.propagator_names())
-        self.selectors   = dict((n, _nodesel.selector(self, n)) for n in self.selector_names())
-        self.separators  = dict((n, _sepa.separator(self, n)) for n in self.separator_names())
+        self.branching   = {n:_branch.branching_rule(self, n) for n in self.branching_names()}
+        self.conflict    = {n:_conflict.conflict(self, n) for n in self.conflict_names()}
+        self.display     = {n:_disp.display_column(self, n) for n in self.display_names()}
+        self.heuristics  = {n:_heur.heuristic(self, n) for n in self.heuristic_names()}
+        self.presolvers  = {n:_presol.presolver(self, n) for n in self.presolver_names()}
+        self.propagators = {n:_prop.propagator(self, n) for n in self.propagator_names()}
+        self.selectors   = {n:_nodesel.selector(self, n) for n in self.selector_names()}
+        self.separators  = {n:_sepa.separator(self, n) for n in self.separator_names()}
 
     def __iadd__(self, cons_info):
         '''
