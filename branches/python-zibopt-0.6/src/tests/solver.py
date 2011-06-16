@@ -37,21 +37,9 @@ class ScipTest(unittest.TestCase):
         '''Solutions should be false for infeasibility'''
         solver = scip.solver()
         x1 = solver.variable()
-        solver += 1 <= x1 <= 0
+        solver += x1 <= 1
+        solver += x1 >= 2
         solution = solver.maximize()
-        print()
-        print()
-        print('X' * 80)
-        c = 1 <= x1 <= 0
-        print('LOWER:', c.lower)
-        print('UPPER:', c.upper)
-        print('TERMS:', c.terms)
-
-        print('SOLUTION INFEASIBLE? ', solution.infeasible)
-        print('SOLUTION OBJECTIVE?  ', solution.objective)
-        print('X' * 80)
-        print()
-
         self.assertFalse(solution)
         
     def testUnbounded(self):
