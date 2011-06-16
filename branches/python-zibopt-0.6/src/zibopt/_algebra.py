@@ -13,18 +13,16 @@ class expression(object):
         (3 * x**2) ** 4
         (x + y) * (x - y)
 
-    Valid inequalitites look like:
+    Expressions can take upper and lower bounds.  When two expressions are
+    being compared, only one inequality may be used.  Inequalities can be
+    chained when the middle is an expression and the upper and lower bounds
+    are constants.  Valid inequalitites look like:
 
-        x <= 4
-        x >= y
-        x <= z*(x + y**2) <= 100
-    
-    Inequalities can be chained together so that there is one
-    less-than and one greater-than inequality.  The following sorts
-    of machinations are invalid:
+        x * y <= x * z**2
+        x + z >= y/2
 
-        x <= y >= z
-        foo <= bar <= baz <= qux
+        0 <= 3 * x <= 10
+        10 >= 3 * x >= 0
     '''
     def __init__(self, terms={}, lower=None, upper=None):
         '''
@@ -132,8 +130,15 @@ class expression(object):
     # This part allows <=, >= and == to populate lower/upper bounds
     def __le__(self, other):
         if isinstance(other, type(self)):
-            # 2*x <= 3*y
-            if self.upper is None and other.lower is None:
+            if self.lower is None and self.upper is None and \
+               other.lower is None and other.upper is None:
+                # 2*x <= 3*y
+                self.upper  = other
+                other.lower = self
+                return self
+
+            elif self.upper is None and list(other.terms) == [()]:
+                # x <= 10
                 self.upper  = other
                 other.lower = self
                 return self
@@ -146,8 +151,15 @@ class expression(object):
 
     def __ge__(self, other):
         if isinstance(other, type(self)):
-            # 2*x >= 3*y
-            if self.lower is None and other.upper is None:
+            if self.lower is None and self.upper is None and \
+               other.lower is None and other.upper is None:
+                # 2*x >= 3*y
+                self.lower  = other
+                other.upper = self
+                return self
+
+            elif self.lower is None and list(other.terms) == [()]:
+                # x >= 10
                 self.lower  = other
                 other.upper = self
                 return self
