@@ -26,7 +26,6 @@ class ScipTest(unittest.TestCase):
         solver = scip.solver()
         solver.minimize()
         self.assertRaises(scip.VariableError, solver.variable)
-        self.assertRaises(scip.ConstraintError, solver.constraint)
 
     def testBadSolverType(self):
         '''Test that solvers must be properly passed'''
@@ -40,6 +39,19 @@ class ScipTest(unittest.TestCase):
         x1 = solver.variable()
         solver += 1 <= x1 <= 0
         solution = solver.maximize()
+        print()
+        print()
+        print('X' * 80)
+        c = 1 <= x1 <= 0
+        print('LOWER:', c.lower)
+        print('UPPER:', c.upper)
+        print('TERMS:', c.terms)
+
+        print('SOLUTION INFEASIBLE? ', solution.infeasible)
+        print('SOLUTION OBJECTIVE?  ', solution.objective)
+        print('X' * 80)
+        print()
+
         self.assertFalse(solution)
         
     def testUnbounded(self):
@@ -69,7 +81,7 @@ class ScipTest(unittest.TestCase):
         v1 = solver.variable(coefficient=1, vartype=scip.INTEGER, upper=2)
         v2 = solver.variable(vartype=scip.BINARY)
         v3 = solver.variable()
-        solver.constraint(upper=2, coefficients={v1:1})
+        solver.constraint(v1 <= 2)
         
         # Pass known solution to the solver
         solution = solver.maximize(solution={v1:2, v2:1, v3:5.4})
@@ -93,8 +105,9 @@ class ScipTest(unittest.TestCase):
         solver1 = scip.solver()
         solver2 = scip.solver()
         v1 = solver1.variable()
-        self.assertRaises(scip.ConstraintError, solver2.constraint, upper=1, coefficients={v1:1})
-        self.assertRaises(scip.SolverError, solver2.maximize, {v1: 3})
+        self.assertRaises(scip.ConstraintError, solver2.constraint, v1 <= 1)
+        # TODO: this will cause errors again once we introduce nonline obj.
+        #self.assertRaises(scip.SolverError, solver2.maximize, objective=v1<=3)
     
 if __name__ == '__main__':
     unittest.main()

@@ -33,7 +33,7 @@ class ConstraintTest(unittest.TestCase):
         x1 = solver.variable(scip.INTEGER)
         x2 = solver.variable(scip.INTEGER)
         c  = solver.constraint(1 <= x1 + 2*x2 <= 4)
-        
+       
         self.assertEqual(c.lower, 1.0)
         self.assertEqual(c.upper, 4.0)
         self.assertEqual(c.coefficients[x1], 1.0)

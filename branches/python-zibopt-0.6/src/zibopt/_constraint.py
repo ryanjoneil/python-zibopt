@@ -17,11 +17,17 @@ class constraint(_cons.constraint):
 
         # Cancel out terms from lhs/rhs and keep constants
         if expression.lower:
-            expression = expression - expression.lower
+            e = expression - expression.lower
+            e.lower = expression.lower
+            e.upper = expression.upper
+            expression = e
             lower = -expression.terms.pop((), 0.0) # just the constant
 
         if expression.upper:
-            expression = expression - expression.upper
+            e = expression - expression.upper
+            e.lower = expression.lower
+            e.upper = expression.upper
+            expression = e
             upper = -expression.terms.pop((), 0.0) # just the constant
 
         # Make sure we have at least one bound
@@ -46,7 +52,7 @@ class constraint(_cons.constraint):
             coefficients[term[0]] = expression[term]
 
         # Keep this information so we can look it up later
-        self.lower = expression.lower
-        self.upper = expression.upper
+        self.lower = lower
+        self.upper = upper
         self.coefficients = coefficients
 
