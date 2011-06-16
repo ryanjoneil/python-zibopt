@@ -125,7 +125,7 @@ class ExpressionTest(unittest.TestCase):
         e3 = +(4 * self.x1 * self.x2)
         self.assertEqual(e3[self.set_x12], 4.0)
 
-    def testVariablePowers(self):
+    def testSimpleVariablePowers(self):
         '''Tests that non-negative integer powers work'''
         e0 = 2*self.x1**0
         self.assertEqual(e0[()], 2.0)
@@ -138,11 +138,25 @@ class ExpressionTest(unittest.TestCase):
 
         e3 = (5*self.x1)**2
         self.assertEqual(e3[self.set_x11], 25.0)
-    
-        e4 = (2*self.x1**3)**4
-        self.assertEqual(e4[(self.x1,)*12], 2.0**4)
 
-        # TODO: e5 = (2 - 5*self.x1**3)**4
+    def testComplexExpressionPowers(self):
+        '''Tests powers of expressions with one variable'''
+        e0 = (2*self.x1**3)**4
+        self.assertEqual(e0[(self.x1,)*12], 2.0**4)
+        
+        e1 = (2*self.x1**3)**0
+        self.assertEqual(len(e1.terms), 1)
+        self.assertEqual(e1[()], 1.0)
+
+        e2 = (4 - 5*self.x1**3)**2
+        self.assertEqual(len(e2.terms), 3)
+        self.assertEqual(e2[()], 16.0)
+        self.assertEqual(e2[(self.x1,)*3], -40.0)
+        self.assertEqual(e2[(self.x1,)*6], 25.0)
+
+        e3 = (4 - 5*self.x1**3)**0
+        self.assertEqual(len(e3.terms), 1)
+        self.assertEqual(e3[()], 1.0)
 
     def testExpressionBounds(self):
         '''Tests <=, >= and == for expressions'''

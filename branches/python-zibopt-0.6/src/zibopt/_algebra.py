@@ -79,16 +79,23 @@ class expression(object):
         return self
 
     def __pow__(self, x):
-        # (2*x**3)**4
         if isinstance(x, int) and x >= 0:
             if len(self.terms) == 1:
+                # (2 * x) ** 4
                 for term, c in self.terms.items():
                     # Make sure we only have one variable
                     if len(set(term)) == 1:
                         variables = term * x
                         coefficient = c ** x
-                        return expression({variables:coefficient})
+                        return type(self)({variables:coefficient})
 
+            elif len(self.terms) == 2 and () in self.terms:
+                # (2 * x**3) ** 4
+                e = type(self)({():1.0})
+                for _ in range(x):
+                    e = e * self
+                return e
+                
         return NotImplemented
     
     __radd__ = __add__
