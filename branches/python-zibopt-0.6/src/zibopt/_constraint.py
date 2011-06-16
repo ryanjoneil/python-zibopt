@@ -6,28 +6,47 @@ ConstraintError = _cons.error
 
 class constraint(_cons.constraint):
     '''Stores bounds and coefficients so they can be looked up later'''
-    def __init__(self, *args, **kwds):
-        # Yank out variable coefficients since C code isn't expecting them
-        try:
-            coefficients = kwds['coefficients']
-            del kwds['coefficients']
-        except KeyError:
-            coefficients = {} 
+    def __init__(self, solver, expression):
+        lower = upper = None
 
-        # If upper or lower bounds are None, remove them to be polite
-        if 'lower' in kwds and kwds['lower'] is None:
-            del kwds['lower']
-        if 'upper' in kwds and kwds['upper'] is None:
-            del kwds['upper']
-        
-        super(constraint, self).__init__(*args, **kwds)
+        # Make sure we are in the middle if there are two bounds
+        if expression.lower is None and expression.upper and expression.upper.upper:
+            expression = expression.upper
+        elif expression.upper is None and expression.lower and expression.lower.lower:
+            expression = expression.lower
+
+        # Cancel out terms from lhs/rhs and keep constants
+        if expression.lower:
+            expression = expression - expression.lower
+            lower = -expression.terms.pop((), 0.0) # just the constant
+
+        if expression.upper:
+            expression = expression - expression.upper
+            upper = -expression.terms.pop((), 0.0) # just the constant
+
+        # Make sure we have at least one bound
+        if lower is None and upper is None:
+            raise ConstraintError('at least one bound is required')
+
+        # Be polite: only pass in upper and lower bounds if we have them
+        kwds = {}
+        if lower is not None:
+            kwds['lower'] = lower
+        if upper is not None:
+            kwds['upper'] = upper
+
+        super(constraint, self).__init__(solver, **kwds)
 
         # Add variable cofficients to constraint
-        for k, v in coefficients.items():
-            self.variable(k, v)
+        # TODO: add in more complex terms
+        coefficients = {}
+        for term in expression.terms:
+            assert len(term) == 1
+            self.variable(term[0], expression[term])
+            coefficients[term[0]] = expression[term]
 
         # Keep this information so we can look it up later
-        self.lower = kwds.get('lower')
-        self.upper = kwds.get('upper')
+        self.lower = expression.lower
+        self.upper = expression.upper
         self.coefficients = coefficients
 

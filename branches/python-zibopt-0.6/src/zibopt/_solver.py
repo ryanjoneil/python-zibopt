@@ -140,13 +140,17 @@ class solver(_scip.solver):
         self.unconstrain(constraint)
         return self
 
-    def _update_coefficients(self, obj_info):
+    def _update_coefficients(self, expression):
         '''Allows use of algebraic format for objective functions'''
         # Clear out old coefficients.  This may require freeing the transformed
         # problem, thus the restart.
         self.restart()
+        # TODO: add in more complex terms
         for v in self.variables:
-            v.set_coefficient(obj_info.coefficients.get(v, 0))
+            try:
+                v.set_coefficient(expression[(v,)])
+            except:
+                v.set_coefficient(0)
 
     def variable(self, vartype=CONTINUOUS, coefficient=0, lower=0, **kwds):
         '''
@@ -161,7 +165,7 @@ class solver(_scip.solver):
         self.variables.add(v)
         return v
 
-    def constraint(self, *args, **kwds):
+    def constraint(self, expression):
         '''
         Adds a constraint to the solver.  Returns the constraint. The user 
         can create the constraint out of keyword arguments or algebraically.
@@ -170,22 +174,9 @@ class solver(_scip.solver):
             solver.constraint(upper=4, coefficients={x1:1, x2:2})
             solver.constraint(x1 + 2*x2 <= 4)
 
-        @param lower=-inf:      lhs of constraint (lhs <= a'x)
-        @param upper=+inf:      rhs of constraint (a'x <= rhs)
-        @param coefficients={}: variable coefficients
+        @param expression: zibopt.expression instance
         '''
-        if args:
-            # Take information from the algebraic version as though 
-            # it were passed via keywords.
-            cons_builder = args[0]
-            kwds['lower'] = kwds.get('lower') or cons_builder.lower
-            kwds['upper'] = kwds.get('upper') or cons_builder.upper
-            if 'coefficients' in kwds:
-                kwds['coefficients'].update(cons_builder.coefficients)
-            else:
-                kwds['coefficients'] = cons_builder.coefficients.copy()
-        
-        cons = constraint(self, **kwds)
+        cons = constraint(self, expression)
         self.constrain(cons)
         return cons
 
@@ -219,7 +210,10 @@ class solver(_scip.solver):
         @param absgap=0.0:  optional primal/dual gap to stop solving
         @param nsol=-1:     number of solutions to find before stopping
         '''
+        # TODO: does SCIP allow nonlinear objective functions?
+        #       I assume so, and that changes quite a bit more.
         if 'objective' in kwds:
+            # TODO: for now we are just getting linear objectives working
             self._update_coefficients(kwds['objective'])
             del kwds['objective']
         super(solver, self).maximize(*args, **kwds)
