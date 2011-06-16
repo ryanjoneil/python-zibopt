@@ -160,52 +160,63 @@ class ExpressionTest(unittest.TestCase):
 
     def testExpressionBounds(self):
         '''Tests <=, >= and == for expressions'''
-        i0 = self.x1 + self.x2 - 1 <= self.x1 * self.x2 + 2
-        self.assertEqual(len(i0.expression.terms), 3)
-        self.assertEqual(i0.expression[self.set_x1], 1.0)
-        self.assertEqual(i0.expression[self.set_x2], 1.0)
-        self.assertEqual(i0.expression[self.set_x12], -1.0)
-        self.assertEqual(i0.upper, 3.0)
+        e0 = self.x1 + self.x2 - 1 <= self.x1 * self.x2 + 2
+        self.assertEqual(e0[()], -1.0)
+        self.assertEqual(e0[self.set_x1], 1.0)
+        self.assertEqual(e0[self.set_x2], 1.0)
+        self.assertEqual(e0.lower, None)
+        self.assertEqual(e0.upper[()], 2.0)
+        self.assertEqual(e0.upper[self.set_x12], 1.0)
+        self.assertEqual(e0.upper.lower, e0)
+        self.assertEqual(e0.upper.upper, None)
 
-        i1 = self.x1 + self.x2 - 1 >= self.x1 * self.x2 + 2
-        self.assertEqual(len(i1.expression.terms), 3)
-        self.assertEqual(i1.expression[self.set_x1], 1.0)
-        self.assertEqual(i1.expression[self.set_x2], 1.0)
-        self.assertEqual(i1.expression[self.set_x12], -1.0)
-        self.assertEqual(i1.lower, 3.0)
+        e1 = self.x1 + self.x2 - 1 >= self.x1 * self.x2 + 2
+        self.assertEqual(e1[()], -1.0)
+        self.assertEqual(e1[self.set_x1], 1.0)
+        self.assertEqual(e1[self.set_x2], 1.0)
+        self.assertEqual(e1.lower[()], 2.0)
+        self.assertEqual(e1.lower[self.set_x12], 1.0)
+        self.assertEqual(e1.upper, None)
+        self.assertEqual(e1.lower.lower, None)
+        self.assertEqual(e1.lower.upper, e1)
 
-        i2 = self.x1 + self.x2 - 1 == self.x1 * self.x2 + 2
-        self.assertEqual(len(i2.expression.terms), 3)
-        self.assertEqual(i2.expression[self.set_x1], 1.0)
-        self.assertEqual(i2.expression[self.set_x2], 1.0)
-        self.assertEqual(i2.expression[self.set_x12], -1.0)
-        self.assertEqual(i2.lower, 3.0)
-        self.assertEqual(i2.upper, 3.0)
+        e2 = self.x1 + self.x2 - 1 == self.x1 * self.x2 + 2
+        self.assertEqual(e2[()], -1.0)
+        self.assertEqual(e2[self.set_x1], 1.0)
+        self.assertEqual(e2[self.set_x2], 1.0)
+        self.assertEqual(e2.lower[()], 2.0)
+        self.assertEqual(e2.lower[self.set_x12], 1.0)
+        self.assertEqual(e2.upper, e2.lower)
+        self.assertEqual(e2.lower.lower, e2)
+        self.assertEqual(e2.lower.upper, e2)
 
     def testVariableBounds(self):
         '''Tests <=, >= and == for variables'''
-        i0 = self.x1 <= 3
-        self.assertEqual(len(i0.expression.terms), 1)
-        self.assertEqual(i0.upper, 3.0)
+        e0 = self.x1 <= 3
+        self.assertEqual(e0[self.set_x1], 1.0)
+        self.assertEqual(e0.lower, None)
+        self.assertEqual(e0.upper[()], 3.0)
+        self.assertEqual(e0.upper.lower, e0)
+        self.assertEqual(e0.upper.upper, None)
 
-        i1 = self.x1 >= 3
-        self.assertEqual(len(i1.expression.terms), 1)
-        self.assertEqual(i1.lower, 3.0)
+        e1 = self.x1 >= 3
+        self.assertEqual(e1[self.set_x1], 1.0)
+        self.assertEqual(e1.lower[()], 3.0)
+        self.assertEqual(e1.upper, None)
+        self.assertEqual(e1.lower.lower, None)
+        self.assertEqual(e1.lower.upper, e1)
 
-        i2 = self.x1 == 3
-        self.assertEqual(len(i2.expression.terms), 1)
-        self.assertEqual(i2.lower, 3.0)
-        self.assertEqual(i2.upper, 3.0)
+        e2 = self.x1 == 3
+        self.assertEqual(e2[self.set_x1], 1.0)
+        self.assertEqual(e2.lower[()], 3.0)
+        self.assertEqual(e2.upper, e2.lower)
+        self.assertEqual(e2.lower.lower, e2)
+        self.assertEqual(e2.lower.upper, e2)
 
 #    def testChainedExpressionInequalities(self):
 #        '''Tests chained <= and >= for expressions'''
 #        i0 = 1 + 3*self.x1 <= self.x1*self.x2 <= 4*self.x3 + 5
 #        print(i0.expression.terms, i0.lower, i0.upper)
-
-    # TODO: 0 * x + 3 ?
-    # TODO: (2*x)**2
-    # TODO: (2*x**3)**4
-    # TODO: (2-5*x**3)**4
 
 if __name__ == '__main__':
     unittest.main()

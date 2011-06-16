@@ -1,8 +1,31 @@
 from itertools import product
 
-__all__ = 'expression', 'inequality'
+__all__ = 'expression',
 
 class expression(object):
+    '''
+    Represents an expression with an upper and/or lower bound.  Valid 
+    expressions can be constructed using any arithmetic operation and 
+    powers of expressions containing one variable.  Expressions cannot be
+    divided by anything but a number.  The following are valid examples:
+
+        (x + 3*y) / 4
+        (3 * x**2) ** 4
+        (x + y) * (x - y)
+
+    Valid inequalitites look like:
+
+        x <= 4
+        x >= y
+        x <= z*(x + y**2) <= 100
+    
+    Inequalities can be chained together so that there is one
+    less-than and one greater-than inequality.  The following sorts
+    of machinations are invalid:
+
+        x <= y >= z
+        foo <= bar <= baz <= qux
+    '''
     def __init__(self, terms={}, lower=None, upper=None):
         '''
         Instantiates an algebraic expression.  This is assumed to be a 
@@ -109,9 +132,11 @@ class expression(object):
     # This part allows <=, >= and == to populate lower/upper bounds
     def __le__(self, other):
         if isinstance(other, type(self)):
-            e = self - other
-            c = 0.0 - e.terms.pop((), 0.0)
-            return inequality(e, upper=c)
+            # 2*x <= 3*y
+            if self.upper is None and other.lower is None:
+                self.upper  = other
+                other.lower = self
+                return self
 
         elif isinstance(other, int) or isinstance(other, float):
             # x + y <= 1
@@ -121,9 +146,11 @@ class expression(object):
 
     def __ge__(self, other):
         if isinstance(other, type(self)):
-            e = self - other
-            c = 0.0 - e.terms.pop((), 0.0)
-            return inequality(e, lower=c)
+            # 2*x >= 3*y
+            if self.lower is None and other.upper is None:
+                self.lower  = other
+                other.upper = self
+                return self
 
         elif isinstance(other, int) or isinstance(other, float):
             # x + y >= 1
@@ -133,56 +160,18 @@ class expression(object):
 
     def __eq__(self, other):
         if isinstance(other, type(self)):
-            e = self - other
-            c = 0.0 - e.terms.pop((), 0.0)
-            return inequality(e, lower=c, upper=c)
-
+            # 2*x == 3*y
+            if self.lower is None and self.upper is None and \
+               other.lower is None and other.upper is None:
+                self.lower  = other
+                self.upper  = other
+                other.lower = self
+                other.upper = self
+                return self
+                
         elif isinstance(other, int) or isinstance(other, float):
             # x + y == 1
             return self == type(self)({():other})         
 
         return NotImplemented           
-
-class inequality(object):
-    '''
-    Represents an expression with an upper and/or lower bound.
-    Valid inequalitites look like:
-
-        x <= 4
-        x >= y
-        x <= z*(x + y**2) <= 100
-    
-    Inequalities can be chained together so that there is one
-    less-than and one greater-than inequality.  The following sorts
-    of machinations are invalid:
-
-        x <= y >= z
-        foo <= bar <= baz <= qux
-    '''
-    def __init__(self, expression, upper=None, lower=None):
-        self.expression = expression
-        self.upper = upper
-        self.lower = lower
-
-    # TODO: how do we get chained inequalities working? x <= y <= z
-#    def __le__(self, other):
-#        print('YYY <=', other)
-#        if isinstance(other, expression):
-#            print('YYY foo', self.lower, self.upper)
-#            
-#        return NotImplemented           
-#
-#    def __ge__(self, other):
-#        print('YYY >=', other)
-#        if isinstance(other, expression):
-#            print('YYY bar')
-#
-#        return NotImplemented           
-#
-#    def __eq__(self, other):
-#        print('YYY ==', other)
-#        if isinstance(other, expression):
-#            print('YYY baz')
-#
-#        return NotImplemented           
 
