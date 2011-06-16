@@ -41,18 +41,31 @@ class constraint(_cons.constraint):
         if upper is not None:
             kwds['upper'] = upper
 
-        super(constraint, self).__init__(solver, **kwds)
+        # Determine what type of constraint this is: linear or quadratic.
+        # Linear constraints will have one variable per term.
+        cons_type = _cons.LINEAR
+        for term in expression.terms:
+            if len(term) > 1:
+                cons_type = _cons.NONLINEAR
+            elif len(term) > 2:
+                # SCIP allows terms like: x, x*y x^2
+                # TODO: i think...
+                raise ConstraintError('unsupported constraint type')
+
+        super(constraint, self).__init__(solver, cons_type, **kwds)
 
         # Add variable cofficients to constraint
-        # TODO: add in more complex terms
-        coefficients = {}
         for term in expression.terms:
-            assert len(term) == 1
-            self.variable(term[0], expression[term])
-            coefficients[term[0]] = expression[term]
+            if len(term) == 1:
+                self.linear_term(term[0], expression[term])
+            elif len(set(term)) == 1:
+                self.quadratic_term(term[0], expression[term], len(term))
+            else:
+                self.bilinear_term(term[0], term[1], expression[term])
 
         # Keep this information so we can look it up later
         self.lower = lower
         self.upper = upper
-        self.coefficients = coefficients
+        self.coefficients = expression.terms.copy()
+        self.constraint_type = cons_type
 

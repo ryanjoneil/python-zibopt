@@ -28,6 +28,7 @@ class ConstraintTest(unittest.TestCase):
         self.assertEqual(solution.objective, 0.25)
 
     def testAlgebraicConstraints(self):
+        '''Tests algebraic format for solver.constraint(...)'''
         solver = scip.solver()
 
         x1 = solver.variable(scip.INTEGER)
@@ -36,8 +37,8 @@ class ConstraintTest(unittest.TestCase):
        
         self.assertEqual(c.lower, 1.0)
         self.assertEqual(c.upper, 4.0)
-        self.assertEqual(c.coefficients[x1], 1.0)
-        self.assertEqual(c.coefficients[x2], 2.0)
+        self.assertEqual(c.coefficients[(x1,)], 1.0)
+        self.assertEqual(c.coefficients[(x2,)], 2.0)
 
 class ConstraintRemovalTest(unittest.TestCase):
     def setUp(self):
