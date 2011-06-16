@@ -111,46 +111,87 @@ class ExpressionTest(unittest.TestCase):
         self.assertEqual(e2[self.set_x11], 2.0) 
         self.assertEqual(e2[self.set_x12], 2.0) 
 
+    def testNegativePositive(self):
+        '''Tests that negative/positive expressions and variables work'''
+        e0 = -self.x1
+        self.assertEqual(e0[self.set_x1], -1.0)
+
+        e1 = -(4 * self.x1 * self.x2)
+        self.assertEqual(e1[self.set_x12], -4.0)
+
+        e2 = +self.x1
+        self.assertEqual(e2[self.set_x1], 1.0)
+        
+        e3 = +(4 * self.x1 * self.x2)
+        self.assertEqual(e3[self.set_x12], 4.0)
+
+    def testVariablePowers(self):
+        '''Tests that non-negative integer powers work'''
+        e0 = 2*self.x1**0
+        self.assertEqual(e0[()], 2.0)
+
+        e1 = 3*self.x1**1
+        self.assertEqual(e1[self.set_x1], 3.0)
+
+        e2 = 4*self.x1**2
+        self.assertEqual(e2[self.set_x11], 4.0)
+
+        e3 = (5*self.x1)**2
+        self.assertEqual(e3[self.set_x11], 25.0)
+    
+        e4 = (2*self.x1**3)**4
+        self.assertEqual(e4[(self.x1,)*12], 2.0**4)
+
+        # TODO: e5 = (2 - 5*self.x1**3)**4
+
     def testExpressionBounds(self):
         '''Tests <=, >= and == for expressions'''
-        e0 = self.x1 + self.x2 - 1 <= self.x1 * self.x2 + 2
-        self.assertEqual(len(e0.terms), 3)
-        self.assertEqual(e0[self.set_x1], 1.0)
-        self.assertEqual(e0[self.set_x2], 1.0)
-        self.assertEqual(e0[self.set_x12], -1.0)
-        self.assertEqual(e0.upper, 3.0)
+        i0 = self.x1 + self.x2 - 1 <= self.x1 * self.x2 + 2
+        self.assertEqual(len(i0.expression.terms), 3)
+        self.assertEqual(i0.expression[self.set_x1], 1.0)
+        self.assertEqual(i0.expression[self.set_x2], 1.0)
+        self.assertEqual(i0.expression[self.set_x12], -1.0)
+        self.assertEqual(i0.upper, 3.0)
 
-        e1 = self.x1 + self.x2 - 1 >= self.x1 * self.x2 + 2
-        self.assertEqual(len(e1.terms), 3)
-        self.assertEqual(e1[self.set_x1], 1.0)
-        self.assertEqual(e1[self.set_x2], 1.0)
-        self.assertEqual(e1[self.set_x12], -1.0)
-        self.assertEqual(e1.lower, 3.0)
+        i1 = self.x1 + self.x2 - 1 >= self.x1 * self.x2 + 2
+        self.assertEqual(len(i1.expression.terms), 3)
+        self.assertEqual(i1.expression[self.set_x1], 1.0)
+        self.assertEqual(i1.expression[self.set_x2], 1.0)
+        self.assertEqual(i1.expression[self.set_x12], -1.0)
+        self.assertEqual(i1.lower, 3.0)
 
-        e2 = self.x1 + self.x2 - 1 == self.x1 * self.x2 + 2
-        self.assertEqual(len(e2.terms), 3)
-        self.assertEqual(e2[self.set_x1], 1.0)
-        self.assertEqual(e2[self.set_x2], 1.0)
-        self.assertEqual(e2[self.set_x12], -1.0)
-        self.assertEqual(e2.lower, 3.0)
-        self.assertEqual(e2.upper, 3.0)
+        i2 = self.x1 + self.x2 - 1 == self.x1 * self.x2 + 2
+        self.assertEqual(len(i2.expression.terms), 3)
+        self.assertEqual(i2.expression[self.set_x1], 1.0)
+        self.assertEqual(i2.expression[self.set_x2], 1.0)
+        self.assertEqual(i2.expression[self.set_x12], -1.0)
+        self.assertEqual(i2.lower, 3.0)
+        self.assertEqual(i2.upper, 3.0)
 
     def testVariableBounds(self):
         '''Tests <=, >= and == for variables'''
-        e0 = self.x1 <= 3
-        self.assertEqual(len(e0.terms), 1)
-        self.assertEqual(e0.upper, 3.0)
+        i0 = self.x1 <= 3
+        self.assertEqual(len(i0.expression.terms), 1)
+        self.assertEqual(i0.upper, 3.0)
 
-        e1 = self.x1 >= 3
-        self.assertEqual(len(e1.terms), 1)
-        self.assertEqual(e1.lower, 3.0)
+        i1 = self.x1 >= 3
+        self.assertEqual(len(i1.expression.terms), 1)
+        self.assertEqual(i1.lower, 3.0)
 
-        e2 = self.x1 == 3
-        self.assertEqual(len(e2.terms), 1)
-        self.assertEqual(e2.lower, 3.0)
-        self.assertEqual(e2.upper, 3.0)
+        i2 = self.x1 == 3
+        self.assertEqual(len(i2.expression.terms), 1)
+        self.assertEqual(i2.lower, 3.0)
+        self.assertEqual(i2.upper, 3.0)
 
-    # TODO: 4 <= x1 + x2 <= 5
+#    def testChainedExpressionInequalities(self):
+#        '''Tests chained <= and >= for expressions'''
+#        i0 = 1 + 3*self.x1 <= self.x1*self.x2 <= 4*self.x3 + 5
+#        print(i0.expression.terms, i0.lower, i0.upper)
+
+    # TODO: 0 * x + 3 ?
+    # TODO: (2*x)**2
+    # TODO: (2*x**3)**4
+    # TODO: (2-5*x**3)**4
 
 if __name__ == '__main__':
     unittest.main()

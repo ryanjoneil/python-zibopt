@@ -1,6 +1,6 @@
 from itertools import product
 
-__all__ = 'expression',
+__all__ = 'expression', 'inequality'
 
 class expression(object):
     def __init__(self, terms={}, lower=None, upper=None):
@@ -70,6 +70,26 @@ class expression(object):
 
         return NotImplemented
 
+    def __neg__(self):
+        # -(x * y)
+        return type(self)({v:-c for v, c in self.terms.items()})
+
+    def __pos__(self):
+        # +(x * y)
+        return self
+
+    def __pow__(self, x):
+        # (2*x**3)**4
+        if isinstance(x, int) and x >= 0:
+            if len(self.terms) == 1:
+                for term, c in self.terms.items():
+                    # Make sure we only have one variable
+                    if len(set(term)) == 1:
+                        variables = term * x
+                        coefficient = c ** x
+                        return expression({variables:coefficient})
+
+        return NotImplemented
     
     __radd__ = __add__
     __rsub__ = __sub__
@@ -81,16 +101,10 @@ class expression(object):
 
     # This part allows <=, >= and == to populate lower/upper bounds
     def __le__(self, other):
-        from zibopt._variable import variable
         if isinstance(other, type(self)):
-            # x + y <= y + z
             e = self - other
-            e.upper = 0.0 - e.terms.pop((), 0.0)
-            return e
-
-        elif isinstance(other, variable):
-            # x + y <= x
-            return self <= type(self)({other:1.0})
+            c = 0.0 - e.terms.pop((), 0.0)
+            return inequality(e, upper=c)
 
         elif isinstance(other, int) or isinstance(other, float):
             # x + y <= 1
@@ -99,16 +113,10 @@ class expression(object):
         return NotImplemented
 
     def __ge__(self, other):
-        from zibopt._variable import variable
         if isinstance(other, type(self)):
-            # x + y >= y + z
             e = self - other
-            e.lower = 0.0 - e.terms.pop((), 0.0)
-            return e
-
-        elif isinstance(other, variable):
-            # x + y >= x
-            return self >= type(self)({other:1.0})
+            c = 0.0 - e.terms.pop((), 0.0)
+            return inequality(e, lower=c)
 
         elif isinstance(other, int) or isinstance(other, float):
             # x + y >= 1
@@ -117,16 +125,10 @@ class expression(object):
         return NotImplemented
 
     def __eq__(self, other):
-        from zibopt._variable import variable
         if isinstance(other, type(self)):
-            # x + y == y + z
             e = self - other
-            e.upper = e.lower = 0.0 - e.terms.pop((), 0.0)
-            return e
-
-        elif isinstance(other, variable):
-            # x + y == x
-            return self == type(self)({other:1.0})
+            c = 0.0 - e.terms.pop((), 0.0)
+            return inequality(e, lower=c, upper=c)
 
         elif isinstance(other, int) or isinstance(other, float):
             # x + y == 1
@@ -134,5 +136,46 @@ class expression(object):
 
         return NotImplemented           
 
-    # TODO: __neg__, __pos__, __abs__?
+class inequality(object):
+    '''
+    Represents an expression with an upper and/or lower bound.
+    Valid inequalitites look like:
+
+        x <= 4
+        x >= y
+        x <= z*(x + y**2) <= 100
+    
+    Inequalities can be chained together so that there is one
+    less-than and one greater-than inequality.  The following sorts
+    of machinations are invalid:
+
+        x <= y >= z
+        foo <= bar <= baz <= qux
+    '''
+    def __init__(self, expression, upper=None, lower=None):
+        self.expression = expression
+        self.upper = upper
+        self.lower = lower
+
+    # TODO: how do we get chained inequalities working? x <= y <= z
+#    def __le__(self, other):
+#        print('YYY <=', other)
+#        if isinstance(other, expression):
+#            print('YYY foo', self.lower, self.upper)
+#            
+#        return NotImplemented           
+#
+#    def __ge__(self, other):
+#        print('YYY >=', other)
+#        if isinstance(other, expression):
+#            print('YYY bar')
+#
+#        return NotImplemented           
+#
+#    def __eq__(self, other):
+#        print('YYY ==', other)
+#        if isinstance(other, expression):
+#            print('YYY baz')
+#
+#        return NotImplemented           
 

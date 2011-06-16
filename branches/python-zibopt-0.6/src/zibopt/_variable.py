@@ -1,5 +1,5 @@
 from zibopt import _vars
-from zibopt._expression import expression
+from zibopt._algebra import expression
 
 __all__ = 'variable', 'VariableError'
 
@@ -16,18 +16,11 @@ class variable(_vars.variable):
     def __getattr__(self, attr):
         return super(variable, self).__getattr__(attr)
 
-    # Convert variables into _cons_builder instances on all math ops
+    # Convert variables into expression instances on math operations
     def __add__(self, other):
-        # TODO: deal with sum 
-        # # Using sum(...) will put a 0 in the list
-        # if other is 0:
-        #     return self._cons_builder(self)
         return expression({(self,):1.0}) + other
 
     def __sub__(self, other):
-        # TODO: deal with sum
-        #if other is 0:
-        #    return self._cons_builder(self)
         return expression({(self,):1.0}) - other
 
     def __mul__(self, other):
@@ -35,6 +28,19 @@ class variable(_vars.variable):
 
     def __div__(self, other):
         return expression({(self,):1.0}) * other
+
+    def __neg__(self):
+        return expression({(self,):-1.0})
+
+    def __pos__(self):
+        return expression({(self,):1.0})
+
+    def __pow__(self, x):
+        if isinstance(x, int) and x >= 0:
+            if x == 0:
+                return expression({():1.0})
+            else:
+                return expression({(self,)*x:1.0})
 
     __radd__ = __add__
     __rsub__ = __sub__
