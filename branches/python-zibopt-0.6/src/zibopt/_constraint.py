@@ -49,7 +49,6 @@ class constraint(_cons.constraint):
                 cons_type = _cons.NONLINEAR
             elif len(term) > 2:
                 # SCIP allows terms like: x, x*y x^2
-                # TODO: i think...
                 raise ConstraintError('unsupported constraint type')
 
         super(constraint, self).__init__(solver, cons_type, **kwds)
@@ -58,9 +57,8 @@ class constraint(_cons.constraint):
         for term in expression.terms:
             if len(term) == 1:
                 self.linear_term(term[0], expression[term])
-            elif len(set(term)) == 1:
-                self.quadratic_term(term[0], expression[term], len(term))
             else:
+                print('BILINEAR:', term, expression[term])
                 self.bilinear_term(term[0], term[1], expression[term])
 
         # Keep this information so we can look it up later

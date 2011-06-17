@@ -36,11 +36,13 @@ static int constraint_init(constraint *self, PyObject *args, PyObject *kwds) {
     self->constraint_type = cons_type;
 
     if (cons_type == PY_SCIP_CONSTRAINT_LINEAR) {
+        puts("CREATING LINEAR CONSTRAINT");
         PY_SCIP_CALL(error, -1,
             SCIPcreateConsLinear(self->scip, &self->constraint, "", 0, NULL, NULL, 
                 lhs, rhs, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE)
         );
     } else {
+        puts("CREATING QUADRATIC CONSTRAINT");
         PY_SCIP_CALL(error, -1,
             SCIPcreateConsQuadratic(self->scip, &self->constraint, "", 0, NULL, NULL, 0, NULL, NULL, NULL,
                 lhs, rhs, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE)
@@ -96,34 +98,6 @@ static PyObject *constraint_linear_term(constraint *self, PyObject *args) {
     Py_RETURN_NONE;
 }
 
-static PyObject *constraint_quadratic_term(constraint *self, PyObject *args) {
-    PyObject *v;
-    double coefficient;
-    double exponent;
-    variable *var;
-
-    if (!PyArg_ParseTuple(args, "Odd", &v, &coefficient, &exponent))
-        return NULL;
-        
-    // Check and make sure we have a real variable type
-    if (strcmp(v->ob_type->tp_name, VARIABLE_TYPE_NAME)) {
-        PyErr_SetString(error, "invalid variable type");
-        return NULL;
-    }
-    var = (variable *) v;
-
-    // Verify that the variable is associated with this solver
-    if (var->scip != self->scip) {
-        PyErr_SetString(error, "variable not associated with solver");
-        return NULL;
-    }
-
-    PY_SCIP_CALL(error, NULL, 
-        SCIPaddQuadVarQuadratic(self->scip, self->constraint, var->variable, coefficient, exponent)
-    );
-    Py_RETURN_NONE;
-}
-
 static PyObject *constraint_bilinear_term(constraint *self, PyObject *args) {
     PyObject *v1;
     PyObject *v2;
@@ -136,7 +110,7 @@ static PyObject *constraint_bilinear_term(constraint *self, PyObject *args) {
         
     // Check and make sure we have a real variable type
     if (strcmp(v1->ob_type->tp_name, VARIABLE_TYPE_NAME) ||
-        strcmp(v1->ob_type->tp_name, VARIABLE_TYPE_NAME)) {
+        strcmp(v2->ob_type->tp_name, VARIABLE_TYPE_NAME)) {
         PyErr_SetString(error, "invalid variable type");
         return NULL;
     }
@@ -149,6 +123,7 @@ static PyObject *constraint_bilinear_term(constraint *self, PyObject *args) {
         return NULL;
     }
 
+    printf("ABOUT TO ADD w/ TYPE=%d var1=%p var2=%p c=%f\n", self->constraint_type, var1, var2, coefficient);
     PY_SCIP_CALL(error, NULL, 
         SCIPaddBilinTermQuadratic(self->scip, self->constraint, var1->variable, var2->variable, coefficient)
     );
@@ -168,7 +143,6 @@ static PyObject *constraint_register(constraint *self) {
 /*****************************************************************************/
 static PyMethodDef constraint_methods[] = {
     {"linear_term", (PyCFunction) constraint_linear_term, METH_VARARGS, "add a variable to a constraint"},
-    {"quadratic_term", (PyCFunction) constraint_quadratic_term, METH_VARARGS, "add a quadratic term to a constraint"},
     {"bilinear_term", (PyCFunction) constraint_bilinear_term, METH_VARARGS, "add a bilinear term to a constraint"},
     {"register", (PyCFunction) constraint_register, METH_NOARGS,  "registers the constraint with the solver"},
     {NULL} /* Sentinel */
