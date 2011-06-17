@@ -9,10 +9,9 @@ class NonlinearConstraintTest(unittest.TestCase):
         x1 = solver.variable()
         x2 = solver.variable()
 
-        solver += 0 <= x1*x2 <= 1
-        print("CONSTRAINT ADDED")
-        solution = solver.maximize(objective=1*x1)
-        # TODO: solution = solver.maximize(objective=x1)
+        solver += 0 <= x1 <= 1
+        #solver += 0 <= x1*x2 <= 1
+        solution = solver.maximize(objective=x1)
 
         self.assertEqual(solution.objective, 1.0)
         self.assertEqual(solution[x1], 1.0)

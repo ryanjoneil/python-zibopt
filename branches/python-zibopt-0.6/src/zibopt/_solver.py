@@ -130,25 +130,30 @@ class solver(_scip.solver):
         the only way to properly construct and store constraints in variables
         is using the solver.constraint(...) method.
 
-            some_constraint = solver.constraint(
-                upper = 4,
-                coefficients = {x1: 2, x2: 2}
-            )
+            some_constraint = solver.constraint(2*x1 + 2*x2 <= 4)
             solver.maximize(objective=x1+x2)
             solver -= some_constraint
         '''
         self.unconstrain(constraint)
         return self
 
-    def _update_coefficients(self, expression):
+    def _update_coefficients(self, expr):
         '''Allows use of algebraic format for objective functions'''
         # Clear out old coefficients.  This may require freeing the transformed
         # problem, thus the restart.
         self.restart()
+
+        # Make sure it's actually an expression.  It could be a constant or 
+        # a variable as well, such as: solver.maximize(objective=x1)
+        if isinstance(expr, variable):
+            expr = expression({(expr,):1.0})
+        elif isinstance(expr, int) or isinstance(expr, float):
+            expr = expression({():expr})
+
         # TODO: add in more complex terms
         for v in self.variables:
             try:
-                v.set_coefficient(expression[(v,)])
+                v.set_coefficient(expr[(v,)])
             except:
                 v.set_coefficient(0)
 
@@ -171,8 +176,17 @@ class solver(_scip.solver):
         can create the constraint out of keyword arguments or algebraically.
         For instance, the following two statements are equivalent:
 
-            solver.constraint(upper=4, coefficients={x1:1, x2:2})
             solver.constraint(x1 + 2*x2 <= 4)
+
+            solver.constraint(
+                expression(
+                    terms = {
+                        (x1,): 1.0,
+                        (x2,): 2.0
+                    },
+                    upper = 4
+                )
+            )
 
         @param expression: zibopt.expression instance
         '''
@@ -214,8 +228,7 @@ class solver(_scip.solver):
         #       I assume so, and that changes quite a bit more.
         if 'objective' in kwds:
             # TODO: for now we are just getting linear objectives working
-            self._update_coefficients(kwds['objective'])
-            del kwds['objective']
+            self._update_coefficients(kwds.pop('objective'))
         super(solver, self).maximize(*args, **kwds)
         return solution(self)
         
@@ -232,8 +245,7 @@ class solver(_scip.solver):
         @param nsol=-1:     number of solutions to find before stopping
         '''
         if 'objective' in kwds:
-            self._update_coefficients(kwds['objective'])
-            del kwds['objective']
+            self._update_coefficients(kwds.pop('objective'))
         super(solver, self).minimize(*args, **kwds)
         return solution(self)
         
