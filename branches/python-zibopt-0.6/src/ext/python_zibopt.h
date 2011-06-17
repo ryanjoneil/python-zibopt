@@ -10,7 +10,6 @@
 #include <scip/clock.h>
 #include <scip/conflict.h>
 #include <scip/cons.h>
-#include <scip/cons_quadratic.h>
 #include <scip/heur.h>
 #include <scip/misc.h>
 #include <scip/nodesel.h>
@@ -47,10 +46,6 @@
                                        *   bound reaches this value */
 #define SCIP_DEFAULT_LIMIT_SOLUTIONS -1 /** solving stops after this number of solutions */
 
-// Constraint types
-#define PY_SCIP_CONSTRAINT_LINEAR 0
-#define PY_SCIP_CONSTRAINT_NONLINEAR 1
-
 typedef struct {
     PyObject_HEAD
     SCIP_VAR *variable;
@@ -64,7 +59,6 @@ typedef struct {
     PyObject_HEAD
     SCIP_CONS *constraint;
     SCIP *scip;
-    int constraint_type;     // linear or quadratic
     struct constraint *next; // linked list next
 } constraint;
 

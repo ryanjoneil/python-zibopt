@@ -31,7 +31,7 @@ class ScipTest(unittest.TestCase):
         '''Test that solvers must be properly passed'''
         solver = scip.solver()
         self.assertRaises(scip.VariableError, _vars.variable, object(), 0)
-        self.assertRaises(scip.ConstraintError, _cons.constraint, object(), _cons.LINEAR)
+        self.assertRaises(scip.ConstraintError, _cons.constraint, object())
 
     def testInfeasible(self):
         '''Solutions should be false for infeasibility'''

@@ -7,14 +7,13 @@ static PyObject *error;
 /* PYTHON TYPE METHODS                                                       */
 /*****************************************************************************/
 static int constraint_init(constraint *self, PyObject *args, PyObject *kwds) {
-    static char *argnames[] = {"solver", "constraint_type", "lower", "upper", NULL};
+    static char *argnames[] = {"solver", "lower", "upper", NULL};
     PyObject *s;     // solver Python object
     solver *solv;    // solver C object
-    int cons_type;   // linear or quadratic
     double lhs, rhs; // lhs <= a'x <= rhs
 
     // SCIPinfinity requires self->scip, so we have to parse the args twice
-    if (!PyArg_ParseTuple(args, "Oi|dd", &s, &cons_type))
+    if (!PyArg_ParseTuple(args, "O|dd", &s))
         return -1;
 
     // Check solver type in the best way we seem to have available
@@ -30,24 +29,47 @@ static int constraint_init(constraint *self, PyObject *args, PyObject *kwds) {
     rhs = SCIPinfinity(self->scip);
 
     // This time is just to get the upper and lower bounds out    
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "Oi|dd", argnames, &s, &cons_type, &lhs, &rhs))
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|dd", argnames, &s, &lhs, &rhs))
         return -1;
 
-    self->constraint_type = cons_type;
-
-    if (cons_type == PY_SCIP_CONSTRAINT_LINEAR) {
-        puts("CREATING LINEAR CONSTRAINT");
-        PY_SCIP_CALL(error, -1,
-            SCIPcreateConsLinear(self->scip, &self->constraint, "", 0, NULL, NULL, 
-                lhs, rhs, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE)
-        );
-    } else {
-        puts("CREATING QUADRATIC CONSTRAINT");
-        PY_SCIP_CALL(error, -1,
-            SCIPcreateConsQuadratic(self->scip, &self->constraint, "", 0, NULL, NULL, 0, NULL, NULL, NULL,
-                lhs, rhs, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE)
-        );
-    }
+    // SCIPcreateConsLinear Arguments:
+    // scip        SCIP data structure
+    // cons        pointer to hold the created constraint
+    // name        name of constraint
+    // nvars       number of nonzeros in the constraint
+    // vars        array with variables of constraint entries
+    // vals        array with coefficients of constraint entries
+    // lhs         left hand side of constraint
+    // rhs         right hand side of constraint
+    // initial     should the LP relaxation of constraint be in the initial LP? 
+    //             Usually set to TRUE. Set to FALSE for 'lazy constraints'.
+    // separate    should the constraint be separated during LP processing? 
+    //             Usually set to TRUE.
+    // enforce     should the constraint be enforced during node processing? 
+    //             TRUE for model constraints, FALSE for additional, redundant 
+    //             constraints.
+    // check       should the constraint be checked for feasibility? TRUE for 
+    //             model constraints, FALSE for additional, redundant constraints.
+    // propagate   should the constraint be propagated during node processing? 
+    //             Usually set to TRUE.
+    // local       is constraint only valid locally? Usually set to FALSE. Has 
+    //             to be set to TRUE, e.g., for branching constraints.
+    // modifiable  is constraint modifiable (subject to column generation)? 
+    //             Usually set to FALSE. In column generation applications, set
+    //             to TRUE if pricing adds coefficients to this constraint.
+    // dynamic     Is constraint subject to aging? Usually set to FALSE. Set to 
+    //             TRUE for own cuts which are seperated as constraints.
+    // removable   should the relaxation be removed from the LP due to aging or 
+    //             cleanup? Usually set to FALSE. Set to TRUE for 'lazy 
+    //             constraints' and 'user cuts'.
+    // stickingatnode   should the constraint always be kept at the node where 
+    //             it was added, even if it may be moved to a more global node?
+    //             Usually set to FALSE. Set to TRUE to for constraints that 
+    //             represent node data.
+    PY_SCIP_CALL(error, -1,
+        SCIPcreateConsLinear(self->scip, &self->constraint, "", 0, NULL, NULL, 
+            lhs, rhs, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE)        
+    );
 
     // Put new constraint at head of linked list
     self->next = (struct constraint *) solv->first_cons;
@@ -63,7 +85,7 @@ static void constraint_dealloc(constraint *self) {
 /*****************************************************************************/
 /* ADDITONAL METHODS                                                         */
 /*****************************************************************************/
-static PyObject *constraint_linear_term(constraint *self, PyObject *args) {
+static PyObject *constraint_variable(constraint *self, PyObject *args) {
     PyObject *v;
     double coefficient;
     variable *var;
@@ -84,48 +106,8 @@ static PyObject *constraint_linear_term(constraint *self, PyObject *args) {
         return NULL;
     }
 
-    // How to add linear variable depends on what type of constraint we have
-    if (self->constraint_type == PY_SCIP_CONSTRAINT_LINEAR) {
-        PY_SCIP_CALL(error, NULL, 
-            SCIPaddCoefLinear(self->scip, self->constraint, var->variable, coefficient)
-        );
-    } else {
-        PY_SCIP_CALL(error, NULL, 
-            SCIPaddLinearVarQuadratic(self->scip, self->constraint, var->variable, coefficient)
-        );
-    }
-
-    Py_RETURN_NONE;
-}
-
-static PyObject *constraint_bilinear_term(constraint *self, PyObject *args) {
-    PyObject *v1;
-    PyObject *v2;
-    double coefficient;
-    variable *var1;
-    variable *var2;
-
-    if (!PyArg_ParseTuple(args, "OOd", &v1, &v2, &coefficient))
-        return NULL;
-        
-    // Check and make sure we have a real variable type
-    if (strcmp(v1->ob_type->tp_name, VARIABLE_TYPE_NAME) ||
-        strcmp(v2->ob_type->tp_name, VARIABLE_TYPE_NAME)) {
-        PyErr_SetString(error, "invalid variable type");
-        return NULL;
-    }
-    var1 = (variable *) v1;
-    var2 = (variable *) v2;
-
-    // Verify that the variable is associated with this solver
-    if (var1->scip != self->scip || var2->scip != self->scip) {
-        PyErr_SetString(error, "variable not associated with solver");
-        return NULL;
-    }
-
-    printf("ABOUT TO ADD w/ TYPE=%d var1=%p var2=%p c=%f\n", self->constraint_type, var1, var2, coefficient);
     PY_SCIP_CALL(error, NULL, 
-        SCIPaddBilinTermQuadratic(self->scip, self->constraint, var1->variable, var2->variable, coefficient)
+        SCIPaddCoefLinear(self->scip, self->constraint, var->variable, coefficient)
     );
     Py_RETURN_NONE;
 }
@@ -142,8 +124,7 @@ static PyObject *constraint_register(constraint *self) {
 /* MODULE INITIALIZATION                                                     */
 /*****************************************************************************/
 static PyMethodDef constraint_methods[] = {
-    {"linear_term", (PyCFunction) constraint_linear_term, METH_VARARGS, "add a variable to a constraint"},
-    {"bilinear_term", (PyCFunction) constraint_bilinear_term, METH_VARARGS, "add a bilinear term to a constraint"},
+    {"variable", (PyCFunction) constraint_variable, METH_VARARGS, "add a variable to a constraint"},
     {"register", (PyCFunction) constraint_register, METH_NOARGS,  "registers the constraint with the solver"},
     {NULL} /* Sentinel */
 };
@@ -208,10 +189,6 @@ PyMODINIT_FUNC PyInit__cons(void) {
         return NULL;
 
     m = PyModule_Create(&cons_module); 
-
-    // Constants on constraint module
-    PyModule_AddIntConstant(m, "LINEAR", PY_SCIP_CONSTRAINT_LINEAR);
-    PyModule_AddIntConstant(m, "NONLINEAR", PY_SCIP_CONSTRAINT_NONLINEAR);
 
     Py_INCREF(&constraint_type);
     PyModule_AddObject(m, "constraint", (PyObject *) &constraint_type);
