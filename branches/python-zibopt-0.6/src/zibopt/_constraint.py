@@ -5,7 +5,14 @@ __all__ = 'constraint', 'ConstraintError'
 ConstraintError = _cons.error
 
 class constraint(_cons.constraint):
-    '''Stores bounds and coefficients so they can be looked up later'''
+    '''
+    Stores bounds and coefficients for problem formulations.  Valid
+    constraints for SCIP include linear and bilinear terms.  Examples:
+    
+        solver += 4 * (x + y) * (x + z) <= 10
+        solver += 3*x**2 - 4*x >= 5*y
+        solver += 3 <= 4*y <= 5
+    '''
     def __init__(self, solver, expression):
         lower = upper = None
 
@@ -41,18 +48,46 @@ class constraint(_cons.constraint):
         if upper is not None:
             kwds['upper'] = upper
 
-        super(constraint, self).__init__(solver, **kwds)
+        # Separate out variables by term type (linear/bilinear)
+        linear_vars = [] # information for linear terms
+        linear_coef = []
+        bilin_var1  = [] # information for bilinear terms
+        bilin_var2  = []
+        bilin_coef  = []
 
-        # Add variable cofficients to constraint
-        # TODO: add in more complex terms
-        coefficients = {}
         for term in expression.terms:
-            assert len(term) == 1
-            self.variable(term[0], expression[term])
-            coefficients[term] = expression[term]
+            coef = expression[term]
+
+            # SCIP supports linear terms (3*x) and bilinear (3*x*y + 4*x**2).
+            # Everything else should raise a NotImplementedError.
+            if len(term) == 1:
+                linear_vars.append(term[0])
+                linear_coef.append(coef)
+
+            elif len(term) == 2:
+                bilin_var1.append(term[0])
+                bilin_var2.append(term[1])
+                bilin_coef.append(coef)
+
+            else:
+                raise NotImplementedError('unsupported term type in constraint')
+
+        super(constraint, self).__init__(
+            solver,
+            linear_vars,
+            linear_coef,
+            #bilin_var1,
+            #bilin_var2,
+            #bilin_coef,
+            **kwds
+        )
+
+        # TODO: remove
+        for v, c in zip(linear_vars, linear_coef):
+            self.variable(v, c)
 
         # Keep this information so we can look it up later
         self.lower = lower
         self.upper = upper
-        self.coefficients = coefficients
+        self.coefficients = expression.terms.copy()
 

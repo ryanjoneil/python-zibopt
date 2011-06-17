@@ -7,13 +7,16 @@ static PyObject *error;
 /* PYTHON TYPE METHODS                                                       */
 /*****************************************************************************/
 static int constraint_init(constraint *self, PyObject *args, PyObject *kwds) {
-    static char *argnames[] = {"solver", "lower", "upper", NULL};
-    PyObject *s;     // solver Python object
-    solver *solv;    // solver C object
-    double lhs, rhs; // lhs <= a'x <= rhs
+    static char *argnames[] = {"solver", "linear_vars", "linear_coef", "lower", "upper", NULL};
+    PyObject *s;           // solver Python object
+    solver *solv;          // solver C object
+    PyObject *linear_vars; // list of linear terms in constraint
+    PyObject *linear_coef; // list of their associated coefficients
+    double lhs, rhs;       // lhs <= f(x) <= rhs
+    int i;
 
     // SCIPinfinity requires self->scip, so we have to parse the args twice
-    if (!PyArg_ParseTuple(args, "O|dd", &s))
+    if (!PyArg_ParseTuple(args, "OOO|dd", &s, &linear_vars, &linear_coef))
         return -1;
 
     // Check solver type in the best way we seem to have available
@@ -21,51 +24,46 @@ static int constraint_init(constraint *self, PyObject *args, PyObject *kwds) {
         PyErr_SetString(error, "invalid solver type");
         return -1;
     }
-    
+
     solv = (solver *) s;
     self->scip = solv->scip;
         
     lhs = -SCIPinfinity(self->scip);
     rhs = SCIPinfinity(self->scip);
 
+    // Make sure that linear variables and coefficients are lists containing
+    // variables and coefficients, respectively.
+    if (!PyList_CheckExact(linear_vars)) {
+        PyErr_SetString(error, "linear_vars list required");
+        return -1;
+    }
+
+    if (!PyList_CheckExact(linear_coef)) {
+        PyErr_SetString(error, "linear_coef list required");
+        return -1;
+    }
+ 
+    for (i = 0; i < PyList_Size(linear_vars); i++ ) {
+        // Check that each element is a variable
+        if (strcmp(PyList_GetItem(linear_vars, i)->ob_type->tp_name, VARIABLE_TYPE_NAME)) {
+            PyErr_SetString(error, "invalid variable type");
+            return -1;
+        }
+    }
+
+    for (i = 0; i < PyList_Size(linear_coef); i++ ) {
+        // Check that each element is numeric
+        PyObject *o = PyList_GetItem(linear_coef, i);
+        if (!(PyLong_Check(o) || PyFloat_Check(o))) {
+            PyErr_SetString(error, "invalid coefficient");
+            return -1;
+        }
+    }
+
     // This time is just to get the upper and lower bounds out    
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|dd", argnames, &s, &lhs, &rhs))
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "OOO|dd", argnames, &s, &linear_vars, linear_coef, &lhs, &rhs))
         return -1;
 
-    // SCIPcreateConsLinear Arguments:
-    // scip        SCIP data structure
-    // cons        pointer to hold the created constraint
-    // name        name of constraint
-    // nvars       number of nonzeros in the constraint
-    // vars        array with variables of constraint entries
-    // vals        array with coefficients of constraint entries
-    // lhs         left hand side of constraint
-    // rhs         right hand side of constraint
-    // initial     should the LP relaxation of constraint be in the initial LP? 
-    //             Usually set to TRUE. Set to FALSE for 'lazy constraints'.
-    // separate    should the constraint be separated during LP processing? 
-    //             Usually set to TRUE.
-    // enforce     should the constraint be enforced during node processing? 
-    //             TRUE for model constraints, FALSE for additional, redundant 
-    //             constraints.
-    // check       should the constraint be checked for feasibility? TRUE for 
-    //             model constraints, FALSE for additional, redundant constraints.
-    // propagate   should the constraint be propagated during node processing? 
-    //             Usually set to TRUE.
-    // local       is constraint only valid locally? Usually set to FALSE. Has 
-    //             to be set to TRUE, e.g., for branching constraints.
-    // modifiable  is constraint modifiable (subject to column generation)? 
-    //             Usually set to FALSE. In column generation applications, set
-    //             to TRUE if pricing adds coefficients to this constraint.
-    // dynamic     Is constraint subject to aging? Usually set to FALSE. Set to 
-    //             TRUE for own cuts which are seperated as constraints.
-    // removable   should the relaxation be removed from the LP due to aging or 
-    //             cleanup? Usually set to FALSE. Set to TRUE for 'lazy 
-    //             constraints' and 'user cuts'.
-    // stickingatnode   should the constraint always be kept at the node where 
-    //             it was added, even if it may be moved to a more global node?
-    //             Usually set to FALSE. Set to TRUE to for constraints that 
-    //             represent node data.
     PY_SCIP_CALL(error, -1,
         SCIPcreateConsLinear(self->scip, &self->constraint, "", 0, NULL, NULL, 
             lhs, rhs, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE)        

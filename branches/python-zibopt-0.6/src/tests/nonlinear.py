@@ -9,8 +9,8 @@ class NonlinearConstraintTest(unittest.TestCase):
         x1 = solver.variable()
         x2 = solver.variable()
 
-        solver += 0 <= x1 <= 1
-        #solver += 0 <= x1*x2 <= 1
+        #solver += 0 <= x1 <= 1
+        solver += 0 <= x1*x2 <= 1
         solution = solver.maximize(objective=x1)
 
         self.assertEqual(solution.objective, 1.0)
