@@ -88,7 +88,7 @@ class solver(_scip.solver):
         self.selectors   = {n:_nodesel.selector(self, n) for n in self.selector_names()}
         self.separators  = {n:_sepa.separator(self, n) for n in self.separator_names()}
 
-    def __iadd__(self, cons_info):
+    def __iadd__(self, expr):
         '''
         Allows a constraint to be added using a more natural algebraic format.
         Note that this does *not* return the constraint, so if you want to
@@ -101,26 +101,12 @@ class solver(_scip.solver):
 
             solver += some_constraint
         '''
-        # This is some annoying magic here.  If we write a constraint like:
-        #     0 <= x <= 1
-        # Python will apply the variable instance to each inequality, losing
-        # anything done along the way.  Thus we have to store the new upper and
-        # lower bounds on the variable.  Sad.  This gets rid of them after the 
-        # boundes are updated.
-        if isinstance(cons_info, variable):
-            if cons_info._upper_bnd is not None:
-                cons_info.tighten_upper_bound(cons_info._upper_bnd)
-            if cons_info._lower_bnd is not None:
-                cons_info.tighten_lower_bound(cons_info._lower_bnd)
-            cons_info._upper_bnd = cons_info._lower_bnd = None
-            
-        elif isinstance(cons_info, constraint):
+        if isinstance(expr, constraint):
             # Is already a constraint
-            self.constrain(cons_info)
-
+            self.constrain(expr)
         else:
             # Is a zibopt._variable._cons_builder instance
-            self.constraint(cons_info)
+            self.constraint(expr)
             
         return self
 
