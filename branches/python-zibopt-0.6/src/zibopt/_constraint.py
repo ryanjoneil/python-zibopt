@@ -76,9 +76,9 @@ class constraint(_cons.constraint):
             solver,
             linear_vars,
             linear_coef,
-            #bilin_var1,
-            #bilin_var2,
-            #bilin_coef,
+            bilin_var1,
+            bilin_var2,
+            bilin_coef,
             **kwds
         )
 

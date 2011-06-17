@@ -10,6 +10,7 @@
 #include <scip/clock.h>
 #include <scip/conflict.h>
 #include <scip/cons.h>
+#include <scip/cons_quadratic.h>
 #include <scip/heur.h>
 #include <scip/misc.h>
 #include <scip/nodesel.h>
@@ -62,10 +63,10 @@ typedef struct {
     SCIP_VAR **linear_vars;  // linear terms
     SCIP_Real *linear_coef;  // linear coefficients
     int linear_nvars;        // number of linear terms
-    //SCIP_VAR **bilin_var1;   // first bilinear terms
-    //SCIP_VAR **bilin_var2;   // second bilinear terms
-    //SCIP_Real *bilin_coef;   // bilinear coefficients
-    //int bilin_nvars;         // number of bilinear terms
+    SCIP_VAR **bilin_var1;   // first bilinear terms
+    SCIP_VAR **bilin_var2;   // second bilinear terms
+    SCIP_Real *bilin_coef;   // bilinear coefficients
+    int bilin_nvars;         // number of bilinear terms
     struct constraint *next; // linked list next
 } constraint;
 
