@@ -19,7 +19,7 @@ setup (
     version      = '0.6',
     description  = 'ZIB Optimization Suite interface for python',
     author       = "Ryan J. O'Neil",
-    author_email = 'ryan@chenoneil.com',
+    author_email = 'ryanjoneil@gmail.com',
     url          = 'http://code.google.com/p/python-zibopt/',
     download_url = 'http://code.google.com/p/python-zibopt/downloads/list',
 
