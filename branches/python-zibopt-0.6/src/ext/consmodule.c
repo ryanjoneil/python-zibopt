@@ -190,6 +190,7 @@ static int constraint_init(constraint *self, PyObject *args, PyObject *kwds) {
                 self->bilin_nvars, self->bilin_var1, self->bilin_var2, self->bilin_coef,
                 lhs, rhs, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE)
         );
+
     } else {
         PY_SCIP_CALL(error, -1,
             SCIPcreateConsLinear(self->scip, &self->constraint, "", 
@@ -197,6 +198,7 @@ static int constraint_init(constraint *self, PyObject *args, PyObject *kwds) {
                 lhs, rhs, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE)
         );
     }
+    
 
     // Put new constraint at head of linked list
     self->next = (struct constraint *) solv->first_cons;
@@ -206,11 +208,11 @@ static int constraint_init(constraint *self, PyObject *args, PyObject *kwds) {
 }
 
 static void constraint_dealloc(constraint *self) {
-    free(self->linear_vars);
-    free(self->linear_coef);
-    free(self->bilin_var1);
-    free(self->bilin_var2);
-    free(self->bilin_coef);
+    if (self->linear_vars != NULL) free(self->linear_vars);
+    if (self->linear_coef != NULL) free(self->linear_coef);
+    if (self->bilin_var1 != NULL) free(self->bilin_var1);
+    if (self->bilin_var2 != NULL) free(self->bilin_var2);
+    if (self->bilin_coef != NULL) free(self->bilin_coef);
     ((PyObject *) self)->ob_type->tp_free(self);
 }
 
