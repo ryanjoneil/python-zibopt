@@ -1,5 +1,5 @@
 from zibopt import _vars
-from zibopt._algebra import expression
+from zibopt._expression import expression
 
 __all__ = 'variable', 'VariableError'
 
