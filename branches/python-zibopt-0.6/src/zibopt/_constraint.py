@@ -23,19 +23,29 @@ class constraint(_cons.constraint):
             expression = expression.lower
 
         # Cancel out terms from lhs/rhs and keep constants
-        if expression.lower:
-            e = expression - expression.lower
-            e.lower = expression.lower
-            e.upper = expression.upper
-            expression = e
-            lower = -expression.terms.pop((), 0.0) # just the constant
+        if expression.lower and expression.upper is expression.lower:
+            # Special case where x == y.  This keeps from double-counting
+            # one side of the constraint.
+            expression = expression - expression.lower
+            lower = upper = -expression.terms.pop((), 0.0)
+            expression.lower = lower
+            expression.upper = upper
 
-        if expression.upper:
-            e = expression - expression.upper
-            e.lower = expression.lower
-            e.upper = expression.upper
-            expression = e
-            upper = -expression.terms.pop((), 0.0) # just the constant
+        else:
+            # Logic for constraints constructed via <= and >=
+            if expression.lower:
+                e = expression - expression.lower
+                e.lower = expression.lower
+                e.upper = expression.upper
+                expression = e
+                lower = -expression.terms.pop((), 0.0) # just the constant
+    
+            if expression.upper:
+                e = expression - expression.upper
+                e.lower = expression.lower
+                e.upper = expression.upper
+                expression = e
+                upper = -expression.terms.pop((), 0.0) # just the constant
 
         # Make sure we have at least one bound
         if lower is None and upper is None:

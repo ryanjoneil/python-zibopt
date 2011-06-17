@@ -6,6 +6,7 @@ from zibopt._constraint import constraint
 from zibopt._expression import expression
 from zibopt._solution import solution
 from zibopt._variable import variable
+import sys
 
 __all__ = 'solver', 'SolverError', 'BINARY', 'INTEGER', 'IMPLINT', 'CONTINUOUS'
 
@@ -136,7 +137,17 @@ class solver(_scip.solver):
         elif isinstance(expr, int) or isinstance(expr, float):
             expr = expression({():expr})
 
-        # TODO: add in more complex terms
+        # It appears SCIP only allows linear expression for objective
+        # functions, so if we get something with bilinear terms, set 
+        # that equal to an unbounded variable, min/max that variable.
+        for term in expr.terms:
+            if len(term) > 1:
+                z = self.variable(lower=-sys.maxsize)
+                self += z == expr
+                expr = expression({(z,):1.0})
+                break
+
+        # Now set linear coefficients on the objective function
         for v in self.variables:
             try:
                 v.set_coefficient(expr[(v,)])
@@ -210,10 +221,7 @@ class solver(_scip.solver):
         @param absgap=0.0:  optional primal/dual gap to stop solving
         @param nsol=-1:     number of solutions to find before stopping
         '''
-        # TODO: does SCIP allow nonlinear objective functions?
-        #       I assume so, and that changes quite a bit more.
         if 'objective' in kwds:
-            # TODO: for now we are just getting linear objectives working
             self._update_coefficients(kwds.pop('objective'))
         super(solver, self).maximize(*args, **kwds)
         return solution(self)

@@ -6,10 +6,6 @@ __all__ = 'variable', 'VariableError'
 VariableError = _vars.error
 
 class variable(_vars.variable):
-    def __init__(self, *args, **kwds):
-        # Stores a few things locally that will not interfer with the C version
-        super(variable, self).__init__(*args, **kwds)
-    
     def __hash__(self):
         return hash(id(self))
 
