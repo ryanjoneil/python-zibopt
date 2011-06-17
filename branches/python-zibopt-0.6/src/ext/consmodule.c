@@ -32,7 +32,8 @@ static int constraint_init(constraint *self, PyObject *args, PyObject *kwds) {
     rhs = SCIPinfinity(self->scip);
 
     // Make sure that linear variables and coefficients are lists containing
-    // variables and coefficients, respectively.
+    // variables and coefficients, respectively.  Also check that they are
+    // the same length and reference the same solver.
     if (!PyList_CheckExact(linear_vars)) {
         PyErr_SetString(error, "linear_vars list required");
         return -1;
@@ -43,15 +44,26 @@ static int constraint_init(constraint *self, PyObject *args, PyObject *kwds) {
         return -1;
     }
  
-    for (i = 0; i < PyList_Size(linear_vars); i++ ) {
+    self->linear_nvars = PyList_Size(linear_vars);
+    if (self->linear_nvars != PyList_Size(linear_coef)) {
+        PyErr_SetString(error, "linear_vars and linear_coef must be the same length");
+        return -1;
+    }
+
+    for (i = 0; i < self->linear_nvars; i++ ) {
         // Check that each element is a variable
-        if (strcmp(PyList_GetItem(linear_vars, i)->ob_type->tp_name, VARIABLE_TYPE_NAME)) {
+        PyObject *v = PyList_GetItem(linear_vars, i);
+        if (strcmp(v->ob_type->tp_name, VARIABLE_TYPE_NAME)) {
             PyErr_SetString(error, "invalid variable type");
             return -1;
         }
-    }
 
-    for (i = 0; i < PyList_Size(linear_coef); i++ ) {
+        // Verify that the variable is associated with this solver
+        if (((variable *) v)->scip != self->scip) {
+            PyErr_SetString(error, "variable not associated with solver");
+            return -1;
+        }
+
         // Check that each element is numeric
         PyObject *o = PyList_GetItem(linear_coef, i);
         if (!(PyLong_Check(o) || PyFloat_Check(o))) {
@@ -64,8 +76,33 @@ static int constraint_init(constraint *self, PyObject *args, PyObject *kwds) {
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "OOO|dd", argnames, &s, &linear_vars, linear_coef, &lhs, &rhs))
         return -1;
 
+    // Store variables and coefficients to pass in to the constraint
+    if (self->linear_nvars > 0) {
+        self->linear_vars = malloc(self->linear_nvars * sizeof(SCIP_VAR *));
+        self->linear_coef = malloc(self->linear_nvars * sizeof(SCIP_Real));
+
+        // Add vars and coefficients into these lists
+        for (i = 0; i < self->linear_nvars; i++) {
+            self->linear_vars[i] = ((variable *) PyList_GetItem(linear_vars, i))->variable;
+
+            PyObject *coefficient_obj = PyList_GetItem(linear_coef, i);
+            SCIP_Real coefficient;
+            if (PyLong_Check(coefficient_obj)) {
+                coefficient = PyLong_AsDouble(coefficient_obj);
+            } else {
+                coefficient = PyFloat_AsDouble(coefficient_obj);
+            }
+            self->linear_coef[i] = coefficient;        
+        }
+
+    } else {
+        self->linear_vars = NULL;
+        self->linear_coef = NULL;
+    }
+
     PY_SCIP_CALL(error, -1,
-        SCIPcreateConsLinear(self->scip, &self->constraint, "", 0, NULL, NULL, 
+        SCIPcreateConsLinear(self->scip, &self->constraint, "", 
+            self->linear_nvars, self->linear_vars, self->linear_coef, 
             lhs, rhs, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE)        
     );
 
@@ -77,37 +114,9 @@ static int constraint_init(constraint *self, PyObject *args, PyObject *kwds) {
 }
 
 static void constraint_dealloc(constraint *self) {
+    free(self->linear_vars);
+    free(self->linear_coef);
     ((PyObject *) self)->ob_type->tp_free(self);
-}
-
-/*****************************************************************************/
-/* ADDITONAL METHODS                                                         */
-/*****************************************************************************/
-static PyObject *constraint_variable(constraint *self, PyObject *args) {
-    PyObject *v;
-    double coefficient;
-    variable *var;
-
-    if (!PyArg_ParseTuple(args, "Od", &v, &coefficient))
-        return NULL;
-        
-    // Check and make sure we have a real variable type
-    if (strcmp(v->ob_type->tp_name, VARIABLE_TYPE_NAME)) {
-        PyErr_SetString(error, "invalid variable type");
-        return NULL;
-    }
-    var = (variable *) v;
-
-    // Verify that the variable is associated with this solver
-    if (var->scip != self->scip) {
-        PyErr_SetString(error, "variable not associated with solver");
-        return NULL;
-    }
-
-    PY_SCIP_CALL(error, NULL, 
-        SCIPaddCoefLinear(self->scip, self->constraint, var->variable, coefficient)
-    );
-    Py_RETURN_NONE;
 }
 
 static PyObject *constraint_register(constraint *self) {
@@ -122,7 +131,6 @@ static PyObject *constraint_register(constraint *self) {
 /* MODULE INITIALIZATION                                                     */
 /*****************************************************************************/
 static PyMethodDef constraint_methods[] = {
-    {"variable", (PyCFunction) constraint_variable, METH_VARARGS, "add a variable to a constraint"},
     {"register", (PyCFunction) constraint_register, METH_NOARGS,  "registers the constraint with the solver"},
     {NULL} /* Sentinel */
 };

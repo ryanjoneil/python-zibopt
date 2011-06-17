@@ -82,10 +82,6 @@ class constraint(_cons.constraint):
             **kwds
         )
 
-        # TODO: remove
-        for v, c in zip(linear_vars, linear_coef):
-            self.variable(v, c)
-
         # Keep this information so we can look it up later
         self.lower = lower
         self.upper = upper
