@@ -24,7 +24,7 @@ class ExpressionTest(unittest.TestCase):
         e0 = 4 * self.x1
         self.assertEqual(len(e0.terms), 1)
         self.assertEqual(e0[self.set_x1], 4.0)
-        self.assertEqual((e0/4)[self.set_x1], 1.0)
+        self.assertEqual((e0/(2+2))[self.set_x1], 1.0)
 
         e1 = 2 * self.x1 * self.x2 * 3.0
         self.assertEqual(e1[self.set_x12], 6.0)
