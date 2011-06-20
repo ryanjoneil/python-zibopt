@@ -1,6 +1,9 @@
 #summary python-zibopt change log
 #labels Featured
 
+= 0.7 dev =
+  * Issue 22: dividing by variables should raise a !TypeError
+
 = 0.6 dev =
   * Issue 19: Added bilinear constraints from SCIP 2.0.1.  This requires restructuring of constraints and expressions, so code that used internal features of these will need to be changed.  The following sorts of programs are now possible:
 {{{
