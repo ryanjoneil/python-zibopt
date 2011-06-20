@@ -2,9 +2,24 @@
 
 = Road Map =
 
-There isn't an explicit road map for the project yet.  Some features you can expect to see in future releases include, in no particular order:
+== 0.7 beta ==
+  * Bug fixing & beta period
+  * Resolution of build issues
+  * Improved examples library
+  * .deb and .rpm files
 
-  * Access to SCIP settings
-  * The ability to stop the solver after a certain amount of time or when the primal/dual gap shrinks a certain size
-  * Serialization of problem instances using pickle or json files
-  * The ability to write and prioritize branching rules, heuristics, presolving, and other SCIP components in Python
+== 0.8 dev ==
+  * Exposure of SCIP components to implementation in Python:
+    * branching rules
+    * heuristics 
+    * presolving
+    * separators
+    * etc
+
+== 0.9 beta ==
+  * Beta testing period
+  * Bug fixing
+
+== 1.0 stable ==
+  * Release candidate period
+  * Final 1.0 release
