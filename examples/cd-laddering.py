@@ -64,8 +64,8 @@ if __name__ == '__main__':
     # Add constraints to guarantee minimum investment amounts
     for im, ai in zip(investment_made, amount_to_invest):
         for cd in cd_options:
-            solver += ai[cd] - im[cd] * cd.min_invest >= 0
-            solver += ai[cd] - im[cd] * data['max investment'] <= 0
+            solver += ai[cd] >= im[cd] * cd.min_invest
+            solver += ai[cd] <= im[cd] * data['max investment']
     
     # Variables and constraints that tell how much expires at the end of
     # each month.  A 1-month CD expires the same month it is purchased.
@@ -83,10 +83,10 @@ if __name__ == '__main__':
     expires = [solver.variable() for _ in range(data['total periods'])]
     for e, by_period in zip(expires, expirations_by_period):
         if by_period:
-            solver += e - sum(
+            solver += e == sum(
                 (1 + cd.periodic_rate)**cd.periods * invest_var
                 for cd, invest_var in by_period
-            ) == 0
+            ) 
 
     # Add variables that describe how much uninvested cash we have
     # during each period (after making investments).
@@ -97,10 +97,10 @@ if __name__ == '__main__':
             solver += cash_on_hand[i] \
                 + sum(amount_to_invest[i].values()) == data['initial cash']
         else:
-            solver += cash_on_hand[i] \
-                - cash_on_hand[i-1] \
-                - expires[i-1] \
-                + sum(amount_to_invest[i].values()) == 0
+            solver += cash_on_hand[i] == \
+                cash_on_hand[i-1] \
+                + expires[i-1] \
+                - sum(amount_to_invest[i].values())
 
     # Constraints for cash_on_hand + current expirations >= something
     for e, c in zip(expires, cash_on_hand):
