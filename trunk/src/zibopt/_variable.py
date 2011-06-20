@@ -22,9 +22,6 @@ class variable(_vars.variable):
     def __mul__(self, other):
         return expression({(self,):1.0}) * other
 
-    def __div__(self, other):
-        return expression({(self,):1.0}) * other
-
     def __neg__(self):
         return expression({(self,):-1.0})
 
@@ -42,9 +39,6 @@ class variable(_vars.variable):
     __rsub__ = __sub__
     __rmul__ = __mul__
     
-    __truediv__  = __div__
-    __rtruediv__ = __div__
-
     # These exist for sorting variables and have nothing to do with <=, etc
     def __lt__(self, other):
         return id(self) < id(other)

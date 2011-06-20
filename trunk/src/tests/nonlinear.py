@@ -31,13 +31,32 @@ class NonlinearConstraintTest(unittest.TestCase):
         self.assertEqual(solution[x2], 1.0)
 
     def testnonlinearobjective(self):
-        '''tests nonlinear objective functions'''
+        '''Tests nonlinear objective functions'''
         solver = scip.solver()
         x1 = solver.variable(scip.INTEGER)
         solver += 0 <= x1 <= 2
         solution = solver.maximize(objective=x1**2)
         self.assertEqual(solution.objective, 4.0)
         self.assertEqual(solution[x1], 2.0)
+
+    def testDivisionByTerms(self):
+        '''Tests that 1/expression raises an exception'''
+        solver = scip.solver()
+
+        x1 = solver.variable()
+        x2 = solver.variable()
+
+        try:
+            1 / x1 <= 1
+            self.assertTrue(False)
+        except TypeError:
+            pass
+
+        try:
+            1 / (x1+x2) <= 1
+            self.assertTrue(False)
+        except TypeError:
+            pass
 
 if __name__ == '__main__':
     unittest.main()
