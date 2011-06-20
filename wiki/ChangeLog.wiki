@@ -2,6 +2,32 @@
 #labels Featured
 
 = 0.6 dev =
+  * Issue 19: Added bilinear constraints from SCIP 2.0.1.  This requires restructuring of constraints and expressions, so code that used internal features of these will need to be changed.  The following sorts of programs are now possible:
+{{{
+from zibopt import scip
+solver = scip.solver()
+x1 = solver.variable(upper=10)
+x2 = solver.variable(upper=10)
+solver += (x1 + x2) * (3*x1 - x2) <= 10
+solver += 3*x1 <= 4*x2
+solution = solver.maximize(objective=x1**2 + x1*x2/4)
+# 21.76
+}}}
+{{{
+from zibopt import scip
+solver = scip.solver()
+x1 = solver.variable(scip.BINARY)
+x2 = solver.variable(scip.BINARY)
+solver += x1 * x2 == 0
+solution = solver.maximize(objective=3*x1 + 4*x2)
+print(solution.objective, solution[x1], solution[x2])
+# 4.0 0.0 1.0.
+}}}
+Further, expression handling has been vastly improved and can handle these sorts of constructions now:
+{{{
+solver += (x + y) * (3*x - y) <= 10
+solver += (3*x)**2 >= 3
+}}}
   * Issue 21: Allow better expression of constraints in solver.constraint(...)
 {{{
 c = solver.constraint(x1 + 2*x2 <= 4)
