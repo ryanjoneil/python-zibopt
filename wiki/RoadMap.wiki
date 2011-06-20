@@ -3,8 +3,7 @@
 = Road Map =
 The schedule is tentative and for planning purposes.
 
-== 0.7 beta: July 10, 2011 ==
-  * Bug fixing & beta period
+== 0.7 dev: July 10, 2011 ==
   * Resolution of build issues
   * Improved examples library
   * .deb and .rpm files
