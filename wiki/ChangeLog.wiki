@@ -15,7 +15,7 @@ solution = solver.maximize(objective=x1**2 + x1*x2/4)
 }}}
 {{{
 from zibopt import scip
-solver = scip.solver()
+solver = scip.solver()  
 x1 = solver.variable(scip.BINARY)
 x2 = solver.variable(scip.BINARY)
 solver += x1 * x2 == 0
@@ -23,7 +23,7 @@ solution = solver.maximize(objective=3*x1 + 4*x2)
 print(solution.objective, solution[x1], solution[x2])
 # 4.0 0.0 1.0.
 }}}
-Further, expression handling has been vastly improved and can handle these sorts of constructions now:
+  Further, expression handling has been vastly improved and can handle these sorts of constructions now:
 {{{
 solver += (x + y) * (3*x - y) <= 10
 solver += (3*x)**2 >= 3
