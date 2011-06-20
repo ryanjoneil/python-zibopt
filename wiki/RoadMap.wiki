@@ -1,14 +1,15 @@
 #summary Where is python-zibopt going?
 
 = Road Map =
+The schedule is tentative and for planning purposes.
 
-== 0.7 beta ==
+== 0.7 beta: July 10, 2011 ==
   * Bug fixing & beta period
   * Resolution of build issues
   * Improved examples library
   * .deb and .rpm files
 
-== 0.8 dev ==
+== 0.8 dev: August 7, 2011 ==
   * Exposure of SCIP components to implementation in Python:
     * branching rules
     * heuristics 
@@ -16,10 +17,10 @@
     * separators
     * etc
 
-== 0.9 beta ==
+== 0.9 beta: August 14, 2011==
   * Beta testing period
   * Bug fixing
 
-== 1.0 stable ==
+== 1.0 stable: August 28, 2011 ==
   * Release candidate period
   * Final 1.0 release
