@@ -122,7 +122,7 @@ class expression(object):
     __radd__ = __add__
     __rsub__ = __sub__
     __rmul__ = __mul__        
-    __truediv__  = __div__
+    __truediv__ = __div__
     
     # __rdiv__ & __rtruediv__ would allow expressions like 1/x
     # Thus they are specifically NOT implemented here.

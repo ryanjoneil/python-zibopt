@@ -1,4 +1,6 @@
 from zibopt import _cons
+from zibopt._expression import expression
+from zibopt._variable import variable
 
 __all__ = 'constraint', 'ConstraintError'
 
@@ -13,39 +15,49 @@ class constraint(_cons.constraint):
         solver += 3*x**2 - 4*x >= 5*y
         solver += 3 <= 4*y <= 5
     '''
-    def __init__(self, solver, expression):
+    def __init__(self, solver, expr):
+        # Allows constraints like x <= 1
+        if isinstance(expr, variable):
+            if expr.lower is not None or expr.upper is not None:
+                kwds = {}
+                if expr.lower is not None:
+                    kwds['lower'] = expression({():expr.lower})
+                if expr.upper is not None:
+                    kwds['upper'] = expression({():expr.upper})
+                expr = expression({(expr,):1.0}, **kwds)
+
         lower = upper = None
 
         # Make sure we are in the middle if there are two bounds
-        if expression.lower is None and expression.upper and expression.upper.upper:
-            expression = expression.upper
-        elif expression.upper is None and expression.lower and expression.lower.lower:
-            expression = expression.lower
+        if expr.lower is None and expr.upper and expr.upper.upper:
+            expr = expr.upper
+        elif expr.upper is None and expr.lower and expr.lower.lower:
+            expr = expr.lower
 
         # Cancel out terms from lhs/rhs and keep constants
-        if expression.lower and expression.upper is expression.lower:
+        if expr.lower and expr.upper is expr.lower:
             # Special case where x == y.  This keeps from double-counting
             # one side of the constraint.
-            expression = expression - expression.lower
-            lower = upper = -expression.terms.pop((), 0.0)
-            expression.lower = lower
-            expression.upper = upper
+            expr = expr - expr.lower
+            lower = upper = -expr.terms.pop((), 0.0)
+            expr.lower = lower
+            expr.upper = upper
 
         else:
             # Logic for constraints constructed via <= and >=
-            if expression.lower:
-                e = expression - expression.lower
-                e.lower = expression.lower
-                e.upper = expression.upper
-                expression = e
-                lower = -expression.terms.pop((), 0.0) # just the constant
+            if expr.lower:
+                e = expr - expr.lower
+                e.lower = expr.lower
+                e.upper = expr.upper
+                expr = e
+                lower = -expr.terms.pop((), 0.0) # just the constant
     
-            if expression.upper:
-                e = expression - expression.upper
-                e.lower = expression.lower
-                e.upper = expression.upper
-                expression = e
-                upper = -expression.terms.pop((), 0.0) # just the constant
+            if expr.upper:
+                e = expr - expr.upper
+                e.lower = expr.lower
+                e.upper = expr.upper
+                expr = e
+                upper = -expr.terms.pop((), 0.0) # just the constant
 
         # Make sure we have at least one bound
         if lower is None and upper is None:
@@ -58,6 +70,10 @@ class constraint(_cons.constraint):
         if upper is not None:
             kwds['upper'] = upper
 
+        # If upper < lower: constraint error
+        if upper is not None and lower is not None and upper < lower:
+            raise ConstraintError('invalid constraint: upper < lower')
+
         # Separate out variables by term type (linear/bilinear)
         linear_vars = [] # information for linear terms
         linear_coef = []
@@ -65,8 +81,8 @@ class constraint(_cons.constraint):
         bilin_var2  = []
         bilin_coef  = []
 
-        for term in expression.terms:
-            coef = expression[term]
+        for term in expr.terms:
+            coef = expr[term]
 
             # SCIP supports linear terms (3*x) and bilinear (3*x*y + 4*x**2).
             # Everything else should raise a NotImplementedError.
@@ -95,5 +111,5 @@ class constraint(_cons.constraint):
         # Keep this information so we can look it up later
         self.lower = lower
         self.upper = upper
-        self.coefficients = expression.terms.copy()
+        self.coefficients = expr.terms.copy()
 

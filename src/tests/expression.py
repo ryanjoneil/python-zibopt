@@ -192,26 +192,15 @@ class ExpressionTest(unittest.TestCase):
 
     def testVariableBounds(self):
         '''Tests <=, >= and == for variables'''
-        e0 = self.x1 <= 3
-        self.assertEqual(e0[self.set_x1], 1.0)
-        self.assertEqual(e0.lower, None)
-        self.assertEqual(e0.upper[()], 3.0)
-        self.assertEqual(e0.upper.lower, e0)
-        self.assertEqual(e0.upper.upper, None)
+        v0 = self.x1 <= 3
+        self.assertEqual(v0.upper, 3)
 
-        e1 = self.x1 >= 3
-        self.assertEqual(e1[self.set_x1], 1.0)
-        self.assertEqual(e1.lower[()], 3.0)
-        self.assertEqual(e1.upper, None)
-        self.assertEqual(e1.lower.lower, None)
-        self.assertEqual(e1.lower.upper, e1)
+        v1 = self.x1 >= 4
+        self.assertEqual(v1.lower, 4)
 
-        e2 = self.x1 == 3
-        self.assertEqual(e2[self.set_x1], 1.0)
-        self.assertEqual(e2.lower[()], 3.0)
-        self.assertEqual(e2.upper, e2.lower)
-        self.assertEqual(e2.lower.lower, e2)
-        self.assertEqual(e2.lower.upper, e2)
+        v2 = self.x1 == 5
+        self.assertEqual(v2.lower, 5)
+        self.assertEqual(v2.upper, 5)
 
     def testChainedInequalities(self):
         '''Tests chained <= and >= for expressions'''

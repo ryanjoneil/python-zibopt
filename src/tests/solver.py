@@ -34,15 +34,22 @@ class ScipTest(unittest.TestCase):
         self.assertRaises(scip.ConstraintError, _cons.constraint, object(), 
             [], [], [], [], [])
 
-    def testInfeasible(self):
-        '''Solutions should be false for infeasibility'''
+    def testVariableInfeasible(self):
+        '''Solutions should raise error on infeasible variables'''
         solver = scip.solver()
         x1 = solver.variable()
-        solver += x1 <= 1
-        solver += x1 >= 2
+        self.assertRaises(scip.ConstraintError, solver.constraint, 2 <= x1 <= 0)
+
+    def testExpressionInfeasible(self):
+        '''Solutions should be false for infeasibility on expressions'''
+        solver = scip.solver()
+        x1 = solver.variable()
+        x2 = solver.variable()
+        solver += x1 + x2  <= 1
+        solver += x1 + x2 >= 2
         solution = solver.maximize()
         self.assertFalse(solution)
-        
+
     def testUnbounded(self):
         '''Solutions should be false when unbounded'''
         solver = scip.solver()

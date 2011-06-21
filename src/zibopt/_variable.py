@@ -6,11 +6,15 @@ __all__ = 'variable', 'VariableError'
 VariableError = _vars.error
 
 class variable(_vars.variable):
+    def __init__(self, *args, **kwds):
+        super(variable, self).__init__(*args, **kwds)
+
+        # We do this to allow single variable bounds: 0 <= x <= 4
+        self.lower = None
+        self.upper = None
+
     def __hash__(self):
         return hash(id(self))
-
-    def __getattr__(self, attr):
-        return super(variable, self).__getattr__(attr)
 
     # Convert variables into expression instances on math operations
     def __add__(self, other):
@@ -48,11 +52,24 @@ class variable(_vars.variable):
     
     # These allow single-variable bounds
     def __le__(self, other):
-        return expression({(self,):1.0}) <= other
+        if isinstance(other, float) or isinstance(other, int):
+            self.upper = other
+            return self
+        else:
+            return expression({(self,):1.0}) <= other
         
     def __ge__(self, other):
-        return expression({(self,):1.0}) >= other
+        if isinstance(other, float) or isinstance(other, int):
+            self.lower = other
+            return self
+        else:
+            return expression({(self,):1.0}) >= other
 
     def __eq__(self, other):
-        return expression({(self,):1.0}) == other
+        if isinstance(other, float) or isinstance(other, int):
+            self.lower = other
+            self.upper = other
+            return self
+        else:
+            return expression({(self,):1.0}) == other
 
