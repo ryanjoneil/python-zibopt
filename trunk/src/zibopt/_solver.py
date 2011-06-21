@@ -105,6 +105,19 @@ class solver(_scip.solver):
         if isinstance(expr, constraint):
             # Is already a constraint
             self.constrain(expr)
+
+        elif isinstance(expr, variable):
+            # Supports single variable constraints: 0 <= 2 <= 2
+            if expr.lower is not None or expr.upper is not None:
+                kwds = {}
+                if expr.lower is not None:
+                    kwds['lower'] = expression({():expr.lower})
+                if expr.upper is not None:
+                    kwds['upper'] = expression({():expr.upper})
+                self += expression({(expr,):1.0}, **kwds)
+            else:
+                return NotImplementedError
+            
         else:
             # Is a zibopt._variable._cons_builder instance
             self.constraint(expr)
@@ -124,7 +137,7 @@ class solver(_scip.solver):
         self.unconstrain(constraint)
         return self
 
-    def _update_coefficients(self, expr):
+    def _update_coefficients(self, expr, opt_type):
         '''Allows use of algebraic format for objective functions'''
         # Clear out old coefficients.  This may require freeing the transformed
         # problem, thus the restart.
@@ -133,7 +146,7 @@ class solver(_scip.solver):
         # Make sure it's actually an expression.  It could be a constant or 
         # a variable as well, such as: solver.maximize(objective=x1)
         if isinstance(expr, variable):
-            expr = expression({(expr,):1.0})
+            expr = expression({(expr,):1.0}, lower=expr.lower, upper=expr.upper)
         elif isinstance(expr, int) or isinstance(expr, float):
             expr = expression({():expr})
 
@@ -148,7 +161,13 @@ class solver(_scip.solver):
         for term in expr.terms:
             if len(term) > 1:
                 z = self.variable(lower=-sys.maxsize)
-                self += z == expr
+
+                # Using inequalities may give slightly better performance
+                if opt_type == 'max':
+                    self += z <= expr
+                else:
+                    self += z >= expr
+
                 expr = expression({(z,):1.0})
                 break
 
@@ -227,7 +246,7 @@ class solver(_scip.solver):
         @param nsol=-1:     number of solutions to find before stopping
         '''
         if 'objective' in kwds:
-            self._update_coefficients(kwds.pop('objective'))
+            self._update_coefficients(kwds.pop('objective'), 'max')
         super(solver, self).maximize(*args, **kwds)
         return solution(self)
         
@@ -244,7 +263,7 @@ class solver(_scip.solver):
         @param nsol=-1:     number of solutions to find before stopping
         '''
         if 'objective' in kwds:
-            self._update_coefficients(kwds.pop('objective'))
+            self._update_coefficients(kwds.pop('objective'), 'min')
         super(solver, self).minimize(*args, **kwds)
         return solution(self)
         

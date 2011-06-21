@@ -30,12 +30,21 @@ class NonlinearConstraintTest(unittest.TestCase):
         self.assertEqual(solution[x1], 2.0)
         self.assertEqual(solution[x2], 1.0)
 
-    def testnonlinearobjective(self):
-        '''Tests nonlinear objective functions'''
+    def testNonlinearMaximize(self):
+        '''Tests nonlinear objective maximization'''
         solver = scip.solver()
         x1 = solver.variable(scip.INTEGER)
         solver += 0 <= x1 <= 2
         solution = solver.maximize(objective=x1**2)
+        self.assertEqual(solution.objective, 4.0)
+        self.assertEqual(solution[x1], 2.0)
+
+    def testNonlinearMinimize(self):
+        '''Tests nonlinear objective maximization'''
+        solver = scip.solver()
+        x1 = solver.variable(scip.INTEGER)
+        solver += 2 <= x1 <= 4
+        solution = solver.minimize(objective=x1**2)
         self.assertEqual(solution.objective, 4.0)
         self.assertEqual(solution[x1], 2.0)
 
