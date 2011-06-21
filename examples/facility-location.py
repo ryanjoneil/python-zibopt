@@ -52,8 +52,7 @@ if __name__ == '__main__':
 
     # Using a facility incurs its fixed cost
     for f, c in product(FACILITIES, CUSTOMERS):
-        # x[f][c] <= y[f]    <=>    x[f][c] - y[f] <= 0
-        solver += x[f][c] - y[f] <= 0
+        solver += x[f][c] <= y[f]
 
     # Facilities cannot exceed their capacities
     for f in FACILITIES:
