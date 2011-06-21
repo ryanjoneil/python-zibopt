@@ -95,8 +95,7 @@ class ScipTest(unittest.TestCase):
         solver2 = scip.solver()
         v1 = solver1.variable()
         self.assertRaises(scip.ConstraintError, solver2.constraint, v1 <= 1)
-        # TODO: this will cause errors again once we introduce nonline obj.
-        #self.assertRaises(scip.SolverError, solver2.maximize, objective=v1<=3)
+        self.assertRaises(scip.SolverError, solver2.maximize, objective=v1<=3)
     
 if __name__ == '__main__':
     unittest.main()

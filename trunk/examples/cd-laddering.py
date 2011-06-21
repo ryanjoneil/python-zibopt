@@ -1,16 +1,21 @@
 #!/usr/bin/env python
 
+# This model attempts to maximize revenue from investing in CDs
+# given the following inputs:
+#
+#     1. A starting balance
+#     2. A minimum amount of available money (cash + expiring CDs)
+#     3. A maximum amount to put in any one CD
+#     4. A list of CD terms, APYs, and minmum investments
+
+# It makes the following assumptions:
+#
+#     1. APYs stay the same from one period to the next
+#     2. All investments are compounded monthly
+
 from zibopt import scip
 import json
 import sys
-
-# TODO: verify that the output is correct
-# TODO: write a post explaining this. 
-# TODO: try without 1 and 2 pd CDs.  causes an LP solver error (?!?)
-
-# Assumptions:
-# 1. APYs stay the same from one period to the next
-# 2. All investments are compounded monthly
 
 class CD(object):
     '''Represents an option for CD investment'''

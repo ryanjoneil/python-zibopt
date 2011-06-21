@@ -137,6 +137,11 @@ class solver(_scip.solver):
         elif isinstance(expr, int) or isinstance(expr, float):
             expr = expression({():expr})
 
+        # If it is an expression, make sure there are no bounds on it
+        # because that wouldn't make any sense.
+        if expr.upper is not None or expr.lower is not None:
+            raise SolverError('objectives functions should not have bounds')
+
         # It appears SCIP only allows linear expression for objective
         # functions, so if we get something with bilinear terms, set 
         # that equal to an unbounded variable, min/max that variable.
