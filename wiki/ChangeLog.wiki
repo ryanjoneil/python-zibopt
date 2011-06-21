@@ -2,7 +2,9 @@
 #labels Featured
 
 = 0.7 dev =
-  * Issue 22: dividing by variables should raise a !TypeError
+  * Issue 24: Providing both upper and lower bounds on a variable now works properly: 2 <= x <= 4.
+  * Issue 23: Nonlinear objectives now use >= and <= to create new variables instead of ==.  This may give a performance benefit.
+  * Issue 22: Dividing by variables raises a !TypeError.
 
 = 0.6 dev =
   * Issue 19: Added bilinear constraints from SCIP 2.0.1.  This requires restructuring of constraints and expressions, so code that used internal features of these will need to be changed.  The following sorts of programs are now possible:
