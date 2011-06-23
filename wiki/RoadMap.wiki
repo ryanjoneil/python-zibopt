@@ -4,6 +4,8 @@
 The schedule is tentative and for planning purposes.
 
 == 0.7 dev: July 10, 2011 ==
+  * Access to dual prices, reduced costs, and similar values
+  * Access to pricer settings and any other missing components
   * Resolution of build issues
   * Improved examples library
   * .deb and .rpm files
