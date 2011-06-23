@@ -224,6 +224,22 @@ static PyObject *constraint_register(constraint *self) {
     Py_RETURN_NONE;
 }
 
+static PyObject* constraint_getattr(constraint *self, PyObject *attr_name) {
+    // Check and make sure we have a string as attribute name...
+    if (PyUnicode_Check(attr_name)) {
+        if (PyUnicode_CompareWithASCIIString(attr_name, "dual_sol_linear") == 0) {
+            SCIP_CONS *transformed;
+            SCIPgetTransformedCons(self->scip, self->constraint, &transformed);
+            if (transformed == NULL) {
+                return Py_BuildValue("d", 0);
+            } else {
+                return Py_BuildValue("d", SCIPgetDualsolLinear(self->scip, transformed));
+            }
+        }
+    }
+    return PyObject_GenericGetAttr((PyObject *) self, attr_name);
+}
+
 /*****************************************************************************/
 /* MODULE INITIALIZATION                                                     */
 /*****************************************************************************/
@@ -249,7 +265,7 @@ static PyTypeObject constraint_type = {
     0,                               /* tp_hash */
     0,                               /* tp_call */
     0,                               /* tp_str */
-    0,                               /* tp_getattro */
+    (getattrofunc) constraint_getattr, /* tp_getattro */
     0,                               /* tp_setattro */
     0,                               /* tp_as_buffer */
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /* tp_flags */
