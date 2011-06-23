@@ -228,12 +228,18 @@ static PyObject* constraint_getattr(constraint *self, PyObject *attr_name) {
     // Check and make sure we have a string as attribute name...
     if (PyUnicode_Check(attr_name)) {
         if (PyUnicode_CompareWithASCIIString(attr_name, "dual_sol_linear") == 0) {
+            // We have to get dual values off of the transformed problem
             SCIP_CONS *transformed;
-            SCIPgetTransformedCons(self->scip, self->constraint, &transformed);
+            PY_SCIP_CALL(error, NULL, SCIPgetTransformedCons(self->scip, self->constraint, &transformed));
+
             if (transformed == NULL) {
                 return Py_BuildValue("d", 0);
             } else {
-                return Py_BuildValue("d", SCIPgetDualsolLinear(self->scip, transformed));
+                // SCIP always minimizes.  We can use the objective sense
+                // to make duals look we'd expect in maximizing.
+                int sense = SCIPgetObjsense(self->scip);
+                SCIP_Real dual = SCIPgetDualsolLinear(self->scip, transformed);
+                return Py_BuildValue("d", sense * dual);
             }
         }
     }
