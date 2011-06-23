@@ -16,63 +16,53 @@ class constraint(_cons.constraint):
         solver += 3 <= 4*y <= 5
     '''
     def __init__(self, solver, expr):
-        # Allows constraints like x <= 1
-        if isinstance(expr, variable):
-            if expr.lower is not None or expr.upper is not None:
-                kwds = {}
-                if expr.lower is not None:
-                    kwds['lower'] = expression({():expr.lower})
-                if expr.upper is not None:
-                    kwds['upper'] = expression({():expr.upper})
-                expr = expression({(expr,):1.0}, **kwds)
-
-        lower = upper = None
+        expr_lower = expr_upper = None
 
         # Make sure we are in the middle if there are two bounds
-        if expr.lower is None and expr.upper and expr.upper.upper:
-            expr = expr.upper
-        elif expr.upper is None and expr.lower and expr.lower.lower:
-            expr = expr.lower
+        if expr.expr_lower is None and expr.expr_upper and expr.expr_upper.expr_upper:
+            expr = expr.expr_upper
+        elif expr.expr_upper is None and expr.expr_lower and expr.expr_lower.expr_lower:
+            expr = expr.expr_lower
 
         # Cancel out terms from lhs/rhs and keep constants
-        if expr.lower and expr.upper is expr.lower:
+        if expr.expr_lower and expr.expr_upper is expr.expr_lower:
             # Special case where x == y.  This keeps from double-counting
             # one side of the constraint.
-            expr = expr - expr.lower
-            lower = upper = -expr.terms.pop((), 0.0)
-            expr.lower = lower
-            expr.upper = upper
+            expr = expr - expr.expr_lower
+            expr_lower = expr_upper = -expr.terms.pop((), 0.0)
+            expr.expr_lower = expr_lower
+            expr.expr_upper = expr_upper
 
         else:
             # Logic for constraints constructed via <= and >=
-            if expr.lower:
-                e = expr - expr.lower
-                e.lower = expr.lower
-                e.upper = expr.upper
+            if expr.expr_lower:
+                e = expr - expr.expr_lower
+                e.expr_lower = expr.expr_lower
+                e.expr_upper = expr.expr_upper
                 expr = e
-                lower = -expr.terms.pop((), 0.0) # just the constant
+                expr_lower = -expr.terms.pop((), 0.0) # just the constant
     
-            if expr.upper:
-                e = expr - expr.upper
-                e.lower = expr.lower
-                e.upper = expr.upper
+            if expr.expr_upper:
+                e = expr - expr.expr_upper
+                e.expr_lower = expr.expr_lower
+                e.expr_upper = expr.expr_upper
                 expr = e
-                upper = -expr.terms.pop((), 0.0) # just the constant
+                expr_upper = -expr.terms.pop((), 0.0) # just the constant
 
         # Make sure we have at least one bound
-        if lower is None and upper is None:
+        if expr_lower is None and expr_upper is None:
             raise ConstraintError('at least one bound is required')
 
-        # Be polite: only pass in upper and lower bounds if we have them
+        # Be polite: only pass in expr_upper and expr_lower bounds if we have them
         kwds = {}
-        if lower is not None:
-            kwds['lower'] = lower
-        if upper is not None:
-            kwds['upper'] = upper
+        if expr_lower is not None:
+            kwds['lower'] = expr_lower
+        if expr_upper is not None:
+            kwds['upper'] = expr_upper
 
-        # If upper < lower: constraint error
-        if upper is not None and lower is not None and upper < lower:
-            raise ConstraintError('invalid constraint: upper < lower')
+        # If expr_upper < expr_lower: constraint error
+        if expr_upper is not None and expr_lower is not None and expr_upper < expr_lower:
+            raise ConstraintError('invalid constraint: expr_upper < expr_lower')
 
         # Separate out variables by term type (linear/bilinear)
         linear_vars = [] # information for linear terms
@@ -108,8 +98,13 @@ class constraint(_cons.constraint):
             **kwds
         )
 
+        # Clear off expression bounds if necessary.  This is so we can
+        # keep reuse variables without mucking things up, since bounds 
+        # are stored on expression (and thus variable) instances.
+        expr._clear_bounds()
+
         # Keep this information so we can look it up later
-        self.lower = lower
-        self.upper = upper
+        self.lower = expr_lower
+        self.upper = expr_upper
         self.coefficients = expr.terms.copy()
 

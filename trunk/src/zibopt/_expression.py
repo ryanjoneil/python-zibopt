@@ -24,37 +24,37 @@ class expression(object):
         0 <= 3 * x <= 10
         10 >= 3 * x >= 0
     '''
-    def __init__(self, terms={}, lower=None, upper=None):
+    def __init__(self, terms={}, expr_lower=None, expr_upper=None):
         '''
         Instantiates an algebraic expression.  This is assumed to be a 
         sum of sets of variables which are multiplied.
 
         @param terms: {(tuple of variables): coefficient, ...}
-        @param lower: lower bound
-        @param lower: upper bound
+        @param expr_lower: lower bound
+        @param expr_lower: upper bound
         '''
         # Terms should be {(variable sequence): coefficient}
         self.terms = {tuple(sorted(v)):c for v, c in terms.items()}
-        self.lower = lower
-        self.upper = upper
+        self.expr_lower = expr_lower
+        self.expr_upper = expr_upper
 
     def __getitem__(self, key):
         return self.terms[key]
 
     def __add__(self, other):
-        if isinstance(other, type(self)):
+        if isinstance(other, expression):
             # x + y
             terms = self.terms.copy()
             for v, c in other.terms.items():
                 terms[v] = terms.get(v, 0.0) + c
 
-            return type(self)(terms)
+            return expression(terms)
 
         elif isinstance(other, int) or isinstance(other, float):
             # x + 1
             terms = self.terms.copy()
             terms[()] = terms.get((), 0.0) + other
-            return type(self)(terms)
+            return expression(terms)
 
         return NotImplemented
         
@@ -64,7 +64,7 @@ class expression(object):
         return self + (-1) * other
 
     def __mul__(self, other):
-        if isinstance(other, type(self)):
+        if isinstance(other, expression):
             # (x + y) * (x * y)
             # (x + y) * (v - w) 
             # x * (y - z)
@@ -74,11 +74,11 @@ class expression(object):
                 c = self.terms.get(v1, 1.0) * other.terms.get(v2, 1.0)
                 terms[v] = terms.get(v, 0.0) + c
             
-            return type(self)(terms)
+            return expression(terms)
 
         elif isinstance(other, int) or isinstance(other, float):
             # 2 * (x + y)
-            return type(self)({
+            return expression({
                 v:c*float(other) for v, c in self.terms.items()
             })
 
@@ -93,7 +93,7 @@ class expression(object):
 
     def __neg__(self):
         # -(x * y)
-        return type(self)({v:-c for v, c in self.terms.items()})
+        return expression({v:-c for v, c in self.terms.items()})
 
     def __pos__(self):
         # +(x * y)
@@ -108,11 +108,11 @@ class expression(object):
                     if len(set(term)) == 1:
                         variables = term * x
                         coefficient = c ** x
-                        return type(self)({variables:coefficient})
+                        return expression({variables:coefficient})
 
             elif len(self.terms) == 2 and () in self.terms:
                 # (2 * x**3) ** 4
-                e = type(self)({():1.0})
+                e = expression({():1.0})
                 for _ in range(x):
                     e = e * self
                 return e
@@ -129,61 +129,86 @@ class expression(object):
 
     # This part allows <=, >= and == to populate lower/upper bounds
     def __le__(self, other):
-        if isinstance(other, type(self)):
-            if self.lower is None and self.upper is None and \
-               other.lower is None and other.upper is None:
+        from zibopt._variable import variable
+        if isinstance(other, expression):
+            if isinstance(self, variable) or (
+               self.expr_lower is None and self.expr_upper is None and \
+               other.expr_lower is None and other.expr_upper is None
+            ):
+                # x <= 3
                 # 2*x <= 3*y
-                self.upper  = other
-                other.lower = self
+                self.expr_upper  = other
+                other.expr_lower = self
                 return self
 
-            elif self.upper is None and list(other.terms) == [()]:
+            elif self.expr_upper is None and list(other.terms) == [()]:
                 # x <= 10
-                self.upper  = other
-                other.lower = self
+                self.expr_upper  = other
+                other.expr_lower = self
                 return self
 
         elif isinstance(other, int) or isinstance(other, float):
             # x + y <= 1
-            return self <= type(self)({():other})
+            return self <= expression({():other})
 
         return NotImplemented
 
     def __ge__(self, other):
-        if isinstance(other, type(self)):
-            if self.lower is None and self.upper is None and \
-               other.lower is None and other.upper is None:
+        from zibopt._variable import variable
+        if isinstance(other, expression):
+            if isinstance(self, variable) or (
+               self.expr_lower is None and self.expr_upper is None and \
+               other.expr_lower is None and other.expr_upper is None
+            ):
+                # x >= 3
                 # 2*x >= 3*y
-                self.lower  = other
-                other.upper = self
+                self.expr_lower  = other
+                other.expr_upper = self
                 return self
 
-            elif self.lower is None and list(other.terms) == [()]:
+            elif self.expr_lower is None and list(other.terms) == [()]:
                 # x >= 10
-                self.lower  = other
-                other.upper = self
+                self.expr_lower  = other
+                other.expr_upper = self
                 return self
 
         elif isinstance(other, int) or isinstance(other, float):
             # x + y >= 1
-            return self >= type(self)({():other})         
+            return self >= expression({():other})         
 
         return NotImplemented
 
     def __eq__(self, other):
-        if isinstance(other, type(self)):
-            # 2*x == 3*y
-            if self.lower is None and self.upper is None and \
-               other.lower is None and other.upper is None:
-                self.lower  = other
-                self.upper  = other
-                other.lower = self
-                other.upper = self
+        from zibopt._variable import variable
+        if isinstance(other, expression):
+            if isinstance(self, variable) or (
+               self.expr_lower is None and self.expr_upper is None and \
+               other.expr_lower is None and other.expr_upper is None
+            ):
+                # x == 3
+                # 2*x == 3*y
+                self.expr_lower  = other
+                self.expr_upper  = other
+                other.expr_lower = self
+                other.expr_upper = self
                 return self
                 
         elif isinstance(other, int) or isinstance(other, float):
             # x + y == 1
-            return self == type(self)({():other})         
+            return self == expression({():other})         
 
         return NotImplemented           
+
+    def _clear_bounds(self):
+        '''
+        This is intended for use after an expression is turned into a 
+        constraint. It clears expression-type bounds off of individual 
+        variables, since they are not constructed in the same manner.
+        '''
+        # Only matters if we get an expresion of one variable
+        if () not in self.terms and len(self.terms) == 1:
+            t = list(self.terms.keys())[0]
+            if len(t) == 1:
+                t[0].expr_lower = None
+                t[0].expr_upper = None
 
