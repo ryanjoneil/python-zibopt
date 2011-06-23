@@ -164,55 +164,55 @@ class ExpressionTest(unittest.TestCase):
         self.assertEqual(e0[()], -1.0)
         self.assertEqual(e0[self.set_x1], 1.0)
         self.assertEqual(e0[self.set_x2], 1.0)
-        self.assertEqual(e0.lower, None)
-        self.assertEqual(e0.upper[()], 2.0)
-        self.assertEqual(e0.upper[self.set_x12], 1.0)
-        self.assertEqual(e0.upper.lower, e0)
-        self.assertEqual(e0.upper.upper, None)
+        self.assertEqual(e0.expr_lower, None)
+        self.assertEqual(e0.expr_upper[()], 2.0)
+        self.assertEqual(e0.expr_upper[self.set_x12], 1.0)
+        self.assertEqual(e0.expr_upper.expr_lower, e0)
+        self.assertEqual(e0.expr_upper.expr_upper, None)
 
         e1 = self.x1 + self.x2 - 1 >= self.x1 * self.x2 + 2
         self.assertEqual(e1[()], -1.0)
         self.assertEqual(e1[self.set_x1], 1.0)
         self.assertEqual(e1[self.set_x2], 1.0)
-        self.assertEqual(e1.lower[()], 2.0)
-        self.assertEqual(e1.lower[self.set_x12], 1.0)
-        self.assertEqual(e1.upper, None)
-        self.assertEqual(e1.lower.lower, None)
-        self.assertEqual(e1.lower.upper, e1)
+        self.assertEqual(e1.expr_lower[()], 2.0)
+        self.assertEqual(e1.expr_lower[self.set_x12], 1.0)
+        self.assertEqual(e1.expr_upper, None)
+        self.assertEqual(e1.expr_lower.expr_lower, None)
+        self.assertEqual(e1.expr_lower.expr_upper, e1)
 
         e2 = self.x1 + self.x2 - 1 == self.x1 * self.x2 + 2
         self.assertEqual(e2[()], -1.0)
         self.assertEqual(e2[self.set_x1], 1.0)
         self.assertEqual(e2[self.set_x2], 1.0)
-        self.assertEqual(e2.lower[()], 2.0)
-        self.assertEqual(e2.lower[self.set_x12], 1.0)
-        self.assertEqual(e2.upper, e2.lower)
-        self.assertEqual(e2.lower.lower, e2)
-        self.assertEqual(e2.lower.upper, e2)
+        self.assertEqual(e2.expr_lower[()], 2.0)
+        self.assertEqual(e2.expr_lower[self.set_x12], 1.0)
+        self.assertEqual(e2.expr_upper, e2.expr_lower)
+        self.assertEqual(e2.expr_lower.expr_lower, e2)
+        self.assertEqual(e2.expr_lower.expr_upper, e2)
 
     def testVariableBounds(self):
         '''Tests <=, >= and == for variables'''
-        v0 = self.x1 <= 3
-        self.assertEqual(v0.upper, 3)
+        e0 = self.x1 <= 3
+        self.assertEqual(e0.expr_upper[()], 3)
 
-        v1 = self.x1 >= 4
-        self.assertEqual(v1.lower, 4)
+        e1 = self.x1 >= 4
+        self.assertEqual(e1.expr_lower[()], 4)
 
-        v2 = self.x1 == 5
-        self.assertEqual(v2.lower, 5)
-        self.assertEqual(v2.upper, 5)
+        e2 = self.x1 == 5
+        self.assertEqual(e2.expr_lower[()], 5)
+        self.assertEqual(e2.expr_upper[()], 5)
 
     def testChainedInequalities(self):
         '''Tests chained <= and >= for expressions'''
         e = 5 * self.x1
         1.0 <= e <= 10.0
-        self.assertEqual(e.lower.terms[()], 1.0)
-        self.assertEqual(e.upper.terms[()], 10.0)
+        self.assertEqual(e.expr_lower.terms[()], 1.0)
+        self.assertEqual(e.expr_upper.terms[()], 10.0)
 
-        e.lower = e.upper = None
+        e.expr_lower = e.expr_upper = None
         20 >= e >= 5
-        self.assertEqual(e.lower.terms[()], 5)
-        self.assertEqual(e.upper.terms[()], 20)
+        self.assertEqual(e.expr_lower.terms[()], 5)
+        self.assertEqual(e.expr_upper.terms[()], 20)
 
 if __name__ == '__main__':
     unittest.main()

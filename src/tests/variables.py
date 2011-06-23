@@ -18,6 +18,21 @@ class VariableTest(unittest.TestCase):
         solver = scip.solver()
         x = solver.variable(priority=10)
         self.assertEqual(x.priority, 10)
+
+    def testExpressionBounds(self):
+        '''Tests that bounds are cleared by constraint construction'''
+        solver = scip.solver()
+        x = solver.variable()
+        c1 = solver.constraint(x >= 2)
+        self.assertIsNone(x.expr_upper)
+        
+        c2 = solver.constraint(3 <= x <= 4)
+        solution = solver.maximize(objective=x)
+        self.assertEqual(solution.objective, 4)
+
+        solver -= c2
+        solution = solver.minimize(objective=x)
+        self.assertEqual(solution.objective, 2)
         
 if __name__ == '__main__':
     unittest.main()

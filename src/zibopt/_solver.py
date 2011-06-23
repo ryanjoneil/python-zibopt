@@ -105,21 +105,8 @@ class solver(_scip.solver):
         if isinstance(expr, constraint):
             # Is already a constraint
             self.constrain(expr)
-
-        elif isinstance(expr, variable):
-            # Supports single variable constraints: 0 <= 2 <= 2
-            if expr.lower is not None or expr.upper is not None:
-                kwds = {}
-                if expr.lower is not None:
-                    kwds['lower'] = expression({():expr.lower})
-                if expr.upper is not None:
-                    kwds['upper'] = expression({():expr.upper})
-                self += expression({(expr,):1.0}, **kwds)
-            else:
-                return NotImplementedError
-            
         else:
-            # Is a zibopt._variable._cons_builder instance
+            # Create a new one
             self.constraint(expr)
             
         return self
@@ -143,16 +130,13 @@ class solver(_scip.solver):
         # problem, thus the restart.
         self.restart()
 
-        # Make sure it's actually an expression.  It could be a constant or 
-        # a variable as well, such as: solver.maximize(objective=x1)
-        if isinstance(expr, variable):
-            expr = expression({(expr,):1.0}, lower=expr.lower, upper=expr.upper)
-        elif isinstance(expr, int) or isinstance(expr, float):
+        # Make sure it's actually an expression.  It could be a constant.
+        if isinstance(expr, int) or isinstance(expr, float):
             expr = expression({():expr})
 
         # If it is an expression, make sure there are no bounds on it
         # because that wouldn't make any sense.
-        if expr.upper is not None or expr.lower is not None:
+        if expr.expr_upper is not None or expr.expr_lower is not None:
             raise SolverError('objective functions should not have bounds')
 
         # It appears SCIP only allows linear expression for objective

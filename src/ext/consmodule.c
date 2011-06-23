@@ -237,7 +237,7 @@ static PyObject* constraint_getattr(constraint *self, PyObject *attr_name) {
             } else {
                 // SCIP always minimizes.  We can use the objective sense
                 // to make duals look we'd expect in maximizing.
-                int sense = SCIPgetObjsense(self->scip);
+                SCIP_OBJSENSE sense = SCIPgetObjsense(self->scip);
                 SCIP_Real dual = SCIPgetDualsolLinear(self->scip, transformed);
                 return Py_BuildValue("d", sense * dual);
             }
