@@ -10,6 +10,7 @@
 #include <scip/clock.h>
 #include <scip/conflict.h>
 #include <scip/cons.h>
+#include <scip/cons_linear.h>
 #include <scip/cons_quadratic.h>
 #include <scip/heur.h>
 #include <scip/misc.h>

@@ -70,6 +70,26 @@ class ConstraintRemovalTest(unittest.TestCase):
         self.solver += self.c2
         self.assertEqual(1.0, self.solver.maximize(objective=self.x1+self.x2).objective)
 
+class ConstraintAttributesTest(unittest.TestCase):
+    def setUp(self):
+        self.solver = scip.solver()
+        self.x1 = self.solver.variable()
+        self.x2 = self.solver.variable()
+        self.c1 = self.solver.constraint(self.x1 + 3*self.x2 <= 4)
+        self.c2 = self.solver.constraint(2*self.x1 + self.x2 <= 6)
+
+    def testUnsolvedDualSolLinear(self):
+        '''Tests LP shadow prices on an unsolved problem'''
+        self.assertAlmostEqual(self.c1.dual_sol_linear, 0.0)
+        self.assertAlmostEqual(self.c2.dual_sol_linear, 0.0)
+    
+    def testSolvedDualSolLinear(self):
+        '''Tests LP shadow prices on a solved problem'''
+        solution = self.solver.maximize(objective=3*self.x1 + 5*self.x2)
+        self.assertAlmostEqual(self.c1.dual_sol_linear, -1.4)
+        self.assertAlmostEqual(self.c2.dual_sol_linear, -0.8)
+        self.solver.restart()
+
 if __name__ == '__main__':
     unittest.main()
 
