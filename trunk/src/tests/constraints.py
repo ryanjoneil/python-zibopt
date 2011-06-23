@@ -81,8 +81,8 @@ class ConstraintAttributesTest(unittest.TestCase):
     def testMaxDualSolLinear(self):
         '''Tests LP shadow prices on a maximization problem'''
         solution = self.solver.maximize(objective=3*self.x1 + 5*self.x2)
-        self.assertAlmostEqual(self.c1.dual_sol_linear, -1.4)
-        self.assertAlmostEqual(self.c2.dual_sol_linear, -0.8)
+        self.assertAlmostEqual(self.c1.dual_sol_linear, 1.4)
+        self.assertAlmostEqual(self.c2.dual_sol_linear, 0.8)
         self.solver.restart()
 
     def testMinDualSolLinear(self):

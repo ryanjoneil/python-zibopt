@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include <blockmemshell/memory.h>
+
 #include <scip/branch.h>
 #include <scip/clock.h>
 #include <scip/conflict.h>
@@ -33,6 +34,8 @@
 #include <scip/struct_prop.h>
 #include <scip/struct_sepa.h>
 #include <scip/struct_stat.h>
+
+#include <scip/type_prob.h>
 
 #include "structmember.h"
 #include "python_zibopt_util.h"
