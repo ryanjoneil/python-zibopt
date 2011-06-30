@@ -31,17 +31,17 @@ If you are running on x86_64, you will need an extra make file to build the .so 
 {{{
 tar xvfz soplex-1.5.0.tgz
 cat << "EOF" > soplex-1.5.0/make/make.linux.x86_64.gnu.opt-shared
-CXX=g++
-CPPFLAGS=-Isrc -DNDEBUG  -m64 -fPIC
-CXXFLAGS=-O3 -mtune=native -fexceptions -fomit-frame-pointer # -malign-double -ffast-math
-LDFLAGS=-m64 -lm -Wl,-rpath,$(CURDIR)/$(LIBDIR)
-ARFLAGS=crs
-ZLIB_FLAGS=
-ZLIB_LDFLAGS =-lz
+CXX		=	g++
+CPPFLAGS	=	-Isrc -DNDEBUG  -m64 -fPIC
+CXXFLAGS	=	-O3 -mtune=native -fexceptions -fomit-frame-pointer # -malign-double -ffast-math
+LDFLAGS		=	-m64 -lm -Wl,-rpath,$(CURDIR)/$(LIBDIR)
+ARFLAGS		=	crs
+ZLIB_FLAGS	=
+ZLIB_LDFLAGS 	=	-lz
 LIBBUILD        =       $(CXX)
-LIBBUILDFLAGS   =-shared -m64 -fPIC
+LIBBUILDFLAGS   =	-shared -m64 -fPIC
 LIBBUILD_o      =       -o # the trailing space is important
-LIBEXT=so
+LIBEXT		=	so
 ARFLAGS         =
 RANLIB          =
 EOF
