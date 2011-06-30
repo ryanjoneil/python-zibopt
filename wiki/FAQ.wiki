@@ -2,6 +2,24 @@
 #labels Featured
 
 = Frequently Asked Questions =
+
+==== Q: How do I create bilinear constraints? ====
+A: Simply multiply variables by each other.  You may also use **2.  Examples of valid constraints include:
+{{{
+solver += 2*x**2 + (3*y)**2 <= z**2 + 4
+solver += (x + y) * (x - y) >= 0
+solver += (x/4)**2 == 3
+solver += 2 <= x <= 4
+}}}
+
+==== Q: How do I remove a constraint once I've added it? ====
+A: Use solver.constraint(...) to capture the constraint.  You may now remove it and add it again later:
+{{{
+constraint = solver.constraint(2 <= x <= 4)
+solver -= constraint # remove from formulation
+solver += constraint # add back to formulation
+}}} 
+
 ==== Q: How do I change priorities of branching rules and set other settings? ====
 
 A: On instantiation, a SCIP solver is preloaded with dictionaries containing available branching rules, conflict handlers, heuristics, presolvers, heuristics, presolvers, domain propagators, and node selectors.  You can set properties such as priority and frequency on these directly.  See the module docs for complete examples:
@@ -20,7 +38,7 @@ A: SCIP keeps the original problem untouched and works against a transformed cop
 # ... instantiate a problem ...
 solver.maximize()
 new_variable   = solver.variable(coefficient=1)
-new_constraint = solver.constraint(upper=2, coefficients={new_variable: 1})
+new_constraint = solver.constraint(new_variable <= 2)
 solver.maximize()
 }}}
 
@@ -37,7 +55,7 @@ solver.maximize(quiet=False)
 
 ==== Q: There seem to be multiple ways to add constraints and objectives.  What should I use? ====
 
-A: This may be best served by an example.  These two programs are equivalent.  First, we show the algebraic method:
+A: python-zibopt creates constraints as collections of terms with coefficients.  Behind the scenes, this gets a little complex to allow for bilinear constraints.  You should always use the algebraic method:
 {{{
 from zibopt import scip
 solver = scip.solver()
@@ -47,26 +65,12 @@ x2 = solver.variable(scip.INTEGER)
 x3 = solver.variable(scip.INTEGER)
 
 solver += x1 <= 2
-solver += x1 + x2 + 3*x3 <= 3
+solver += x1 + x2 + 3*x3**2 <= 3
 
-solution = solver.maximize(objective=x1 + x2 + 2*x3)
+solution = solver.maximize(objective=x1*x2 + x2 + 2*x3)
 }}}
-What this really does behind the scenes is:
-{{{
-from zibopt import scip
-solver = scip.solver()
 
-x1 = solver.variable(coefficient=1, vartype=scip.INTEGER, upper=2)
-x2 = solver.variable(coefficient=1, vartype=scip.INTEGER)
-x3 = solver.variable(coefficient=2, vartype=scip.INTEGER)
-
-solver.constraint(upper=3, coefficients={x1:1, x2:1, x3:3})
-
-solution = solver.maximize()
-}}}
-The former example overrides += on the solver to add constraints.  Valid constraints must have the form l <= some expression <= u, where the expression contains references to SCIP variables and l and u are constants for lower and upper bounds, respectively.  One or both of the bounds may be used.
-
-The syntax plays nicely with the Python builtin sum(...), example of which can be found in the source.
+The syntax plays nicely with the Python builtin sum(...), examples of which can be found in the source.
 
 ==== Q: How can I set branching priority on a variable? ====
 
@@ -78,4 +82,3 @@ x.priority = 1000
 x = solver.variable(scip.INTEGER, priority=10)
 }}}
 This uses SCIP's SCIPvarChgBranchPriority function for setting the branching priority.  Depending on the state of the solver, what may actually get set is the priority on a transformed or aggregate variable, meaning that the value of x.priority may not look how you expect.
-
