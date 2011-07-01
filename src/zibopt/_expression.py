@@ -7,9 +7,9 @@ class expression(object):
     Instantiates an algebraic expression.  This is assumed to be a 
     sum of sets of variables which are multiplied.  Parameters:
      
-        - *terms*: {(tuple of variables): coefficient, ...}
-        - *expr_lower*: lower bound
-        - *expr_lower*: upper bound
+        - terms: {(tuple of variables): coefficient, ...}
+        - expr_lower: lower bound
+        - expr_lower: upper bound
         
     Represents an expression with an upper and/or lower bound.  Valid 
     expressions can be constructed using any arithmetic operation and 
