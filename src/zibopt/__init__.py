@@ -1,12 +1,14 @@
-# python-zibopt: Python interface to the ZIB Optimization Suite
-# Copyright (C) 2011 - Ryan J. O'Neil - ryanjoneil@gmail.com
-# http://code.google.com/p/pyython-zibopt/
-
 '''
-python-zibopt: Python interface to the ZIB Optimization Suite
-Copyright (C) 2011 - Ryan J. O'Neil - ryanjoneil@gmail.com
-http://code.google.com/p/python-zibopt/
+python-zibopt
+=============
+:Author: Ryan J. O'Neil <ryanjoneil@gmail.com>
+:Version: 0.7-dev
+:Website: http://code.google.com/p/python-zibopt/
 
+Python Interface to the ZIB Optimization Suite
+
+License
+-------
 This software is released under the GPL 3.0.
 
 Components of the ZIB Optimization Suite which this software links against
