@@ -4,11 +4,11 @@
 The schedule is tentative and for planning purposes.
 
 == 0.7 dev: July 10, 2011 ==
+  * Module docs on PyPI
   * Access to dual prices, reduced costs, and similar values
   * Access to pricer settings and any other missing components
-  * Resolution of build issues
+  * Improved build instructions
   * Improved examples library
-  * .deb and .rpm files
 
 == 0.8 dev: August 7, 2011 ==
   * Exposure of SCIP components to implementation in Python:
@@ -25,3 +25,6 @@ The schedule is tentative and for planning purposes.
 == 1.0 stable: August 28, 2011 ==
   * Release candidate period
   * Final 1.0 release
+
+== On Hold ==
+  * .deb and .rpm files _(ZIB folks are planning to release .so files this year so we are waiting for that)_
