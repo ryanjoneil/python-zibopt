@@ -4,10 +4,17 @@ __all__ = 'expression',
 
 class expression(object):
     '''
+    Instantiates an algebraic expression.  This is assumed to be a 
+    sum of sets of variables which are multiplied.  Parameters:
+     
+        - *terms*: {(tuple of variables): coefficient, ...}
+        - *expr_lower*: lower bound
+        - *expr_lower*: upper bound
+        
     Represents an expression with an upper and/or lower bound.  Valid 
     expressions can be constructed using any arithmetic operation and 
     powers of expressions containing one variable.  Expressions cannot be
-    divided by anything but a number.  The following are valid examples:
+    divided by anything but a number.  The following are valid examples::
 
         (x + 3*y) / 4
         (3 * x**2) ** 4
@@ -16,7 +23,7 @@ class expression(object):
     Expressions can take upper and lower bounds.  When two expressions are
     being compared, only one inequality may be used.  Inequalities can be
     chained when the middle is an expression and the upper and lower bounds
-    are constants.  Valid inequalitites look like:
+    are constants.  Valid inequalitites look like::
 
         x * y <= x * z**2
         x + z >= y/2
@@ -25,14 +32,6 @@ class expression(object):
         10 >= 3 * x >= 0
     '''
     def __init__(self, terms={}, expr_lower=None, expr_upper=None):
-        '''
-        Instantiates an algebraic expression.  This is assumed to be a 
-        sum of sets of variables which are multiplied.
-
-        @param terms: {(tuple of variables): coefficient, ...}
-        @param expr_lower: lower bound
-        @param expr_lower: upper bound
-        '''
         # Terms should be {(variable sequence): coefficient}
         self.terms = {tuple(sorted(v)):c for v, c in terms.items()}
         self.expr_lower = expr_lower

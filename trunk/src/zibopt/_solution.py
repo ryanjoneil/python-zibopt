@@ -7,12 +7,12 @@ SolutionError = _soln.error
 class solution(_soln.solution):
     '''
     A solution to a mixed integer program from SCIP.  Solution values can
-    be obtained using variable references from the solver:
+    be obtained using variable references from the solver::
     
         x1_value = solution[x1]
     
     If a solution is infeasible or unbounded, it will be false when evaluated
-    in boolean context:
+    in boolean context::
     
         if solution:
             # do something interesting
@@ -20,10 +20,10 @@ class solution(_soln.solution):
     Solutions can be tested for optimality using the solution.optimal boolean.
     Available solution statuses include:
     
-        solution.optimal:     solution is optimal
-        solution.infeasible:  no feasible solution could be found
-        solution.unbounded:   solution is unbounded
-        solution.inforunbd:   solution is either infeasible or unbounded
+        - *solution.optimal*:     solution is optimal
+        - *solution.infeasible*:  no feasible solution could be found
+        - *solution.unbounded*:   solution is unbounded
+        - *solution.inforunbd*:   solution is either infeasible or unbounded
     '''
     def __init__(self, solver):
         super(solution, self).__init__(solver)

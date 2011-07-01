@@ -1,16 +1,19 @@
 '''
-This module provides a Python interface to the SCIP mixed integer programming
-solver of the ZIB optimization suite.  It defines two classes:
+zibopt.scip
+===========
+This module provides a Python interface to the SCIP mixed integer 
+programming solver of the ZIB optimization suite.  It defines two classes
+for use by the modeler:
 
-    scip.solver:    interface to SCIP
-    scip.solution:  IP solutions returned by solver.minimize/maximize
+    - *scip.solver*:    interface to SCIP
+    - *scip.solution*:  IP solutions returned by solver.minimize/maximize
 
 There are type constants defined for declaring variables:
 
-    BINARY:      variable can be either 0 or 1
-    INTEGER:     variable can take only integer values
-    IMPLINT:     variable takes only integer values implicitly
-    CONTINUOUS:  variable can take fractional values
+    - *BINARY*:      variable can be either 0 or 1
+    - *INTEGER*:     variable can take only integer values
+    - *IMPLINT*:     variable takes only integer values implicitly
+    - *CONTINUOUS*:  variable can take fractional values
     
 Basic usage of python-zibopt involves constructing a solver, adding variables
 and constraints to it, then calling minimize or maximize.  SCIP varialbles
@@ -19,7 +22,7 @@ the value of a given variable for a given solution to an IP is not set in the
 Python variable itself, but in the solution values.  This is because each
 variable may be able to take on multiple values for an IP.
 
-A simple IP model in ZIMPL might like look:
+A simple IP model in ZIMPL might like look::
 
     var x1 integer >= 0 <= 2;
     var x2 integer >= 0;
@@ -28,7 +31,7 @@ A simple IP model in ZIMPL might like look:
     maximize z: x1 + x2 + 2*x3;
     subto c: x1 + x2 + 3*x3 <= 3;
  
-Translated to python-zibopt this becomes:
+Translated to python-zibopt this becomes::
     
     from zibopt import scip
     solver = scip.solver()
@@ -57,8 +60,9 @@ Translated to python-zibopt this becomes:
         print('invalid problem')
 '''
 
-# Provide better local names for clases
+# This provide more convenient namespacing
 from ._constraint import *
+from ._expression import *
 from ._settings import *
 from ._solution import *
 from ._solver import *

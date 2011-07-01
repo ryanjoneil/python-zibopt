@@ -9,7 +9,7 @@ ConstraintError = _cons.error
 class constraint(_cons.constraint):
     '''
     Stores bounds and coefficients for problem formulations.  Valid
-    constraints for SCIP include linear and bilinear terms.  Examples:
+    constraints for SCIP include linear and bilinear terms.  Examples::
     
         solver += 4 * (x + y) * (x + z) <= 10
         solver += 3*x**2 - 4*x >= 5*y

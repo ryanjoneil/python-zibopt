@@ -6,6 +6,7 @@ __all__ = 'variable', 'VariableError'
 VariableError = _vars.error
 
 class variable(_vars.variable, expression):
+    '''Provides a hashable and orderable Python connector to SCIP variables.'''
     def __init__(self, *args, **kwds):
         _vars.variable.__init__(self, *args, **kwds)
         expression.__init__(self, {(self,):1.0})
