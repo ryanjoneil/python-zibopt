@@ -22,7 +22,7 @@ class solver(_scip.solver):
     Instantiates a A SCIP mixed integer programming solver with default 
     settings.  Parameters:
     
-        - *quiet=True*: turns the SCIP solver output off
+        - quiet=True: turns the SCIP solver output off
 
     Normal behavior is to instantiate a solver, define variables and 
     constraints for it, and then maximize or minimize an objective function.
@@ -118,11 +118,11 @@ class solver(_scip.solver):
         '''
         Adds a variable to the SCIP solver and returns it.  Parameters:
 
-            - *vartype=CONTINUOUS*: type of variable
-            - *coefficient=0*:      objective function coefficient
-            - *lower=0*:            lower bound on variable
-            - *upper=+inf*:         upper bound on variable
-            - *priority=0*:         branching priority for variable
+            - vartype=CONTINUOUS: type of variable
+            - coefficient=0:      objective function coefficient
+            - lower=0:            lower bound on variable
+            - upper=+inf:         upper bound on variable
+            - priority=0:         branching priority for variable
         '''
         v = variable(self, vartype, coefficient, lower, **kwds)
         self.variables.add(v)
@@ -148,7 +148,7 @@ class solver(_scip.solver):
 
         Parameters:
         
-            - *expression*: zibopt.expression instance
+            - expression: zibopt.expression instance
         '''
         cons = constraint(self, expression)
         self.constrain(cons)
@@ -158,7 +158,7 @@ class solver(_scip.solver):
         '''
         Adds a constraint back into the solver.  Returns None.  Parameters:
 
-            - *constraint*: constraint instance to reinstall
+            - constraint: constraint instance to reinstall
         '''
         if constraint not in self.constraints:
             constraint.register()
@@ -168,7 +168,7 @@ class solver(_scip.solver):
         '''
         Removes a constraint from the solver.  Returns None.  Parameters:
             
-            - *constraint*: constraint instance to remove
+            - constraint: constraint instance to remove
         '''
         if constraint in self.constraints:
             self.constraints.remove(constraint)
@@ -179,14 +179,14 @@ class solver(_scip.solver):
         Maximizes the objective function and returns a solution instance.
         Parameters:
 
-            - *objective*:   optional algebraic representation of objective
+            - objective:   optional algebraic representation of objective
               function.  Can also use variable coefficients.
-            - *solution={}*: optional primal solution dictionary.  Raises a
+            - solution={}: optional primal solution dictionary.  Raises a
               SolverError if the solution is infeasible.
-            - *time=inf*:    optional time limit for solving
-            - *gap=0.0*:     optional gap percentage to stop solving (ex: 0.05)
-            - *absgap=0.0*:  optional primal/dual gap to stop solving
-            - *nsol=-1*:     number of solutions to find before stopping
+            - time=inf:    optional time limit for solving
+            - gap=0.0:     optional gap percentage to stop solving (ex: 0.05)
+            - absgap=0.0:  optional primal/dual gap to stop solving
+            - nsol=-1:     number of solutions to find before stopping
         '''
         if 'objective' in kwds:
             self._update_coefficients(kwds.pop('objective'), 'max')
@@ -198,14 +198,14 @@ class solver(_scip.solver):
         Minimizes the objective function and returns a solution instance.
         Parameters:
 
-            - *objective*:   optional algebraic representation of objective
+            - objective:   optional algebraic representation of objective
               function.  Can also use variable coefficients.
-            - *solution={}*: optional primal solution dictionary.  Raises a
+            - solution={}: optional primal solution dictionary.  Raises a
               SolverError if the solution is infeasible.
-            - *time=inf*:    optional time limit for solving
-            - *gap=0.0*:     optional gap percentage to stop solving (ex: 0.05)
-            - *absgap=0.0*:  optional primal/dual gap to stop solving
-            - *nsol=-1*:     number of solutions to find before stopping
+            - time=inf:    optional time limit for solving
+            - gap=0.0:     optional gap percentage to stop solving (ex: 0.05)
+            - absgap=0.0:  optional primal/dual gap to stop solving
+            - nsol=-1:     number of solutions to find before stopping
         '''
         if 'objective' in kwds:
             self._update_coefficients(kwds.pop('objective'), 'min')

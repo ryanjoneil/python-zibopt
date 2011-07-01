@@ -5,15 +5,15 @@ This module provides a Python interface to the SCIP mixed integer
 programming solver of the ZIB optimization suite.  It defines two classes
 for use by the modeler:
 
-    - *scip.solver*:    interface to SCIP
-    - *scip.solution*:  IP solutions returned by solver.minimize/maximize
+    - scip.solver:    interface to SCIP
+    - scip.solution:  IP solutions returned by solver.minimize/maximize
 
 There are type constants defined for declaring variables:
 
-    - *BINARY*:      variable can be either 0 or 1
-    - *INTEGER*:     variable can take only integer values
-    - *IMPLINT*:     variable takes only integer values implicitly
-    - *CONTINUOUS*:  variable can take fractional values
+    - BINARY:      variable can be either 0 or 1
+    - INTEGER:     variable can take only integer values
+    - IMPLINT:     variable takes only integer values implicitly
+    - CONTINUOUS:  variable can take fractional values
     
 Basic usage of python-zibopt involves constructing a solver, adding variables
 and constraints to it, then calling minimize or maximize.  SCIP varialbles
