@@ -15,8 +15,6 @@ static int variable_init(variable *self, PyObject *args, PyObject *kwds) {
     double lhs, rhs; // lhs <= a'x <= rhs
     int priority;    // variable branching priority
     
-    t = SCIP_VARTYPE_CONTINUOUS;
-
     // SCIPinfinity requires self->scip, so we have to parse the args twice
     if (!PyArg_ParseTuple(args, "O|idddi", &s, &t, &c, &lhs, &rhs, &priority))
         return -1;
