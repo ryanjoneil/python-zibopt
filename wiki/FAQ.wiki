@@ -4,10 +4,10 @@
 = Frequently Asked Questions =
 
 ==== Q: Where are the module docs? ====
-A: On [http://packages.python.org/python-zibopt/ PyPI].
+A: On [http://packages.python.org/python-zibopt/ packages.python.org].
 
 ==== Q: How do I create bilinear constraints? ====
-A: Simply multiply variables by each other.  You may also use **2.  Examples of valid constraints include:
+A: Simply multiply variables by each other.  You may also use powers of two.  Examples of valid constraints include:
 {{{
 solver += 2*x**2 + (3*y)**2 <= z**2 + 4
 solver += (x + y) * (x - y) >= 0
