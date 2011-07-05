@@ -1,42 +1,54 @@
 #include <scip/scip.h>
 
 void main() {
-    // Init solver and create problem
     SCIP *scip;
     SCIPcreate(&scip);
-    SCIPincludeDefaultPlugins(scip);
-    SCIPcreateProb(scip, "dual lop sol", NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-
-    // Turn off presolving
-    SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, TRUE);
     
-    // Create a single continuous variable with lower bound 0
-    // and objective coefficient 1
-    SCIP_VAR *variable;
-    SCIPcreateVar(scip, &variable, NULL, 0, SCIPinfinity(scip), 1, 
-        SCIP_VARTYPE_CONTINUOUS, TRUE, FALSE, NULL, NULL, NULL, NULL, NULL);
-    SCIPaddVar(scip, variable);
+    // Build an LP:
+    //   max  x
+    //   s.t. x <= 1 
+    //        x >= 0
+    SCIP_Real obj[1] = {1.0};
+    SCIP_Real lb[1] = {0.0};
+    SCIP_Real ub[1] = {SCIPinfinity(scip)};
+    SCIP_Real lhs[1] = {-SCIPinfinity(scip)};
+    SCIP_Real rhs[1] = {1.0};
+    const int beg[1] = {0};
+    const int ind[1] = {0};
+    const SCIP_Real val[1] = {1.0};
 
-    // Create a single constraint: 0 <= variable <= 1
-    SCIP_CONS *constraint;
-    SCIP_VAR *vars[1] = {variable};
-    SCIP_Real coef[1] = {1.0};
-    SCIPcreateConsLinear(scip, &constraint, "dual lp sol constraint", 
-        1, vars, coef, -SCIPinfinity(scip), 1.0, 
-        TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE);
-    SCIPaddCons(scip, constraint);
+    SCIP_LPI *lpi;
+    SCIPlpiCreate(&lpi, "test lpi", SCIP_OBJSENSE_MAXIMIZE);
+    SCIPlpiLoadColLP(
+        lpi, 
+        SCIP_OBJSENSE_MAXIMIZE,
+        1,    // ncols
+        obj,
+        lb,
+        ub,
+        NULL, // colnames
+        1,    // nrows
+        lhs,
+        rhs,
+        NULL, // rownames
+        1,    // nnonz
+        beg,
+        ind,
+        val
+    );
+    
+    // Tell simplex about the known optimal basis.
+    int cstat[1] = {1};
+    int rstat[1] = {2};
+    SCIPlpiSetBase(lpi, cstat, rstat);
+    
+    // This will make the LP solver think it's found an optimal solution
+    // without actually performing any pivots.
+    SCIPlpiSetIntpar(lpi, SCIP_LPPAR_LPITLIM, 0);
+    SCIPlpiSolvePrimal(lpi);
 
-    // Solve the LP
-    SCIPsetObjsense(scip, SCIP_OBJSENSE_MAXIMIZE);
-    SCIPsolve(scip);
-
-    // Get dual price for the constraint
-    SCIP_CONS *transformed;
-    SCIPgetTransformedCons(scip, constraint, &transformed);
-    if (transformed == NULL) {
-        puts("could not get transformed constraint");
-    } else {
-        SCIP_Real dual = SCIPgetDualsolLinear(scip, transformed);
-        printf("dual price = %.2f\n", dual);
-    }
+    // Get out dual value for our single constraint.
+    SCIP_Real duals[1] = {0};
+    SCIPlpiGetSol(lpi, NULL, NULL, duals, NULL, NULL);
+    printf("dual price: %.2f\n", duals[0]);
 }
