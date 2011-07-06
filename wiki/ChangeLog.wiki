@@ -2,6 +2,7 @@
 #labels Featured
 
 = 0.7 dev =
+  * Issue 20: Build instructions and setup.py now link against Ipopt
   * Issue 28: Module docs are now being generated using reStructuredText and Sphinx.  They live on [http://packages.python.org/python-zibopt/ PyPI].
   * Issue 24: Providing both upper and lower bounds on a variable now works properly: 2 <= x <= 4.
   * Issue 23: Nonlinear objectives now use >= and <= to create new variables instead of ==.  This may give a performance benefit.
