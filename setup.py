@@ -10,7 +10,8 @@ def zibopt_ext(name, c_file):
     return Extension('zibopt.%s' % name, 
         sources = ['src/ext/%s' % c_file], 
         libraries = [
-            'lpispx', 'objscip', 'scip', 'soplex', 'nlpi', #'nlpi.ipopt', 'ipopt'
+            'lpispx', 'objscip', 'scip', 'soplex', 'nlpi.ipopt', 
+            'ipopt', 'dmumps'
         ],
     )
 
