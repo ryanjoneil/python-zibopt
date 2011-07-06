@@ -47,10 +47,17 @@ RANLIB          =
 EOF
 }}}
 
+To build SCIP against Ipopt, it requires that the libipopt.so file have a certain name not provided by the .deb.  Do the following to get around this:
+
+{{{
+ln -s /usr/lib/libipopt.so.0.0.0 ~/lib/libipopt.linux.x86_64.gnu.opt-shared.so
+export LIBRARY_PATH=$HOME/lib
+}}}
+
 You should now be able to build the .so files:
 
 {{{
-make LPSOPT=opt-shared OPT=opt-shared ZIMPL=false ZLIB=false READLINE=false
+make LPSOPT=opt-shared OPT=opt-shared ZIMPL=false ZLIB=false READLINE=false IPOPT=true IPOPTOPT=opt-shared IPOPT_FLAGS="-I/usr/include/coin" IPOPT_LDFLAGS="-ldmumps"
 }}}
 
 Copy the .so files for SCIP to your ~/lib directory and create symbolic links to their latest versions (your file names may be slightly different):
@@ -58,12 +65,12 @@ Copy the .so files for SCIP to your ~/lib directory and create symbolic links to
 {{{
 cp soplex-1.5.0/lib/libsoplex-1.5.0.linux.x86_64.gnu.opt-shared.so ~/lib/
 cp scip-2.0.1/lib/liblpispx-2.0.1.linux.x86_64.gnu.opt-shared.so ~/lib/
-cp scip-2.0.1/lib/libnlpi-2.0.1.linux.x86_64.gnu.opt-shared.so ~/lib/
+cp scip-2.0.1/lib/libnlpi.ipopt-2.0.1.linux.x86_64.gnu.opt-shared.so ~/lib/
 cp scip-2.0.1/lib/libobjscip-2.0.1.linux.x86_64.gnu.opt-shared.so ~/lib/
 cp scip-2.0.1/lib/libscip-2.0.1.linux.x86_64.gnu.opt-shared.so ~/lib/
 ln -s ~/lib/libsoplex-1.5.0.linux.x86_64.gnu.opt-shared.so ~/lib/libsoplex.so
 ln -s ~/lib/liblpispx-2.0.1.linux.x86_64.gnu.opt-shared.so ~/lib/liblpispx.so
-ln -s ~/lib/libnlpi-2.0.1.linux.x86_64.gnu.opt-shared.so ~/lib/libnlpi.so
+ln -s ~/lib/libnlpi.ipopt-2.0.1.linux.x86_64.gnu.opt-shared.so ~/lib/libnlpi.ipopt.so
 ln -s ~/lib/libobjscip-2.0.1.linux.x86_64.gnu.opt-shared.so ~/lib/libobjscip.so
 ln -s ~/lib/libscip-2.0.1.linux.x86_64.gnu.opt-shared.so ~/lib/libscip.so
 }}}

@@ -4,6 +4,7 @@
 #include <Python.h>
 #include <stdbool.h>
 #include <string.h>
+#include <structmember.h>
 
 #include <blockmemshell/memory.h>
 
@@ -35,9 +36,6 @@
 #include <scip/struct_sepa.h>
 #include <scip/struct_stat.h>
 
-#include <scip/type_prob.h>
-
-#include "structmember.h"
 #include "python_zibopt_util.h"
 
 #define CONSTRAINT_TYPE_NAME "constraint"
