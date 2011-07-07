@@ -89,8 +89,8 @@ Now we build python-zibopt:
 
 {{{
 cd ~/src
-tar xvfz python-zibopt-0.6.dev-r157.tar.gz
-cd python-zibopt-0.6.dev-r157/
+tar xvfz python-zibopt-0.7.dev-r191.tar.gz
+cd python-zibopt-0.7.dev-r191/
 python3 setup.py build
 }}}
 
@@ -135,7 +135,7 @@ Type "help", "copyright", "credits" or "license" for more information.
 
 >>> import zibopt
 >>> zibopt.__version__
-'0.6'
+'0.7'
 >>> zibopt.scip.solver()
 <zibopt.scip.solver object at 0xb7d28cd4>
 >>> exit()
