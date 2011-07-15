@@ -31,10 +31,11 @@ setup (
 
     ext_modules  = [
         # Modules to setup and solve optimization problems
-        zibopt_ext('_scip', 'scipmodule.c'),
-        zibopt_ext('_vars', 'varsmodule.c'),
         zibopt_ext('_cons', 'consmodule.c'),
+        zibopt_ext('_lp',   'lpmodule.c'),
+        zibopt_ext('_scip', 'scipmodule.c'),
         zibopt_ext('_soln', 'solnmodule.c'),
+        zibopt_ext('_vars', 'varsmodule.c'),
         
         # Modules to adjust priority and settings
         zibopt_ext('_branch',   'branchmodule.c'),
@@ -51,6 +52,7 @@ setup (
     classifiers = [
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: GNU General Public License (GPL)',
+        'Programming Language :: Python :: 3',
         'Topic :: Scientific/Engineering :: Mathematics',
     ]    
 )
