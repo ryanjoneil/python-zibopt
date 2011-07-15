@@ -25,7 +25,8 @@ static int lp_init(lp *self, PyObject *args, PyObject *kwds) {
 }
 
 static void lp_dealloc(lp *self) {
-    SCIPlpiFree(&self->lpi);
+    if (self->lpi != NULL)
+        SCIPlpiFree(&self->lpi);
     ((PyObject *) self)->ob_type->tp_free(self);
 }
 
@@ -42,7 +43,7 @@ static PyMethodDef lp_methods[] = {
 
 static PyTypeObject lp_type = {
     PyVarObject_HEAD_INIT(NULL, 0)
-    "_scip.lp",                  /* tp_name */
+    "_lp.lp",                    /* tp_name */
     sizeof(lp),                  /* tp_basicsize */
     0,                           /* tp_itemsize */
     (destructor) lp_dealloc,     /* tp_dealloc */
@@ -95,6 +96,7 @@ static PyModuleDef lp_module = {
 PyMODINIT_FUNC PyInit__lp(void) {
     PyObject* m;
 
+    lp_type.tp_new = PyType_GenericNew;
     if (PyType_Ready(&lp_type) < 0)
         return NULL;
 
