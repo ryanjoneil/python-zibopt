@@ -90,6 +90,11 @@ typedef struct {
     bool inforunbd;
 } solution;
 
+typedef struct {
+    PyObject_HEAD
+    SCIP_LPI *lpi;
+} lp;
+
 #define PY_SCIP_SETTINGS_TYPE(setting_type, setting_field, struct_name) \
 typedef struct { \
     PyObject_HEAD \
