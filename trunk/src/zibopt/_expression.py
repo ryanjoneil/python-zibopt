@@ -62,6 +62,10 @@ class expression(object):
         # x - 2
         return self + (-1) * other
 
+    def __rsub__(self, other):
+        # 1 - x is the same as -x + 1
+        return -1*self + other
+
     def __mul__(self, other):
         if isinstance(other, expression):
             # (x + y) * (x * y)
@@ -119,7 +123,6 @@ class expression(object):
         return NotImplemented
     
     __radd__ = __add__
-    __rsub__ = __sub__
     __rmul__ = __mul__        
     __truediv__ = __div__
     
