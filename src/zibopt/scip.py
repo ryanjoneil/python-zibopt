@@ -62,7 +62,6 @@ Translated to python-zibopt this becomes::
 
 # This provide more convenient namespacing
 from ._constraint import *
-from ._expression import *
 from ._settings import *
 from ._solution import *
 from ._solver import *

@@ -21,6 +21,8 @@ setup (
     url          = 'http://code.google.com/p/python-zibopt/',
     download_url = 'http://code.google.com/p/python-zibopt/downloads/list',
 
+    install_requires = ['python-algebraic'],
+
     package_dir = {'': 'src'},
     packages    = find_packages('src', exclude=['tests', 'tests.*']),
     zip_safe    = True,
