@@ -157,30 +157,34 @@ static int _seed_primal(solver *self, PyObject *solution) {
 
 static int _optimize(solver *self, PyObject *args, PyObject *kwds) {
     // Runs components of max/min that are the same
-    static char *argnames[] = {"solution", "time", "gap", "absgap", "nsol", NULL};
+    static char *argnames[] = {"solution", "time", "gap", "absgap", "nsol", "offset", NULL};
     PyObject *solution;
     double time   = SCIP_DEFAULT_LIMIT_TIME;
     double gap    = SCIP_DEFAULT_LIMIT_GAP;
     double absgap = SCIP_DEFAULT_LIMIT_GAP;
     int nsol      = SCIP_DEFAULT_LIMIT_SOLUTIONS;
+    double offset = 0;
     
     // See if we were given a primal solution dict
     solution = NULL;
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|O!dddi", argnames, &PyDict_Type, &solution, &time, &gap, &absgap, &nsol))
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|O!dddid", argnames, &PyDict_Type, &solution, &time, &gap, &absgap, &nsol, &offset))
         return 0;
 
     _seed_primal(self, solution);
     if (PyErr_Occurred())
         return 0;
 
-    // Set timeout & gap values
+    // Set timeout & gap values, etc
     SCIPclockReset(self->scip->stat->solvingtime);
     self->scip->set->limit_time   = time;
     self->scip->set->limit_gap    = gap;
     self->scip->set->limit_absgap = absgap;
     self->scip->set->limit_solutions = nsol;
+    self->scip->origprob->objoffset = offset;
     
+    // This calls the actual optimization routine
     PY_SCIP_CALL(error, 0, SCIPsolve(self->scip));
+    
     return 0;
 }
 

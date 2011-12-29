@@ -32,6 +32,9 @@ static int solution_init(solution *self, PyObject *args, PyObject *kwds) {
     // Extract objective value into Python float
     self->objective = SCIPgetSolOrigObj(self->scip, self->solution);
     
+    // Add offset if there is one
+    self->objective += self->scip->origprob->objoffset;
+    
     return 0;
 }
 
