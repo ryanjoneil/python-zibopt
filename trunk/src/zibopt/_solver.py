@@ -1,9 +1,9 @@
+from algebraic.expression import expression
 from zibopt import _scip
 from zibopt import (
     _branch, _conflict, _disp, _heur, _nodesel, _presol, _prop, _sepa
 )
 from zibopt._constraint import constraint
-from zibopt._expression import expression
 from zibopt._solution import solution
 from zibopt._variable import variable
 import sys

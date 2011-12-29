@@ -1,5 +1,5 @@
+from algebraic import expression
 from zibopt import _cons
-from zibopt._expression import expression
 from zibopt._variable import variable
 
 __all__ = 'constraint', 'ConstraintError'
