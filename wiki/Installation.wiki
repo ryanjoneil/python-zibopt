@@ -98,7 +98,7 @@ Type "help", "copyright", "credits" or "license" for more information.
 
 >>> import zibopt
 >>> zibopt.__version__
-'0.7'
+'0.7.1'
 >>> zibopt.scip.solver()
 <zibopt.scip.solver object at 0xb7d28cd4>
 >>> exit()
