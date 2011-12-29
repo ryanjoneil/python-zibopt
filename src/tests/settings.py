@@ -33,7 +33,7 @@ class SettingsTest(unittest.TestCase):
             for a in ('maxbounddist', 'maxdepth', 'priority'):
                 x = getattr(b, a)
                 setattr(b, a, x + 1)
-                self.assertEqual(x+1, getattr(b, a))
+                self.assertAlmostEqual(x+1, getattr(b, a))
 
     def testBranchingRuleInvalidSettings(self):
         '''Sets branching maxdepth, maxbounddist to values < -1'''
@@ -51,7 +51,7 @@ class SettingsTest(unittest.TestCase):
         for c in solver.conflict.values():
             x = c.priority
             c.priority = x + 1
-            self.assertEqual(x+1, c.priority)
+            self.assertAlmostEqual(x+1, c.priority)
 
     def testConflictHandlerInvalidSettings(self):
         '''Sets invalid conflict handler priority'''
@@ -66,7 +66,7 @@ class SettingsTest(unittest.TestCase):
             for a in ('freqofs', 'frequency', 'maxdepth', 'priority'):
                 x = getattr(h, a)
                 setattr(h, a, x + 1)
-                self.assertEqual(x+1, getattr(h, a))
+                self.assertAlmostEqual(x+1, getattr(h, a))
 
     def testHeuristicInvalidSettings(self):
         '''Sets invalid heuristic priority'''
@@ -85,7 +85,7 @@ class SettingsTest(unittest.TestCase):
         for p in solver.presolvers.values():
             x = p.priority
             p.priority = x + 1
-            self.assertEqual(x+1, p.priority)
+            self.assertAlmostEqual(x+1, p.priority)
 
     def testPresolverInvalidSettings(self):
         '''Sets invalid presolver priority'''
@@ -100,7 +100,7 @@ class SettingsTest(unittest.TestCase):
             for a in ('frequency', 'priority'):
                 x = getattr(p, a)
                 setattr(p, a, x + 1)
-                self.assertEqual(x+1, getattr(p, a))
+                self.assertAlmostEqual(x+1, getattr(p, a))
 
     def testPropagatorInvalidSettings(self):
         '''Sets invalid propagator priority & frequency'''
@@ -117,7 +117,7 @@ class SettingsTest(unittest.TestCase):
             for a in ('memsavepriority', 'stdpriority'):
                 x = getattr(n, a)
                 setattr(n, a, x + 1)
-                self.assertEqual(x+1, getattr(n, a))
+                self.assertAlmostEqual(x+1, getattr(n, a))
 
     def testNodeSelectorInvalidSettings(self):
         '''Sets invalid node selector priorities'''
@@ -133,7 +133,7 @@ class SettingsTest(unittest.TestCase):
             for a in ('frequency', 'maxbounddist', 'priority'):
                 x = getattr(s, a)
                 setattr(s, a, x + 1)
-                self.assertEqual(x+1, getattr(s, a))
+                self.assertAlmostEqual(x+1, getattr(s, a))
 
     def testSeparatorInvalidSettings(self):
         '''Sets invalid separator priority'''
@@ -152,7 +152,7 @@ class SettingsTest(unittest.TestCase):
             for a in ('position', 'priority', 'width'):
                 x = getattr(d, a)
                 setattr(d, a, x + 1)
-                self.assertEqual(x+1, getattr(d, a))
+                self.assertAlmostEqual(x+1, getattr(d, a))
 
     def testDisplayInvalidSettings(self):
         '''Sets invalid display priority, position, and width'''
