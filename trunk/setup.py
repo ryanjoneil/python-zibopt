@@ -9,10 +9,7 @@ def zibopt_ext(name, c_file):
     # C_INCLUDE_PATH and LIBRARY_PATH, respectively.
     return Extension('zibopt.%s' % name, 
         sources = ['src/ext/%s' % c_file], 
-        libraries = [
-            'lpispx', 'objscip', 'scip', 'soplex', 'nlpi.ipopt', 
-            'ipopt', 'dmumps'
-        ],
+        libraries = ['zibopt']
     )
 
 setup (
@@ -45,7 +42,7 @@ setup (
         zibopt_ext('_nodesel',  'nodeselectormodule.c'),
         zibopt_ext('_presol',   'presolvermodule.c'),
         zibopt_ext('_prop',     'propagatormodule.c'),
-        zibopt_ext('_sepa',     'separatormodule.c'),
+        zibopt_ext('_sepa',     'separatormodule.c')
     ],
 
     keywords    = 'mixed binary integer programming optimization zib zibopt',
@@ -53,7 +50,7 @@ setup (
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: GNU General Public License (GPL)',
         'Programming Language :: Python :: 3',
-        'Topic :: Scientific/Engineering :: Mathematics',
+        'Topic :: Scientific/Engineering :: Mathematics'
     ]    
 )
 

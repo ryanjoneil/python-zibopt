@@ -9,7 +9,7 @@ class VariableTest(unittest.TestCase):
         
         p = x.priority
         x.priority = p + 1
-        self.assertEqual(x.priority, p + 1)
+        self.assertAlmostEqual(x.priority, p + 1)
         
         solver.maximize()
         
@@ -17,7 +17,7 @@ class VariableTest(unittest.TestCase):
         '''Sets variable branching priority on constructor'''
         solver = scip.solver()
         x = solver.variable(priority=10)
-        self.assertEqual(x.priority, 10)
+        self.assertAlmostEqual(x.priority, 10)
 
     def testExpressionBounds(self):
         '''Tests that bounds are cleared by constraint construction'''
@@ -28,11 +28,11 @@ class VariableTest(unittest.TestCase):
         
         c2 = solver.constraint(3 <= x <= 4)
         solution = solver.maximize(objective=x)
-        self.assertEqual(solution.objective, 4)
+        self.assertAlmostEqual(solution.objective, 4)
 
         solver -= c2
         solution = solver.minimize(objective=x)
-        self.assertEqual(solution.objective, 2)
+        self.assertAlmostEqual(solution.objective, 2)
         
 if __name__ == '__main__':
     unittest.main()

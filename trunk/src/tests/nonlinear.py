@@ -10,11 +10,12 @@ class NonlinearConstraintTest(unittest.TestCase):
         x2 = solver.variable(upper=1)
 
         solver += 0 <= x1*x2 <= 1
+        solver += 0 == x1*x2
         solution = solver.maximize(objective=x1)
 
-        self.assertEqual(solution.objective, 1.0)
-        self.assertEqual(solution[x1], 1.0)
-        self.assertEqual(solution[x2], 0.0)
+        self.assertAlmostEqual(solution.objective, 1.0)
+        self.assertAlmostEqual(max(solution[x1], solution[x2]), 1.0)
+        self.assertAlmostEqual(min(solution[x1], solution[x2]), 0.0)
 
     def testBilinearIntegerConstraints(self):
         '''Tests nonlinear integer constraints'''
@@ -26,9 +27,9 @@ class NonlinearConstraintTest(unittest.TestCase):
         solver += 0 <= x1*x2 <= 3
         solution = solver.maximize(objective=5*x1+2*x2)
 
-        self.assertEqual(solution.objective, 12.0)
-        self.assertEqual(solution[x1], 2.0)
-        self.assertEqual(solution[x2], 1.0)
+        self.assertAlmostEqual(solution.objective, 12.0)
+        self.assertAlmostEqual(solution[x1], 2.0)
+        self.assertAlmostEqual(solution[x2], 1.0)
 
     def testNonlinearMaximize(self):
         '''Tests nonlinear objective maximization'''
@@ -36,8 +37,8 @@ class NonlinearConstraintTest(unittest.TestCase):
         x1 = solver.variable(scip.INTEGER)
         solver += 0 <= x1 <= 2
         solution = solver.maximize(objective=x1**2)
-        self.assertEqual(solution.objective, 4.0)
-        self.assertEqual(solution[x1], 2.0)
+        self.assertAlmostEqual(solution.objective, 4.0)
+        self.assertAlmostEqual(solution[x1], 2.0)
 
     def testNonlinearMinimize(self):
         '''Tests nonlinear objective maximization'''
@@ -45,8 +46,8 @@ class NonlinearConstraintTest(unittest.TestCase):
         x1 = solver.variable(scip.INTEGER)
         solver += 2 <= x1 <= 4
         solution = solver.minimize(objective=x1**2)
-        self.assertEqual(solution.objective, 4.0)
-        self.assertEqual(solution[x1], 2.0)
+        self.assertAlmostEqual(solution.objective, 4.0)
+        self.assertAlmostEqual(solution[x1], 2.0)
 
     def testDivisionByTerms(self):
         '''Tests that 1/expression raises an exception'''

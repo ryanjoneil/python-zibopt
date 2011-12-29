@@ -18,8 +18,8 @@ class ScipTest(unittest.TestCase):
         solution = solver.maximize(objective=x1+x2+2*x3)
 
         self.assertTrue(solution)
-        self.assertEqual(solution.objective, 3)
-        self.assertEqual(solution[x3], 0)
+        self.assertAlmostEqual(solution.objective, 3)
+        self.assertAlmostEqual(solution[x3], 0)
         
     def testAddVarConsError(self):
         '''Test that out-of-stage operations raise appropriate errors'''
@@ -64,12 +64,12 @@ class ScipTest(unittest.TestCase):
         solver = scip.solver()
         solver.variable(coefficient=1, vartype=scip.INTEGER, upper=2)
         solution = solver.maximize() 
-        self.assertEqual(solution.objective, 2)
+        self.assertAlmostEqual(solution.objective, 2)
 
         solver.restart()
         solver.variable(coefficient=1, vartype=scip.INTEGER, upper=2)
         solution = solver.maximize() 
-        self.assertEqual(solution.objective, 4)
+        self.assertAlmostEqual(solution.objective, 4)
         
     def testPrimal(self):
         '''Test feeding of primal solutions to the solver'''
@@ -81,7 +81,7 @@ class ScipTest(unittest.TestCase):
         
         # Pass known solution to the solver
         solution = solver.maximize(solution={v1:2, v2:1, v3:5.4})
-        self.assertEqual(solution.objective, 2)
+        self.assertAlmostEqual(solution.objective, 2)
     
     def testPrimalErrors(self):
         '''Test feeding of primal with invalid key/value types'''
