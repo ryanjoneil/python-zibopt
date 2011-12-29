@@ -2,6 +2,7 @@
 #labels Featured
 
 = 0.7.1 dev =
+  * Builds against ZIBopt 2.1.1
   * Issue 31: Fixed issue with __rsub__ so 1-(x+y) == -(x+y)+1
 
 = 0.7 dev =
