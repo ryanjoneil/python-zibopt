@@ -103,6 +103,27 @@ class ScipTest(unittest.TestCase):
         v1 = solver1.variable()
         self.assertRaises(scip.ConstraintError, solver2.constraint, v1 <= 1)
         self.assertRaises(scip.SolverError, solver2.maximize, objective=v1<=3)
+        
+    def testConstantInMax(self):
+        '''Test a constant in an maximization, like maximize(objective=x+4)'''
+        solver = scip.solver()
+        x = solver.variable()
+        solver += x <= 1
+        solution = solver.maximize(objective=x+4)
+        self.assertAlmostEqual(solution.objective, 5)
+        
+        solution = solver.maximize(objective=x-7)
+        self.assertAlmostEqual(solution.objective, -6)
+    
+    def testConstantInMin(self):
+        '''Test a constant in an minimization, like minimize(objective=x-4)'''
+        solver = scip.solver()
+        x = solver.variable(lower=-1)
+        solution = solver.minimize(objective=x+4)
+        self.assertAlmostEqual(solution.objective, 3)
+        
+        solution = solver.minimize(objective=x-5)
+        self.assertAlmostEqual(solution.objective, -6)
     
 if __name__ == '__main__':
     unittest.main()

@@ -148,7 +148,7 @@ class solver(_scip.solver):
 
         Parameters:
         
-            - expression: zibopt.expression instance
+            - expression: python-algebraic expression instance
         '''
         cons = constraint(self, expression)
         self.constrain(cons)
@@ -189,6 +189,10 @@ class solver(_scip.solver):
             - nsol=-1:     number of solutions to find before stopping
         '''
         if 'objective' in kwds:
+            try:
+                kwds['offset'] = kwds['objective'].terms[()]
+            except KeyError:
+                pass
             self._update_coefficients(kwds.pop('objective'), 'max')
         super(solver, self).maximize(*args, **kwds)
         return solution(self)
@@ -208,6 +212,10 @@ class solver(_scip.solver):
             - nsol=-1:     number of solutions to find before stopping
         '''
         if 'objective' in kwds:
+            try:
+                kwds['offset'] = kwds['objective'].terms[()]
+            except KeyError:
+                pass
             self._update_coefficients(kwds.pop('objective'), 'min')
         super(solver, self).minimize(*args, **kwds)
         return solution(self)

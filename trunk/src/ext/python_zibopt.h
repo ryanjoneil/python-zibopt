@@ -18,6 +18,7 @@
 #include <scip/misc.h>
 #include <scip/nodesel.h>
 #include <scip/presol.h>
+#include <scip/prob.h>
 #include <scip/prop.h>
 #include <scip/sepa.h>
 #include <scip/scip.h>

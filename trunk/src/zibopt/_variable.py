@@ -10,3 +10,4 @@ class variable(_vars.variable, algvar):
     def __init__(self, *args, **kwds):
         _vars.variable.__init__(self, *args, **kwds)
         algvar.__init__(self, *args, **kwds)
+
