@@ -125,6 +125,16 @@ class ScipTest(unittest.TestCase):
         solution = solver.minimize(objective=x-5)
         self.assertAlmostEqual(solution.objective, -6)
     
+    def testBoundedVariableObjective(self):
+        '''Bounds on a single variable should not matter for min/max'''
+        solver = scip.solver()
+        x = solver.variable()
+        y = solver.variable()
+        solver += y >= 3
+        solver += x >= y
+        solution = solver.minimize(objective=x)
+        self.assertAlmostEqual(solution.objective, 3)
+        
 if __name__ == '__main__':
     unittest.main()
 

@@ -56,8 +56,8 @@ if __name__ == '__main__':
     # big the M should be.  We can get around this using another variable
     # which has the maximum value and bilinear constraints.
     for i, x in enumerate(all_vars):
-        #if not isinstance(M, int):
-        #    solver += M >= x
+        if not isinstance(M, int):
+            solver += M >= x
 
         for y in all_vars[i+1:]:
             z = solver.variable(scip.BINARY)
@@ -66,7 +66,7 @@ if __name__ == '__main__':
             solver += x  >= y + 1 - M*z
             solver += x - M*(1-z) <= y - 1
 
-    solution = solver.minimize()#objective=max_val) # combine with isinstance check
+    solution = solver.minimize(objective=M) # combine with isinstance check
     if solution:
         print('sum = %d' % solution[sum_val])
         print('magic square:')
