@@ -2,13 +2,24 @@
 
 # This script solves the Magic Square problem using SCIP.
 # http://en.wikipedia.org/wiki/Magic_square
+#
+# This is a constraint satisfaction problem.  For a square matrix of size
+# n, we seek n*n integers such that the following constraints are satisfied:
+#
+# 1. All variables are integers >= 1
+# 2. All rows, all columns, and the diagonal sum to the same value
+# 3. All variables are different
+#
+# The first argument to the script is required.  This specifies the size
+# of the matrix.  The second, the maximum value of any variable, is optional,
+# but may speed up solution time significantly.
 
 from itertools import chain
 from zibopt import scip
 import sys
 
 if __name__ == '__main__':
-    solver = scip.solver(quiet=False)
+    solver = scip.solver()# quiet=False)
 
     try:
         # Matrix size is required and should be >= 2
@@ -51,22 +62,26 @@ if __name__ == '__main__':
     # Diagonal sum must be the same too
     solver += sum(matrix[i][i] for i in range(size)) == sum_val
     
-    # No two variables can have the same value.  In pure integer
-    # programming, this would require big-M, but we don't know how
-    # big the M should be.  We can get around this using another variable
-    # which has the maximum value and bilinear constraints.
+    # No two variables can have the same value.
     for i, x in enumerate(all_vars):
-        if not isinstance(M, int):
-            solver += M >= x
+        # If our objective is to minimize the M, then uncomment these,
+        # along with the objective function in solver.minimize(...): 
+        #if not isinstance(M, int):
+        #    solver += M >= x
 
         for y in all_vars[i+1:]:
+            # x and y must be different integers.  To enforce this, 
+            # we require a big-M (whether it is a variable or a constant)
+            # and an additional binary variable.  The binary variable
+            # turns on exactly one of the two constraints below, so either:
+            #     x >= y + 1
+            # or:
+            #     x <= y - 1
             z = solver.variable(scip.BINARY)
-#            solver += x >= (y+1) - (100*z)
-#            solver += x <= (y-1) + 100*(1-z)
-            solver += x  >= y + 1 - M*z
-            solver += x - M*(1-z) <= y - 1
+            solver += x >= y + 1 - M*z
+            solver += x <= y - 1 + M*(1-z)
 
-    solution = solver.minimize(objective=M) # combine with isinstance check
+    solution = solver.minimize()#objective=M) # combine with isinstance check
     if solution:
         print('sum = %d' % solution[sum_val])
         print('magic square:')
@@ -76,5 +91,4 @@ if __name__ == '__main__':
             print()
     else:
         print('invalid')
-    
-    
+
