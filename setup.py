@@ -14,7 +14,7 @@ def zibopt_ext(name, c_file):
 
 setup (
     name         = 'python-zibopt',
-    version      = '0.8',
+    version      = '0.7.2',
     description  = 'ZIB Optimization Suite interface for python',
     author       = "Ryan J. O'Neil",
     author_email = 'ryanjoneil@gmail.com',
