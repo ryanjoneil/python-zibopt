@@ -1,6 +1,19 @@
 #summary python-zibopt change log
 #labels Featured
 
+= 0.7.2 dev =
+  * Added magic square example
+  * Issue 33: Fixed issue with single-variable objectives subject to constraints:
+{{{
+solver += x >= y
+solution = solver.minimize(objective=x)
+}}}
+  * Issue 34: Constant objectives no longer raise errors
+  * Issue 32: Fixed obscure constraint issue
+{{{
+solver += x <= (y-1) + 100*(1-z)
+}}}
+
 = 0.7.1 dev =
   * Issue 25: Offsets work in objective functions:
 {{{
