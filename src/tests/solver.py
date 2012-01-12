@@ -105,7 +105,7 @@ class ScipTest(unittest.TestCase):
         self.assertRaises(scip.SolverError, solver2.maximize, objective=v1<=3)
         
     def testConstantInMax(self):
-        '''Test a constant in an maximization, like maximize(objective=x+4)'''
+        '''Test a constant in maximization, like maximize(objective=x+4)'''
         solver = scip.solver()
         x = solver.variable()
         solver += x <= 1
@@ -116,7 +116,7 @@ class ScipTest(unittest.TestCase):
         self.assertAlmostEqual(solution.objective, -6)
     
     def testConstantInMin(self):
-        '''Test a constant in an minimization, like minimize(objective=x-4)'''
+        '''Test a constant in minimization, like minimize(objective=x-4)'''
         solver = scip.solver()
         x = solver.variable(lower=-1)
         solution = solver.minimize(objective=x+4)
@@ -125,6 +125,11 @@ class ScipTest(unittest.TestCase):
         solution = solver.minimize(objective=x-5)
         self.assertAlmostEqual(solution.objective, -6)
     
+    def testConstantObjective(self):
+        '''Constant objectives shouldn't raise errors, at least'''
+        scip.solver().maximize(objective=3)
+        scip.solver().minimize(objective=3)
+        
     def testBoundedVariableObjective(self):
         '''Bounds on a single variable should not matter for min/max'''
         solver = scip.solver()
