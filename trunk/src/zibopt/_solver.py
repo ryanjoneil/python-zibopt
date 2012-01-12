@@ -190,7 +190,8 @@ class solver(_scip.solver):
         '''
         if 'objective' in kwds:
             try:
-                kwds['offset'] = kwds['objective'].terms[()]
+                if isinstance(kwds['objective'], expression):
+                    kwds['offset'] = kwds['objective'].terms[()]
             except KeyError:
                 pass
             self._update_coefficients(kwds.pop('objective'), 'max')
@@ -213,7 +214,8 @@ class solver(_scip.solver):
         '''
         if 'objective' in kwds:
             try:
-                kwds['offset'] = kwds['objective'].terms[()]
+                if isinstance(kwds['objective'], expression):
+                    kwds['offset'] = kwds['objective'].terms[()]
             except KeyError:
                 pass
             self._update_coefficients(kwds.pop('objective'), 'min')
