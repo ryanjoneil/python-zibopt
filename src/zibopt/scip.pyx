@@ -1,17 +1,34 @@
-from error import PY_SCIP_CALL
-cimport error as cerror
+from error import PY_SCIP_CALL, quiet_solver
 cimport scip as cscip
 
-def test():
-    cdef cerror.SCIP_MESSAGEHDLR *message_hdlr 
+cdef class solver:
     cdef cscip.SCIP *scip
     
-    message_hdlr = cerror.SCIPmessageGetHandler()
-    message_hdlr.messageerror = <void *> cerror.PY_SCIP_CAPTURE_ERROR
-        
-    # This should work
-    PY_SCIP_CALL(cscip.SCIPcreate(&scip))
+    # Public attributes
+    cdef public set variables
+    cdef public set constraints
+    
+    def __init__(self, quiet=True):
+        '''
+        TODO: docs
+        '''
+        if quiet:
+            quiet_solver()
 
-    # And this should raise an exception
-    PY_SCIP_CALL(cscip.SCIPsolve(scip))
+        # Create and prepare solver
+        PY_SCIP_CALL(cscip.SCIPcreate(&(self.scip)))
+        PY_SCIP_CALL(cscip.SCIPincludeDefaultPlugins(self.scip))
+        PY_SCIP_CALL(SCIPcreateProb(self.scip, "python-zibobt", NULL, NULL, NULL, NULL, NULL, NULL, NULL))
+
+        # TODO: (?) Keep SCIP from catching keyboard interrupts.  These go to python.
+        #self->scip->set->misc_catchctrlc = FALSE
+
+        # Initialize variable and constraint sets
+        self.variables = set()
+        self.constraints = set()
+
+    def solve(self):
+        PY_SCIP_CALL(cscip.SCIPsolve(self.scip))
+        
+    # TODO: deallocation of solver, variables, etc?
 
