@@ -24,6 +24,7 @@ setup (
 
     cmdclass = {'build_ext': build_ext},
     ext_modules = [
+        zibopt_ext('error'),
         zibopt_ext('scip'),
     ],  
 
