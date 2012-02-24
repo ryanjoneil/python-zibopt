@@ -1,3 +1,4 @@
+from algebraic.variable import variable as alg_var
 from error import PY_SCIP_CALL, quiet_solver
 from variable import variable
 cimport scip as cscip
@@ -9,12 +10,6 @@ IMPLINT    = cscip.SCIP_VARTYPE_IMPLINT
 INTEGER    = cscip.SCIP_VARTYPE_INTEGER
 
 cdef class solver:
-    cdef cscip.SCIP *scip
-    
-    # Public attributes
-    cdef public set variables
-    cdef public set constraints
-    
     # TODO: deallocation of solver, variables, etc?
     
     def __init__(self, quiet=True):
@@ -41,7 +36,7 @@ cdef class solver:
     def solve(self):
         PY_SCIP_CALL(cscip.SCIPsolve(self.scip))
 
-    def variable(self, vartype=CONTINUOUS, coefficient=0, lower=0, **kwds):
+    def variable(self, vartype=CONTINUOUS, coefficient=0, lower=0, upper=1, prority=0): # TODO: upper = inf
         '''
         Adds a variable to the SCIP solver and returns it.  Parameters:
 
@@ -51,7 +46,7 @@ cdef class solver:
             - upper=+inf:         upper bound on variable
             - priority=0:         branching priority for variable
         '''
-        v = variable(self, vartype, coefficient, lower, **kwds)
+        v = variable(self)#, vartype, coefficient, lower, **kwds)
         self.variables.add(v)
         return v
 
