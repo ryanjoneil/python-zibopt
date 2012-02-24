@@ -4,6 +4,15 @@ cdef extern from "scip/scip.h":
     ctypedef struct SCIP:
         pass
 
+    # Variable types allowed in SCIP
+    enum SCIP_VARTYPE:
+        pass
+
+    SCIP_VARTYPE SCIP_VARTYPE_BINARY
+    SCIP_VARTYPE SCIP_VARTYPE_CONTINUOUS
+    SCIP_VARTYPE SCIP_VARTYPE_IMPLINT
+    SCIP_VARTYPE SCIP_VARTYPE_INTEGER
+
     # I don't want to have to create Cython structs for everything we don't 
     # use, thus all the (void *).  It's tacky, I know.  As we use these,
     # they will get pulled over into the Cython side.
