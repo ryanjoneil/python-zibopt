@@ -6,7 +6,10 @@ class SCIPException(Exception):
 
 SCIP_ERROR_STR = ''
 
-cdef void PY_SCIP_CAPTURE_ERROR(SCIP_MESSAGEHDLR *messagehdlr, FILE *file, char *msg):
+cdef void PY_SCIP_CAPTURE_ERROR(
+        SCIP_MESSAGEHDLR *messagehdlr, 
+        FILE *file, 
+        char *msg):
     global SCIP_ERROR_STR
     SCIP_ERROR_STR += msg
 
@@ -23,12 +26,16 @@ cdef error.SCIP_MESSAGEHDLR *message_hdlr
 message_hdlr = error.SCIPmessageGetHandler()
 message_hdlr.messageerror = <void *> PY_SCIP_CAPTURE_ERROR
 
-cdef void PY_SCIP_IGNORE_MESSAGE(SCIP_MESSAGEHDLR *messagehdlr, FILE *file, char *msg):
+cdef void PY_SCIP_IGNORE_MESSAGE(
+        SCIP_MESSAGEHDLR *messagehdlr, 
+        FILE *file, 
+        char *msg):
     pass
 
 def quiet_solver():
     # TODO: there is a bug here -- if we quiet the solver, then we can't 
-    #       turn it back on later.  Add a text case and fix.
+    #       turn it back on later in another instance.  Add a test case 
+    #       and fix.
     message_hdlr.messagewarning = <void *> PY_SCIP_IGNORE_MESSAGE
     message_hdlr.messagedialog = <void *> PY_SCIP_IGNORE_MESSAGE
     message_hdlr.messageinfo = <void *> PY_SCIP_IGNORE_MESSAGE
