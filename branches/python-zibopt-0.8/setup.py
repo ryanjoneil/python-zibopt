@@ -26,7 +26,7 @@ setup (
     ext_modules = [
         zibopt_ext('error'),
         zibopt_ext('scip'),
-        #zibopt_ext('vars'),
+        zibopt_ext('variable'),
     ],  
 
     keywords    = 'mixed binary integer programming optimization zib zibopt',

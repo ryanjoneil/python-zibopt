@@ -1,4 +1,5 @@
 from error import PY_SCIP_CALL, quiet_solver
+from variable import variable
 cimport scip as cscip
 
 # Variable types
@@ -40,7 +41,17 @@ cdef class solver:
     def solve(self):
         PY_SCIP_CALL(cscip.SCIPsolve(self.scip))
 
-    def variable(self, foo):
-        # TODO: something!
-        pass
+    def variable(self, vartype=CONTINUOUS, coefficient=0, lower=0, **kwds):
+        '''
+        Adds a variable to the SCIP solver and returns it.  Parameters:
+
+            - vartype=CONTINUOUS: type of variable
+            - coefficient=0:      objective function coefficient
+            - lower=0:            lower bound on variable
+            - upper=+inf:         upper bound on variable
+            - priority=0:         branching priority for variable
+        '''
+        v = variable(self, vartype, coefficient, lower, **kwds)
+        self.variables.add(v)
+        return v
 
