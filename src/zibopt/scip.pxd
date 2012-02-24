@@ -26,3 +26,10 @@ cdef extern from "scip/scip.h":
 cdef extern from "scip/scipdefplugins.h":
     SCIP_RETCODE SCIPincludeDefaultPlugins(SCIP *scip)
 
+cdef class solver:
+    cdef SCIP *scip
+    
+    # Public attributes
+    cdef public set variables
+    cdef public set constraints
+
