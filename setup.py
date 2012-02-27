@@ -1,6 +1,5 @@
 from Cython.Distutils import build_ext
-from distutils.core import setup
-from distutils.extension import Extension
+from setuptools import setup, find_packages, Extension
 
 def zibopt_ext(name):
     # ZIBopt headers and shared objects will must be in the user's
@@ -20,7 +19,8 @@ setup (
     download_url = 'http://code.google.com/p/python-zibopt/downloads/list',
 
     package_dir = {'': 'src'},
-    packages = ['zibopt'],
+    packages    = find_packages('src', exclude=['tests', 'tests.*']),
+    test_suite  = 'tests',
 
     cmdclass = {'build_ext': build_ext},
     ext_modules = [
