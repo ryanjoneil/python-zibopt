@@ -5,8 +5,7 @@ cdef extern from "scip/scip.h":
         pass
 
     # Variable types allowed in SCIP
-    enum SCIP_VARTYPE:
-        pass
+    ctypedef int SCIP_VARTYPE
 
     SCIP_VARTYPE SCIP_VARTYPE_BINARY
     SCIP_VARTYPE SCIP_VARTYPE_CONTINUOUS

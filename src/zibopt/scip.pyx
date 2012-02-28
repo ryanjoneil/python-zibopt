@@ -1,4 +1,3 @@
-from algebraic.variable import variable as alg_var
 from error import PY_SCIP_CALL, quiet_solver
 from variable import variable
 cimport scip as cscip
@@ -46,7 +45,8 @@ cdef class solver:
             - upper=+inf:         upper bound on variable
             - priority=0:         branching priority for variable
         '''
-        v = variable(self)#, vartype, coefficient, lower, **kwds)
+        # TODO: parameterize vartype
+        v = variable(self, vartype)#, vartype, coefficient, lower, **kwds)
         self.variables.add(v)
         return v
 
