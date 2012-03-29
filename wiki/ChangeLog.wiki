@@ -2,6 +2,7 @@
 #labels Featured
 
 = 0.7.2 dev =
+  * Added backwards compatibility for Python 2 (thanks to [http://www.zib.de/sagnol/ Guillaume Sagnol] for the patch!).
   * Added magic square example
   * Issue 33: Fixed issue with single-variable objectives subject to constraints:
 {{{
