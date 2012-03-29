@@ -120,6 +120,7 @@ static PyTypeObject branching_rule_type = {
     0 ,                            /* tp_new */
 };
 
+#if PY_MAJOR_VERSION >= 3
 static PyModuleDef branch_module = {
     PyModuleDef_HEAD_INIT,
     "_branch",
@@ -127,6 +128,7 @@ static PyModuleDef branch_module = {
     -1,
     NULL, NULL, NULL, NULL, NULL
 };
+#endif
 
 #ifndef PyMODINIT_FUNC    /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
@@ -136,9 +138,17 @@ PyMODINIT_FUNC PyInit__branch(void) {
 
     branching_rule_type.tp_new = PyType_GenericNew;
     if (PyType_Ready(& branching_rule_type) < 0)
+#if PY_MAJOR_VERSION >= 3
         return NULL;
+#else
+        return;
+#endif
 
+#if PY_MAJOR_VERSION >= 3
     m = PyModule_Create(&branch_module); 
+#else
+    m = Py_InitModule3("_branch", NULL, "SCIP Branching Rule");
+#endif
 
     Py_INCREF(& branching_rule_type);
     PyModule_AddObject(m, "branching_rule", (PyObject *) &branching_rule_type);
@@ -148,6 +158,8 @@ PyMODINIT_FUNC PyInit__branch(void) {
     Py_INCREF(error);
     PyModule_AddObject(m, "error", error);   
 
+#if PY_MAJOR_VERSION >= 3
     return m;
+#endif
 }
 

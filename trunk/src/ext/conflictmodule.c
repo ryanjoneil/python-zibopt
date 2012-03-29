@@ -111,6 +111,7 @@ static PyTypeObject conflict_type = {
     0 ,                            /* tp_new */
 };
 
+#if PY_MAJOR_VERSION >= 3
 static PyModuleDef conflict_module = {
     PyModuleDef_HEAD_INIT,
     "_conflict",
@@ -118,6 +119,7 @@ static PyModuleDef conflict_module = {
     -1,
     NULL, NULL, NULL, NULL, NULL
 };
+#endif
 
 #ifndef PyMODINIT_FUNC    /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
@@ -127,9 +129,17 @@ PyMODINIT_FUNC PyInit__conflict(void) {
 
     conflict_type.tp_new = PyType_GenericNew;
     if (PyType_Ready(& conflict_type) < 0)
+#if PY_MAJOR_VERSION >= 3
         return NULL;
+#else
+        return;
+#endif
 
+#if PY_MAJOR_VERSION >= 3
     m = PyModule_Create(&conflict_module); 
+#else
+    m = Py_InitModule3("_conflict", NULL, "SCIP Conflict Handler");
+#endif
 
     Py_INCREF(& conflict_type);
     PyModule_AddObject(m, "conflict", (PyObject *) &conflict_type);
@@ -139,6 +149,8 @@ PyMODINIT_FUNC PyInit__conflict(void) {
     Py_INCREF(error);
     PyModule_AddObject(m, "error", error);   
 
+#if PY_MAJOR_VERSION >= 3
     return m;
+#endif
 }
 

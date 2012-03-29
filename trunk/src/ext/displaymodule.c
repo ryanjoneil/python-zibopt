@@ -119,6 +119,7 @@ static PyTypeObject display_column_type = {
     0 ,                            /* tp_new */
 };
 
+#if PY_MAJOR_VERSION >= 3
 static PyModuleDef disp_module = {
     PyModuleDef_HEAD_INIT,
     "_disp",
@@ -126,6 +127,7 @@ static PyModuleDef disp_module = {
     -1,
     NULL, NULL, NULL, NULL, NULL
 };
+#endif
 
 #ifndef PyMODINIT_FUNC    /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
@@ -135,9 +137,17 @@ PyMODINIT_FUNC PyInit__disp(void) {
 
     display_column_type.tp_new = PyType_GenericNew;
     if (PyType_Ready(&display_column_type) < 0)
+#if PY_MAJOR_VERSION >= 3
         return NULL;
+#else
+        return;
+#endif
 
+#if PY_MAJOR_VERSION >= 3
     m = PyModule_Create(&disp_module); 
+#else
+    m = Py_InitModule3("_disp", NULL, "SCIP Display Column");
+#endif
 
     Py_INCREF(&display_column_type);
     PyModule_AddObject(m, "display_column", (PyObject *) &display_column_type);
@@ -147,6 +157,8 @@ PyMODINIT_FUNC PyInit__disp(void) {
     Py_INCREF(error);
     PyModule_AddObject(m, "error", error);   
 
+#if PY_MAJOR_VERSION >= 3
     return m;
+#endif
 }
 

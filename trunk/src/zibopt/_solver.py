@@ -112,7 +112,7 @@ class solver(_scip.solver):
             try:
                 v.set_coefficient(expr[(v,)])
             except:
-                v.set_coefficient(0)
+                v.set_coefficient(0.0)
 
     def variable(self, vartype=CONTINUOUS, coefficient=0, lower=0, **kwds):
         '''
