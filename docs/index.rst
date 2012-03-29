@@ -38,8 +38,3 @@ zibopt.scip.constraint
 .. autoclass:: zibopt.scip.constraint
     :members:
 
-zibopt.scip.expression
-----------------------
-.. autoclass:: zibopt.scip.expression
-    :members:
-
