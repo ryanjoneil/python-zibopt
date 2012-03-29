@@ -3,6 +3,8 @@
 
 = Building & Installing python-zibopt =
 
+_The following instructions assume you are building against Python 3.2.  To build against Python 2.7, simply leave off the 3s from all the packages and commands._
+
 == Prerequisites ==
 
 This documentation was written with Ubuntu in mind, so you may need to translate the commands to your platform, but the procedure should be the same.  Before we can build python-zibopt, we need shared object libraries for !SoPlex and SCIP as well as setuptools for Python 3.2:
