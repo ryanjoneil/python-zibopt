@@ -31,6 +31,13 @@ class solution(_soln.solution):
 
     def __bool__(self):
         return not (self.infeasible or self.unbounded or self.inforunbd)
+
+    # This enables backwards-compatibility to py2.  This seems silly,
+    # and folks in #python said it was the wrong thing to do, but they
+    # also said the right thing to do was rewrite the whole thing in
+    # Cython.  Which seems like using a shotgun to kill an ant.  Plus
+    # I'm already rewriting the whole thing in Cython...
+    __nonzero__ = __bool__
     
     def __getitem__(self, key):
         return self.value(key)

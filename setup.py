@@ -1,14 +1,11 @@
 from setuptools import setup, find_packages, Extension
 import sys
 
-# Require at least Python 3.2
-assert sys.version_info >= (3, 2)
-
 def zibopt_ext(name, c_file):
     # ZIBOpt headers and shared objects will must be in the user's
     # C_INCLUDE_PATH and LIBRARY_PATH, respectively.
     return Extension('zibopt.%s' % name, 
-        sources = ['src/ext/%s' % c_file], 
+        sources = ['src/ext/%s' % c_file],
         libraries = ['zibopt']
     )
 
@@ -51,7 +48,6 @@ setup (
     classifiers = [
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: GNU General Public License (GPL)',
-        'Programming Language :: Python :: 3',
         'Topic :: Scientific/Engineering :: Mathematics'
     ]    
 )

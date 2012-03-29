@@ -2,6 +2,7 @@
 #define PYTHON_ZIBOPT_H
 
 #include <Python.h>
+#include <ctype.h>
 #include <stdbool.h>
 #include <string.h>
 #include <structmember.h>
@@ -37,6 +38,29 @@
 #include <scip/struct_sepa.h>
 #include <scip/struct_stat.h>
 
+// This is what enables us to support both Python 2 and
+// Python 3.  It's sort of ugly.
+#if PY_MAJOR_VERSION < 3
+#define PyLong_Check(A) PyInt_Check(A)
+#define PyUnicode_Check(A) PyString_Check(A)
+#define PyUnicode_CompareWithASCIIString(A, B) strcmp(PyString_AS_STRING(A), B)
+
+#define PyInit__branch init_branch
+#define PyInit__conflict init_conflict
+#define PyInit__cons init_cons
+#define PyInit__disp init_disp
+#define PyInit__heur init_heur
+#define PyInit__lp init_lp
+#define PyInit__nodesel init_nodesel
+#define PyInit__presol init_presol
+#define PyInit__prop init_prop
+#define PyInit__soln init_soln
+#define PyInit__scip init_scip
+#define PyInit__sepa init_sepa
+#define PyInit__vars init_vars
+#endif
+
+// Note that the above macros must apply to the following:
 #include "python_zibopt_util.h"
 
 #define CONSTRAINT_TYPE_NAME "constraint"

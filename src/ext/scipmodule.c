@@ -298,6 +298,7 @@ static PyTypeObject solver_type = {
     solver_new,                  /* tp_new */
 };
 
+#if PY_MAJOR_VERSION >= 3
 static PyModuleDef scip_module = {
     PyModuleDef_HEAD_INIT,
     "_scip",
@@ -305,6 +306,7 @@ static PyModuleDef scip_module = {
     -1,
     NULL, NULL, NULL, NULL, NULL
 };
+#endif
 
 #ifndef PyMODINIT_FUNC    /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
@@ -313,9 +315,17 @@ PyMODINIT_FUNC PyInit__scip(void) {
     PyObject* m;
 
     if (PyType_Ready(&solver_type) < 0)
+#if PY_MAJOR_VERSION >= 3
         return NULL;
+#else
+        return;
+#endif
 
+#if PY_MAJOR_VERSION >= 3
     m = PyModule_Create(&scip_module); 
+#else
+    m = Py_InitModule3("_scip", NULL, "SCIP Solver");
+#endif
 
     // Constants on scip module
     PyModule_AddIntConstant(m, "BINARY", SCIP_VARTYPE_BINARY);
@@ -331,6 +341,8 @@ PyMODINIT_FUNC PyInit__scip(void) {
     Py_INCREF(error);
     PyModule_AddObject(m, "error", error);
 
+#if PY_MAJOR_VERSION >= 3
     return m;
+#endif
 }
 

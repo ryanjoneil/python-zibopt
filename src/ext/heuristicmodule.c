@@ -122,6 +122,7 @@ static PyTypeObject heuristic_type = {
     0 ,                            /* tp_new */
 };
 
+#if PY_MAJOR_VERSION >= 3
 static PyModuleDef heur_module = {
     PyModuleDef_HEAD_INIT,
     "_heur",
@@ -129,6 +130,7 @@ static PyModuleDef heur_module = {
     -1,
     NULL, NULL, NULL, NULL, NULL
 };
+#endif
 
 #ifndef PyMODINIT_FUNC    /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
@@ -138,9 +140,17 @@ PyMODINIT_FUNC PyInit__heur(void) {
 
     heuristic_type.tp_new = PyType_GenericNew;
     if (PyType_Ready(& heuristic_type) < 0)
+#if PY_MAJOR_VERSION >= 3
         return NULL;
+#else
+        return;
+#endif
 
+#if PY_MAJOR_VERSION >= 3
     m = PyModule_Create(&heur_module); 
+#else
+    m = Py_InitModule3("_heur", NULL, "SCIP Heuristic");
+#endif
 
     Py_INCREF(& heuristic_type);
     PyModule_AddObject(m, "heuristic", (PyObject *) &heuristic_type);
@@ -150,6 +160,8 @@ PyMODINIT_FUNC PyInit__heur(void) {
     Py_INCREF(error);
     PyModule_AddObject(m, "error", error);   
 
+#if PY_MAJOR_VERSION >= 3
     return m;
+#endif
 }
 
