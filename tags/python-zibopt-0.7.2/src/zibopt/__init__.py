@@ -2,7 +2,7 @@
 python-zibopt
 =============
 :Author: Ryan J. O'Neil <ryanjoneil@gmail.com>
-:Version: 0.7.3-dev
+:Version: 0.7.2-dev
 :Website: http://code.google.com/p/python-zibopt/
 
 Python Interface to the ZIB Optimization Suite
@@ -18,6 +18,6 @@ http://zibopt.zib.de/ for more information about this license.
 
 from zibopt import scip
 
-__version__ = '0.7.3'
+__version__ = '0.7.2'
 __all__ = 'scip',
 
