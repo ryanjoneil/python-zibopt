@@ -51,9 +51,9 @@ A: solver.minimize() and solver.maximize() both take in an optional solution dic
 
 ==== Q: How do I see what SCIP is doing? ====
 
-A: solver.minimize() and solver.maximize() also take an optional quiet argument, which defaults to true.  If you pass quiet=False to minimize or maximize, then you'll see the normal SCIP chatter:
+A: solver.minimize() and solver.maximize() also take an optional quiet argument, which defaults to true.  If you pass quiet=False to the solver constructor, then you'll see the normal SCIP chatter:
 {{{
-solver.maximize(quiet=False)
+solver = scip.solver(quiet=False)
 }}}
 
 ==== Q: There seem to be multiple ways to add constraints and objectives.  What should I use? ====
