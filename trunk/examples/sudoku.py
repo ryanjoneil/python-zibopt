@@ -46,7 +46,7 @@ if __name__ == '__main__':
         solver += sum(x[i][j][k] for j in cols) == 1
 
     # Each value occurs in each column once
-    for i, k in product(rows, vals):
+    for j, k in product(cols, vals):
         solver += sum(x[i][j][k] for i in rows) == 1
 
     # Each 3x3 group has all unique values    
