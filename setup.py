@@ -25,7 +25,6 @@ setup (
     cmdclass = {'build_ext': build_ext},
     ext_modules = [
         zibopt_ext('error'),
-        zibopt_ext('expression'),
         zibopt_ext('scip'),
         zibopt_ext('variable')
     ],  
