@@ -1,5 +1,5 @@
 from error import PY_SCIP_CALL, quiet_solver
-from variable import variable
+from variable import variable as zvariable
 cimport scip as cscip
 
 # Variable types
@@ -46,7 +46,7 @@ cdef class solver:
             - priority=0:         branching priority for variable
         '''
         # TODO: parameterize vartype
-        v = variable(self, vartype)#, vartype, coefficient, lower, **kwds)
+        v = zvariable(solver=self, vartype=vartype)#, vartype, coefficient, lower, **kwds)
         self.variables.add(v)
         return v
 
