@@ -41,6 +41,10 @@ cdef class expression:
         return self.terms[key]
 
     def __add__(self, other):
+        # No reverse operators, so we test to make sure self is an expression.
+        if not isinstance(self, expression):
+            self, other = other, self
+
         if isinstance(other, expression):
             # x + y
             terms = self.terms.copy()
@@ -67,6 +71,10 @@ cdef class expression:
         return -1*self + other
 
     def __mul__(self, other):
+        # No reverse operators, so we test to make sure self is an expression.
+        if not isinstance(self, expression):
+            self, other = other, self
+
         if isinstance(other, expression):
             # (x + y) * (x * y)
             # (x + y) * (v - w)
@@ -122,11 +130,10 @@ cdef class expression:
 
         return NotImplemented
 
-    # TODO: sort through these and make sure they are all necessary...
-    __radd__ = __add__
-    __rmul__ = __mul__
     __truediv__ = __div__
 
+    # TODO: tests for this. There are no reverse operators in cython,
+    #       so we have to raise error in these cases.
     # __rdiv__ & __rtruediv__ would allow expressions like 1/x
     # Thus they are specifically NOT implemented here.
 
@@ -231,6 +238,9 @@ cdef class variable(expression):
         self.scip    = solver.scip
         self.vartype = vartype
 
+        # Add self to the terms of the base expression
+        self.terms[(self,)] = 1.0
+
     def __hash__(self):
         return hash(id(self))
 
@@ -243,13 +253,22 @@ cdef class variable(expression):
 
         return NotImplementedError
 
-    # These exist for sorting variables and have nothing to do with <=, etc.
-    # Order doesn't matter so long as it's consistent, so we use id(...).
     def __richcmp__(self, other, op):
-        # TODO: error on just < or > ?
-        if op == 1: # <=
-            return id(self) < id(other)
+        # Couldn't get inheritance working here. Would rather just default
+        # to the __richcmp__ implementation on expression, but variable
+        # can't see it and I can't figure out how to expose it.
+        if op == 0:   # <
+            return expression.__lt__(self, other)
+        elif op == 1: # <= 
+            return expression.__le__(self, other)
+        elif op == 2: # == 
+            return expression.__eq__(self, other)
+        elif op == 3: # != 
+            return expression.__ne__(self, other)
+        elif op == 4: # > 
+            return expression.__gt__(self, other)
+        elif op == 5: # >= 
+            return expression.__ge__(self, other)
 
-        elif op == 5: # >=
-            return id(self) > id(other)
+        return NotImplementedError
 

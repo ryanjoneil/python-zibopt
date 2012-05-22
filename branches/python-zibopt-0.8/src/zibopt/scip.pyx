@@ -46,7 +46,7 @@ cdef class solver:
             - priority=0:         branching priority for variable
         '''
         # TODO: parameterize vartype
-        v = zvariable(solver=self, vartype=vartype)#, vartype, coefficient, lower, **kwds)
+        v = zvariable(self, vartype)#, vartype, coefficient, lower, **kwds)
         self.variables.add(v)
         return v
 
