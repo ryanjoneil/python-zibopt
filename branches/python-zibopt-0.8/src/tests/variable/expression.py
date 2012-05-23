@@ -1,12 +1,13 @@
-from algebraic import variable
+from zibopt import scip
 import unittest
 
 class ExpressionTest(unittest.TestCase):
     def setUp(self):
-        self.x1 = variable()
-        self.x2 = variable()
-        self.x3 = variable()
-        self.x4 = variable()
+        solver = scip.solver()
+        self.x1 = solver.variable()
+        self.x2 = solver.variable()
+        self.x3 = solver.variable()
+        self.x4 = solver.variable()
 
         self.tup_x1   = tuple(sorted([self.x1]))
         self.tup_x2   = tuple(sorted([self.x2]))
