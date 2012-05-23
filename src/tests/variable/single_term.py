@@ -1,10 +1,11 @@
-from algebraic import variable
+from zibopt import scip
 import unittest
 
 class SingleTermTest(unittest.TestCase):
     def setUp(self):
-        self.x1 = variable()
-        self.x2 = variable()
+        solver = scip.solver()
+        self.x1 = solver.variable()
+        self.x2 = solver.variable()
 
         self.tup_x1 = (self.x1,)
         self.tup_x12 = tuple(sorted([self.x1, self.x2]))

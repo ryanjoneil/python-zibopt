@@ -225,9 +225,7 @@ cdef class expression:
                     upper._clear_bounds()
 
 cdef class variable(expression):
-    '''Provides a hashable and orderable Python decision variable.'''
-    #def __init__(self, *args, **kwds):
-    #    cexpression.expression.__init__(self, {(self,):1.0})
+    '''Provides a hashable Python decision variable.'''
     def __init__(
         self, 
         cscip.solver solver not None,
@@ -247,9 +245,9 @@ cdef class variable(expression):
     def __pow__(self, x, z): # TODO: what's z for?
         if isinstance(x, int) and x >= 0:
             if x == 0:
-                return expression.expression({():1.0})
+                return expression({():1.0})
             else:
-                return expression.expression({(self,)*x:1.0})
+                return expression({(self,)*x:1.0})
 
         return NotImplementedError
 

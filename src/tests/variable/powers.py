@@ -1,9 +1,10 @@
-from algebraic import variable
+from zibopt import scip
 import unittest
 
 class PowersTest(unittest.TestCase):
     def setUp(self):
-        self.x1 = variable()
+        solver = scip.solver()
+        self.x1 = solver.variable()
         self.tup_x1 = (self.x1,)
         self.tup_x11 = (self.x1, self.x1)
 
