@@ -35,7 +35,14 @@ cdef class solver:
     def solve(self):
         PY_SCIP_CALL(cscip.SCIPsolve(self.scip))
 
-    def variable(self, vartype=CONTINUOUS, coefficient=0, lower=0, upper=1, prority=0): # TODO: upper = inf
+    def variable(
+        self, 
+        vartype     = CONTINUOUS, 
+        coefficient = 0, 
+        lower       = 0, 
+        upper       = None, 
+        priority    = 0
+    ):
         '''
         Adds a variable to the SCIP solver and returns it.  Parameters:
 
@@ -45,8 +52,8 @@ cdef class solver:
             - upper=+inf:         upper bound on variable
             - priority=0:         branching priority for variable
         '''
-        # TODO: parameterize vartype
-        v = zvariable(self, vartype)#, vartype, coefficient, lower, **kwds)
+        if upper is None:
+            upper = cscip.SCIPinfinity(self.scip)
+        v = zvariable(self, vartype, coefficient, lower, upper, priority)
         self.variables.add(v)
         return v
-

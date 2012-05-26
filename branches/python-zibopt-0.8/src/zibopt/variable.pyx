@@ -230,21 +230,32 @@ cdef class variable(expression):
     def __init__(
         self, 
         cscip.solver solver not None,
-        cscip.SCIP_VARTYPE vartype
+        cscip.SCIP_VARTYPE vartype,
+        cscip.SCIP_Real coefficient,
+        cscip.SCIP_Real lower,
+        cscip.SCIP_Real upper, 
+        int priority
     ):
         expression.__init__(self)
         self.scip    = solver.scip
         self.vartype = vartype
+        self.lower   = lower
+        self.upper   = upper
 
         # Add self to the terms of the base expression
         self.terms[(self,)] = 1.0
 
-        # Initialize variable into SCIP solver
-        print(vartype)
+        # Create the variable
         PY_SCIP_CALL(cscip.SCIPcreateVar(self.scip, &(self.var), NULL, 
-            0, 1, 1, vartype, 1, 0, NULL, NULL, NULL, NULL, NULL))
-            #lhs, rhs, c, t, TRUE, FALSE, NULL, NULL, NULL, NULL, NULL)
-        print('variable created!')
+            lower, upper, coefficient, vartype, cscip.TRUE, cscip.FALSE,
+            NULL, NULL, NULL, NULL, NULL))
+
+        # Inform the solver the variable exists
+        PY_SCIP_CALL(cscip.SCIPaddVar(self.scip, self.var))
+
+        if priority != 0:
+            PY_SCIP_CALL(
+                cscip.SCIPchgVarBranchPriority(self.scip, self.var, priority))
 
     def __hash__(self):
         return hash(id(self))
@@ -277,3 +288,11 @@ cdef class variable(expression):
 
         return NotImplementedError
 
+    property priority:
+        # Branching priority for a decision variable
+        def __get__(self):
+            return cscip.SCIPvarGetBranchPriority(self.var)
+        
+        def __set__(self, int p):
+            PY_SCIP_CALL(
+                cscip.SCIPchgVarBranchPriority(self.scip, self.var, p))

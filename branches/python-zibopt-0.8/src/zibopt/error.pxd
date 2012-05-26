@@ -11,4 +11,3 @@ cdef extern from "scip/scip.h":
         void *messagedialog
         void *messageinfo
     SCIP_MESSAGEHDLR *SCIPmessageGetHandler()
-

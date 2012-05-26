@@ -7,6 +7,8 @@ cdef class expression:
 
 cdef class variable(expression):
     cdef cscip.SCIP *scip
-    cdef cscip.SCIP_VARTYPE vartype
     cdef cscip.SCIP_VAR *var
 
+    cdef readonly cscip.SCIP_VARTYPE vartype
+    cdef readonly cscip.SCIP_Real lower
+    cdef readonly cscip.SCIP_Real upper
