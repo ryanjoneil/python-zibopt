@@ -2,6 +2,7 @@ from error import PY_SCIP_CALL
 from itertools import product
 cimport scip as cscip
 cimport variable as cvariable
+import scip
 
 cdef class expression:
     '''
@@ -236,6 +237,15 @@ cdef class variable(expression):
         cscip.SCIP_Real upper, 
         int priority
     ):
+        # Sensible defaults for variable types and binary bounds
+        if vartype not in (scip.BINARY, scip.INTEGER, scip.IMPLINT):
+            vartype = scip.CONTINUOUS
+        elif vartype == scip.BINARY:
+            if lower < 0:
+                lower = 0
+            if upper > 1:
+                upper = 1
+
         expression.__init__(self)
         self.scip    = solver.scip
         self.vartype = vartype
