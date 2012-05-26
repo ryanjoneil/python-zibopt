@@ -1,8 +1,11 @@
 from error cimport SCIP_RETCODE
 
 cdef extern from "scip/scip.h":
-    ctypedef struct SCIP:
+    ctypedef struct SCIP_SET:
         pass
+
+    ctypedef struct SCIP:
+        SCIP_SET *set
 
     ctypedef struct SCIP_VAR:
         pass
@@ -39,6 +42,9 @@ cdef extern from "scip/scip.h":
         SCIP_Bool initial, SCIP_Bool removable, void *vardelorig, 
         void *vartrans, void *vardeltrans, void *varcopy, void *vardata)
     SCIP_RETCODE SCIPaddVar(SCIP *scip, SCIP_VAR *var)
+    SCIP_Real SCIPvarGetObj(SCIP_VAR *var)
+    SCIP_RETCODE SCIPvarChgObj(SCIP_VAR *var, void *blkmem, SCIP_SET *set,
+        void *primal, void *lp, void *eventqueue, SCIP_Real coefficient)
     int SCIPvarGetBranchPriority(SCIP_VAR *var)
     SCIP_RETCODE SCIPchgVarBranchPriority(SCIP *scip, SCIP_VAR *var, int p)
 
