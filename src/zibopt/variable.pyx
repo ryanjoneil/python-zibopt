@@ -1,3 +1,4 @@
+from error import PY_SCIP_CALL
 from itertools import product
 cimport scip as cscip
 cimport variable as cvariable
@@ -230,7 +231,6 @@ cdef class variable(expression):
         self, 
         cscip.solver solver not None,
         cscip.SCIP_VARTYPE vartype
-        
     ):
         expression.__init__(self)
         self.scip    = solver.scip
@@ -238,6 +238,13 @@ cdef class variable(expression):
 
         # Add self to the terms of the base expression
         self.terms[(self,)] = 1.0
+
+        # Initialize variable into SCIP solver
+        print(vartype)
+        PY_SCIP_CALL(cscip.SCIPcreateVar(self.scip, &(self.var), NULL, 
+            0, 1, 1, vartype, 1, 0, NULL, NULL, NULL, NULL, NULL))
+            #lhs, rhs, c, t, TRUE, FALSE, NULL, NULL, NULL, NULL, NULL)
+        print('variable created!')
 
     def __hash__(self):
         return hash(id(self))
