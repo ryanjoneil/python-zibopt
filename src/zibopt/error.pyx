@@ -39,4 +39,3 @@ def quiet_solver():
     message_hdlr.messagewarning = <void *> PY_SCIP_IGNORE_MESSAGE
     message_hdlr.messagedialog = <void *> PY_SCIP_IGNORE_MESSAGE
     message_hdlr.messageinfo = <void *> PY_SCIP_IGNORE_MESSAGE
-    

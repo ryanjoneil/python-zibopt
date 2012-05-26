@@ -8,13 +8,18 @@ cdef extern from "scip/scip.h":
         pass
 
     ctypedef int SCIP_VARTYPE        # Variable types allowed in SCIP
-    ctypedef double SCIP_REAL        # Values for decision variables, etc
-    ctypedef unsigned int SCIP_BOOL  # TRUE/FALSE = 1/0
+    ctypedef double SCIP_Real        # Values for decision variables, etc
+    ctypedef unsigned int SCIP_Bool  # TRUE/FALSE = 1/0
 
+    # Constants for variable types
     SCIP_VARTYPE SCIP_VARTYPE_BINARY
     SCIP_VARTYPE SCIP_VARTYPE_CONTINUOUS
     SCIP_VARTYPE SCIP_VARTYPE_IMPLINT
     SCIP_VARTYPE SCIP_VARTYPE_INTEGER
+
+    # Constants for booleans
+    SCIP_Bool TRUE
+    SCIP_Bool FALSE
 
     # I don't want to have to create Cython structs for everything we don't 
     # use, thus all the (void *).  It's tacky, I know.  As we use these,
@@ -28,10 +33,14 @@ cdef extern from "scip/scip.h":
     SCIP_RETCODE SCIPsolve(SCIP *scip)
 
     # Functions dealing with SCIP decision variables
+    SCIP_Real SCIPinfinity(SCIP *scip)
     SCIP_RETCODE SCIPcreateVar(SCIP *scip, SCIP_VAR **var, char *name, 
-        SCIP_REAL lb, SCIP_REAL ub, SCIP_REAL obj, SCIP_VARTYPE vartype,
-        SCIP_BOOL initial, SCIP_BOOL removable, void *vardelorig, 
+        SCIP_Real lb, SCIP_Real ub, SCIP_Real obj, SCIP_VARTYPE vartype,
+        SCIP_Bool initial, SCIP_Bool removable, void *vardelorig, 
         void *vartrans, void *vardeltrans, void *varcopy, void *vardata)
+    SCIP_RETCODE SCIPaddVar(SCIP *scip, SCIP_VAR *var)
+    int SCIPvarGetBranchPriority(SCIP_VAR *var)
+    SCIP_RETCODE SCIPchgVarBranchPriority(SCIP *scip, SCIP_VAR *var, int p)
 
 cdef extern from "scip/scipdefplugins.h":
     SCIP_RETCODE SCIPincludeDefaultPlugins(SCIP *scip)
