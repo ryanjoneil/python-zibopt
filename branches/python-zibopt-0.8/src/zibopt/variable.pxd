@@ -8,4 +8,5 @@ cdef class expression:
 cdef class variable(expression):
     cdef cscip.SCIP *scip
     cdef cscip.SCIP_VARTYPE vartype
+    cdef cscip.SCIP_VAR *var
 
