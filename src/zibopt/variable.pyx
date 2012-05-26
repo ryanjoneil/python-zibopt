@@ -288,6 +288,16 @@ cdef class variable(expression):
 
         return NotImplementedError
 
+    property coefficient:
+        # Branching priority for a decision variable
+        def __get__(self):
+            return cscip.SCIPvarGetObj(self.var)
+        
+        def __set__(self, cscip.SCIP_Real c):
+            PY_SCIP_CALL(
+                cscip.SCIPvarChgObj(self.var, NULL, self.scip.set, 
+                    NULL, NULL, NULL, c))
+
     property priority:
         # Branching priority for a decision variable
         def __get__(self):
