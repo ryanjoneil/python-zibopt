@@ -1,4 +1,4 @@
-from error import PY_SCIP_CALL
+from error import PY_SCIP_CALL, SCIPException
 from itertools import product
 cimport scip as cscip
 cimport variable as cvariable
@@ -141,7 +141,6 @@ cdef class expression:
 
     # This part allows <=, >= and == to populate lower/upper bounds
     def __richcmp__(self, other, op):
-        # TODO: error on just < or > ?
         if op == 1: # <=
             if isinstance(other, expression):
                 if isinstance(self, cvariable.variable) or (
@@ -238,13 +237,13 @@ cdef class variable(expression):
         int priority
     ):
         # Sensible defaults for variable types and binary bounds
-        if vartype not in (scip.BINARY, scip.INTEGER, scip.IMPLINT):
-            vartype = scip.CONTINUOUS
-        elif vartype == scip.BINARY:
-            if lower < 0:
-                lower = 0
-            if upper > 1:
-                upper = 1
+        if vartype not in (
+            scip.BINARY, 
+            scip.CONTINUOUS,
+            scip.IMPLINT,
+            scip.INTEGER
+        ):
+            raise SCIPException('unknown variable type: %d' % vartype)
 
         expression.__init__(self)
         self.scip    = solver.scip
