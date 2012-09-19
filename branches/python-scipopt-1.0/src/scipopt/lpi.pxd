@@ -1,0 +1,54 @@
+from message cimport SCIP_MESSAGEHDLR
+from scip cimport SCIP_RETCODE
+
+cdef extern from "scip/scip.h":
+    ctypedef struct SCIP_LPI:
+        pass
+
+    ctypedef enum SCIP_OBJSEN:
+        SCIP_OBJSEN_MAXIMIZE
+        SCIP_OBJSEN_MINIMIZE
+
+    ctypedef enum SCIP_LPPARAM:
+        SCIP_LPPAR_FROMSCRATCH
+        SCIP_LPPAR_FASTMIP
+        SCIP_LPPAR_SCALING
+        SCIP_LPPAR_PRESOLVING
+        SCIP_LPPAR_PRICING
+        SCIP_LPPAR_LPINFO
+        SCIP_LPPAR_FEASTOL
+        SCIP_LPPAR_DUALFEASTOL
+        SCIP_LPPAR_BARRIERCONVTOL
+        SCIP_LPPAR_LOBJLIM
+        SCIP_LPPAR_UOBJLIM
+        SCIP_LPPAR_LPITLIM
+        SCIP_LPPAR_LPTILIM
+        SCIP_LPPAR_MARKOWITZ
+        SCIP_LPPAR_ROWREPSWITCH
+        SCIP_LPPAR_THREADS
+
+    ctypedef enum SCIP_PRICING:
+        SCIP_PRICING_LPIDEFAULT
+        SCIP_PRICING_AUTO
+        SCIP_PRICING_FULL
+        SCIP_PRICING_PARTIAL
+        SCIP_PRICING_STEEP
+        SCIP_PRICING_STEEPQSTART
+        SCIP_PRICING_DEVEX
+
+    ctypedef enum SCIP_BASESTAT:
+        SCIP_BASESTAT_LOWER
+        SCIP_BASESTAT_BASIC
+        SCIP_BASESTAT_UPPER
+        SCIP_BASESTAT_ZERO
+
+    ctypedef enum SCIP_LPSOLQUALITY:
+        SCIP_LPSOLQUALITY_ESTIMCONDITION
+        SCIP_LPSOLQUALITY_EXACTCONDITION
+
+    SCIP_RETCODE SCIPlpiCreate(SCIP_LPI **lpi, SCIP_MESSAGEHDLR *messagehdlr, 
+        char *name, SCIP_OBJSEN objsen)
+    SCIP_RETCODE SCIPlpiFree(SCIP_LPI **lpi)
+
+cdef class lpi:
+    cdef SCIP_LPI *lpi
