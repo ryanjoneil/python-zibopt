@@ -1,0 +1,21 @@
+cdef extern from "scip/scip.h":
+    # SCIP return codes
+    ctypedef enum SCIP_RETCODE:
+         SCIP_OKAY
+         SCIP_ERROR
+         SCIP_NOMEMORY
+         SCIP_READERROR
+         SCIP_WRITEERROR
+         SCIP_NOFILE
+         SCIP_FILECREATEERROR
+         SCIP_LPERROR
+         SCIP_NOPROBLEM
+         SCIP_INVALIDCALL
+         SCIP_INVALIDDATA
+         SCIP_INVALIDRESULT
+         SCIP_PLUGINNOTFOUND
+         SCIP_PARAMETERUNKNOWN
+         SCIP_PARAMETERWRONGTYPE
+         SCIP_PARAMETERWRONGVAL
+         SCIP_KEYALREADYEXISTING
+         SCIP_MAXDEPTHLEVEL
