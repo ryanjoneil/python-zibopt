@@ -49,6 +49,8 @@ cdef extern from "scip/scip.h":
     SCIP_RETCODE SCIPlpiCreate(SCIP_LPI **lpi, SCIP_MESSAGEHDLR *messagehdlr, 
         char *name, SCIP_OBJSEN objsen)
     SCIP_RETCODE SCIPlpiFree(SCIP_LPI **lpi)
+    
+    SCIP_RETCODE SCIPlpiSolvePrimal(SCIP_LPI *lpi)
 
 cdef class lpi:
     cdef SCIP_LPI *lpi
